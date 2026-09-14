@@ -31,7 +31,6 @@
       height: 100vh;
     }
 
-    /* ツールパネル（左側） */
     #sidebar {
       width: 320px;
       background-color: var(--panel-bg);
@@ -56,7 +55,6 @@
       font-weight: 600;
     }
 
-    /* キャンバス（右側） */
     #canvas-container {
       flex-grow: 1;
       position: relative;
@@ -74,7 +72,6 @@
       cursor: crosshair;
     }
 
-    /* UI部品 */
     .btn {
       width: 100%;
       padding: 10px;
@@ -89,10 +86,7 @@
       gap: 8px;
     }
 
-    .btn-primary {
-      background-color: var(--accent);
-      color: white;
-    }
+    .btn-primary { background-color: var(--accent); color: white; }
     .btn-primary:hover { background-color: var(--accent-hover); }
 
     .btn-danger {
@@ -109,9 +103,7 @@
     }
     .btn-secondary:hover { background-color: #334155; }
 
-    .form-group {
-      margin-bottom: 15px;
-    }
+    .form-group { margin-bottom: 15px; }
     .form-group label {
       display: block;
       font-size: 0.85rem;
@@ -130,13 +122,8 @@
       outline: none;
     }
     .form-group input[type="text"]:focus,
-    .form-group select:focus {
-      border-color: var(--accent);
-    }
-    .form-group input[type="range"] {
-      width: 100%;
-      accent-color: var(--accent);
-    }
+    .form-group select:focus { border-color: var(--accent); }
+    .form-group input[type="range"] { width: 100%; accent-color: var(--accent); }
 
     .color-picker-group {
       display: flex;
@@ -147,29 +134,12 @@
       border-radius: 4px;
       border: 1px solid #334155;
     }
-    
     .color-picker-group input[type="color"] {
-      width: 32px;
-      height: 32px;
-      padding: 0;
-      border: none;
-      border-radius: 4px;
-      background: none;
-      cursor: pointer;
+      width: 32px; height: 32px; padding: 0; border: none; border-radius: 4px; background: none; cursor: pointer;
     }
 
-    .checkbox-label {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      cursor: pointer;
-      font-size: 0.9rem;
-    }
-    .checkbox-label input[type="checkbox"] {
-      accent-color: var(--accent);
-      width: 16px;
-      height: 16px;
-    }
+    .checkbox-label { display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.9rem; }
+    .checkbox-label input[type="checkbox"] { accent-color: var(--accent); width: 16px; height: 16px; }
 
     .info-box {
       background-color: rgba(59, 130, 246, 0.1);
@@ -179,6 +149,22 @@
       color: #cbd5e1;
       margin-bottom: 15px;
       line-height: 1.4;
+    }
+
+    #inline-editor {
+      position: absolute;
+      background-color: var(--panel-bg);
+      color: white;
+      border: 2px solid var(--accent);
+      border-radius: 4px;
+      padding: 0 5px;
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      text-align: center;
+      outline: none;
+      z-index: 100;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.5);
     }
 
     .hidden { display: none !important; }
@@ -197,6 +183,7 @@
       <div class="info-box">
         <b>操作方法:</b><br>
         ・空白をダブルクリック：拠点追加<br>
+        ・<b>拠点をダブルクリック：名前編集</b><br>
         ・<b>Shiftキー ＋ ドラッグ：線で繋ぐ</b><br>
         ・線の上のメモはドラッグで移動可能<br>
         ・クリックしてDelete：削除
@@ -211,7 +198,7 @@
         <input type="range" id="slider-spawn" min="10" max="120" value="60">
       </div>
       <div class="form-group">
-        <label>移動速度 (Speed): <span id="val-speed">1.0x</span></label>
+        <label>全体の基本速度: <span id="val-speed">1.0x</span></label>
         <input type="range" id="slider-speed" min="0.1" max="5.0" step="0.1" value="1.0">
       </div>
 
@@ -238,6 +225,9 @@
       <div class="form-group">
         <label>拠点名</label>
         <input type="text" id="input-node-name" placeholder="例: 受注処理">
+        <div style="font-size: 0.75rem; color: #94a3b8; margin-top: 5px;">
+          ※拠点をダブルクリックでも編集できます
+        </div>
       </div>
       <div class="form-group">
         <label>形状</label>
@@ -272,9 +262,21 @@
       </div>
     </div>
 
-    <!-- 繋がりプロパティ -->
+    <!-- 繋がり(エッジ)プロパティ -->
     <div id="edge-properties" class="panel-section hidden" style="flex-grow: 1;">
       <div class="panel-title">線の設定</div>
+      
+      <!-- 流量・速度の個別コントロール -->
+      <div class="form-group" style="margin-bottom: 20px; padding: 12px; background: rgba(0,0,0,0.2); border-radius: 6px; border: 1px solid #334155;">
+        <label>玉の通過速度: <span id="val-edge-speed" style="color: #60a5fa; font-weight: bold;">1.0x</span></label>
+        <input type="range" id="slider-edge-speed" min="0.1" max="3.0" step="0.1" value="1.0">
+        <div style="font-size: 0.75rem; color: #94a3b8; margin-bottom: 15px;">※遅くすると渋滞(ボトルネック)を表現できます。</div>
+        
+        <label>1回の発生量: <span id="val-edge-volume" style="color: #60a5fa; font-weight: bold;">1個</span></label>
+        <input type="range" id="slider-edge-volume" min="1" max="10" step="1" value="1">
+        <div style="font-size: 0.75rem; color: #94a3b8;">※一度に流れる玉の数（処理ボリューム）</div>
+      </div>
+
       <div class="form-group">
         <label>フローの解説メモ (ラベル)</label>
         <input type="text" id="input-edge-label" placeholder="例: 承認された場合">
@@ -309,6 +311,8 @@
 
   <div id="canvas-container">
     <canvas id="sim-canvas"></canvas>
+    <!-- インラインエディタ -->
+    <input type="text" id="inline-editor" class="hidden">
   </div>
 
   <script>
@@ -337,7 +341,9 @@
       enableSnap: true,
       showCountBadge: true,
       alignGuides: [],
-      lastTime: 0
+      lastTime: 0,
+
+      editingNode: null
     };
 
     const canvas = document.getElementById('sim-canvas');
@@ -366,20 +372,20 @@
       btnDeleteEdge: document.getElementById('btn-delete-edge'),
       btnSave: document.getElementById('btn-save'),
       btnLoad: document.getElementById('btn-load'),
-      fileInput: document.getElementById('file-input')
+      fileInput: document.getElementById('file-input'),
+      inlineEditor: document.getElementById('inline-editor'),
+      sliderEdgeSpeed: document.getElementById('slider-edge-speed'),
+      valEdgeSpeed: document.getElementById('val-edge-speed'),
+      sliderEdgeVolume: document.getElementById('slider-edge-volume'),
+      valEdgeVolume: document.getElementById('val-edge-volume')
     };
 
-    // HexカラーをRgba文字列に変換するヘルパー関数
     function hexToRgba(hex, alpha) {
       let r = 0, g = 0, b = 0;
       if (hex.length === 4) {
-        r = parseInt(hex[1] + hex[1], 16);
-        g = parseInt(hex[2] + hex[2], 16);
-        b = parseInt(hex[3] + hex[3], 16);
+        r = parseInt(hex[1] + hex[1], 16); g = parseInt(hex[2] + hex[2], 16); b = parseInt(hex[3] + hex[3], 16);
       } else if (hex.length === 7) {
-        r = parseInt(hex[1] + hex[2], 16);
-        g = parseInt(hex[3] + hex[4], 16);
-        b = parseInt(hex[5] + hex[6], 16);
+        r = parseInt(hex[1] + hex[2], 16); g = parseInt(hex[3] + hex[4], 16); b = parseInt(hex[5] + hex[6], 16);
       }
       return `rgba(${r}, ${g}, ${b}, ${alpha})`;
     }
@@ -393,11 +399,11 @@
         { id: 'n5', x: 850, y: 150, name: '⑤ 出荷完了', shape: 'rect', isGoal: true, errorCount: 0, successCount: 0 }
       ];
       state.edges = [
-        { from: 'n1', to: 'n2', label: '', labelPos: 0.5 },
-        { from: 'n2', to: 'n3', label: '合格', labelPos: 0.5 },
-        { from: 'n2', to: 'n4', label: '不合格', labelPos: 0.5, useCustomColor: true, customColor: '#ef4444' },
-        { from: 'n3', to: 'n5', label: '', labelPos: 0.5 },
-        { from: 'n5', to: 'n1', label: 'サイクル戻り', labelPos: 0.5 }
+        { from: 'n1', to: 'n2', label: '', labelPos: 0.5, speed: 1.0, volume: 1 },
+        { from: 'n2', to: 'n3', label: '合格', labelPos: 0.5, speed: 1.5, volume: 2 },
+        { from: 'n2', to: 'n4', label: '不合格', labelPos: 0.5, useCustomColor: true, customColor: '#ef4444', speed: 0.3, volume: 1 },
+        { from: 'n3', to: 'n5', label: '', labelPos: 0.5, speed: 1.0, volume: 1 },
+        { from: 'n5', to: 'n1', label: 'サイクル戻り', labelPos: 0.5, speed: 1.0, volume: 1 }
       ];
     }
 
@@ -428,7 +434,6 @@
       ui.checkSnap.addEventListener('change', (e) => state.enableSnap = e.target.checked);
       ui.checkShowBadge.addEventListener('change', (e) => state.showCountBadge = e.target.checked);
       
-      // ノードプロパティのイベント
       ui.inputNodeName.addEventListener('input', (e) => { if (state.selectedNode) state.selectedNode.name = e.target.value; });
       ui.selectNodeShape.addEventListener('change', (e) => { if (state.selectedNode) state.selectedNode.shape = e.target.value; });
       ui.checkIsGoal.addEventListener('change', (e) => { if (state.selectedNode) state.selectedNode.isGoal = e.target.checked; });
@@ -436,12 +441,24 @@
       ui.checkNodeColor.addEventListener('change', (e) => { if (state.selectedNode) state.selectedNode.useCustomColor = e.target.checked; });
       ui.btnDeleteNode.addEventListener('click', deleteSelectedNode);
       
-      // エッジプロパティのイベント
       ui.inputEdgeLabel.addEventListener('input', (e) => { if (state.selectedEdge) state.selectedEdge.label = e.target.value; });
       ui.inputEdgeColor.addEventListener('input', (e) => { if (state.selectedEdge) state.selectedEdge.customColor = e.target.value; });
       ui.checkEdgeColor.addEventListener('change', (e) => { if (state.selectedEdge) state.selectedEdge.useCustomColor = e.target.checked; });
       ui.btnDeleteEdge.addEventListener('click', deleteSelectedEdge);
       
+      ui.sliderEdgeSpeed.addEventListener('input', (e) => { 
+        if (state.selectedEdge) {
+          state.selectedEdge.speed = parseFloat(e.target.value); 
+          ui.valEdgeSpeed.textContent = `${state.selectedEdge.speed.toFixed(1)}x`;
+        }
+      });
+      ui.sliderEdgeVolume.addEventListener('input', (e) => { 
+        if (state.selectedEdge) {
+          state.selectedEdge.volume = parseInt(e.target.value); 
+          ui.valEdgeVolume.textContent = `${state.selectedEdge.volume}個`;
+        }
+      });
+
       ui.btnSave.addEventListener('click', saveToFile);
       ui.btnLoad.addEventListener('click', () => ui.fileInput.click());
       ui.fileInput.addEventListener('change', loadFromFile);
@@ -459,6 +476,55 @@
           }
         }
       });
+
+      ui.inlineEditor.addEventListener('blur', () => stopInlineEditing(true));
+      ui.inlineEditor.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          ui.inlineEditor.blur(); 
+        } else if (e.key === 'Escape') {
+          stopInlineEditing(false); 
+        }
+      });
+    }
+
+    function startInlineEditing(node) {
+      state.editingNode = node;
+      const editor = ui.inlineEditor;
+
+      let w = 100;
+      const h = 30;
+      if (node.shape === 'rect') {
+        const size = getRectSize(node);
+        w = size.width - 20; 
+      } else {
+        w = 60; 
+      }
+
+      editor.style.left = `${node.x - w/2}px`;
+      editor.style.top = `${node.y - h/2}px`;
+      editor.style.width = `${w}px`;
+      editor.style.height = `${h}px`;
+
+      editor.value = node.name;
+      editor.classList.remove('hidden');
+      editor.focus();
+      editor.select(); 
+    }
+
+    function stopInlineEditing(save = true) {
+      if (!state.editingNode) return;
+      
+      if (save) {
+        const newName = ui.inlineEditor.value.trim() || '名称未設定';
+        state.editingNode.name = newName;
+        if (state.selectedNode === state.editingNode) {
+          ui.inputNodeName.value = newName;
+        }
+      }
+
+      ui.inlineEditor.classList.add('hidden');
+      state.editingNode = null;
+      render();
     }
 
     function getMousePos(e) {
@@ -634,7 +700,6 @@
             if (Math.abs(newX - node.x) < minDistX) { minDistX = Math.abs(newX - node.x); snapX = node.x; }
             if (Math.abs(newY - node.y) < minDistY) { minDistY = Math.abs(newY - node.y); snapY = node.y; }
             
-            // マルチアングル・スマートガイド (30, 45, 60, 120, 135, 150度)
             const diagAngles = [30, 45, 60, 120, 135, 150];
             for(const ang of diagAngles) {
               const rad = ang * Math.PI / 180;
@@ -692,7 +757,9 @@
               label: '', 
               labelPos: 0.5,
               useCustomColor: false,
-              customColor: '#ef4444'
+              customColor: '#ef4444',
+              speed: 1.0,
+              volume: 1
             });
           }
         }
@@ -710,9 +777,12 @@
 
     function handleDoubleClick(e) {
       const { x, y } = getMousePos(e);
-      const clicked = state.nodes.some(node => isMouseOnNode(x, y, node));
+      const clickedNode = state.nodes.find(node => isMouseOnNode(x, y, node));
       
-      if (!clicked) {
+      if (clickedNode) {
+        selectNode(clickedNode);
+        startInlineEditing(clickedNode);
+      } else {
         const newNode = {
           id: 'node_' + Date.now(),
           x: x, y: y,
@@ -726,6 +796,7 @@
         };
         state.nodes.push(newNode);
         selectNode(newNode);
+        startInlineEditing(newNode);
       }
     }
 
@@ -753,6 +824,12 @@
       ui.inputEdgeLabel.value = edge.label || '';
       ui.checkEdgeColor.checked = edge.useCustomColor || false;
       ui.inputEdgeColor.value = edge.customColor || '#ef4444';
+
+      ui.sliderEdgeSpeed.value = edge.speed !== undefined ? edge.speed : 1.0;
+      ui.valEdgeSpeed.textContent = `${(edge.speed !== undefined ? edge.speed : 1.0).toFixed(1)}x`;
+      
+      ui.sliderEdgeVolume.value = edge.volume !== undefined ? edge.volume : 1;
+      ui.valEdgeVolume.textContent = `${(edge.volume !== undefined ? edge.volume : 1)}個`;
     }
 
     function clearSelection() {
@@ -779,6 +856,8 @@
     }
 
     function drawNode(node) {
+      const isEditing = (node === state.editingNode);
+
       ctx.save();
       const isSelected = state.selectedNode === node;
       const hasOutgoing = state.edges.some(e => e.from === node.id);
@@ -786,8 +865,7 @@
       const isError = !hasOutgoing && !node.isGoal;
       const isSuccess = (!hasOutgoing && node.isGoal) || (node.isGoal && node.successCount > 0);
 
-      // カラーリングの優先順位決定
-      let nodeStrokeColor = '#475569'; // デフォルトグレー
+      let nodeStrokeColor = '#475569';
       let glowColor = null;
 
       if (isSelected) {
@@ -813,7 +891,7 @@
         ctx.shadowBlur = 15;
       }
 
-      ctx.fillStyle = '#334155'; // 背景の濃いグレー
+      ctx.fillStyle = '#334155'; 
       ctx.strokeStyle = nodeStrokeColor;
       ctx.lineWidth = (isSelected || glowColor) ? 3 : 2;
 
@@ -841,14 +919,17 @@
       }
 
       ctx.shadowBlur = 0;
-      ctx.fillStyle = 'white';
-      ctx.font = '600 13px Inter, sans-serif';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
       
-      let displayName = node.name;
-      if (node.shape !== 'rect' && displayName.length > 8) displayName = displayName.substring(0, 7) + '..';
-      ctx.fillText(displayName, node.x, node.y);
+      if (!isEditing) {
+        ctx.fillStyle = 'white';
+        ctx.font = '600 13px Inter, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        
+        let displayName = node.name;
+        if (node.shape !== 'rect' && displayName.length > 8) displayName = displayName.substring(0, 7) + '..';
+        ctx.fillText(displayName, node.x, node.y);
+      }
 
       if (state.showCountBadge) {
         if (isError && node.errorCount > 0) drawBadge(node, node.errorCount, '#ef4444');
@@ -866,11 +947,11 @@
       ctx.arc(node.x + offsetX, node.y + offsetY, 12, 0, Math.PI*2);
       ctx.fillStyle = color;
       ctx.fill();
-      ctx.strokeStyle = '#fff';
+      ctx.strokeStyle = '#ffffff';
       ctx.lineWidth = 1.5;
       ctx.stroke();
       
-      ctx.fillStyle = 'white';
+      ctx.fillStyle = '#ffffff';
       ctx.font = 'bold 11px sans-serif';
       ctx.fillText(count > 99 ? '99+' : count, node.x + offsetX, node.y + offsetY);
     }
@@ -884,8 +965,7 @@
       const isSelected = state.selectedEdge === edge;
       const isDragged = state.draggedLabelEdge === edge;
       
-      // 線の色の決定
-      let edgeColor = 'rgba(148, 163, 184, 0.4)'; // デフォルト
+      let edgeColor = 'rgba(148, 163, 184, 0.4)';
       if (isSelected) {
         edgeColor = '#3b82f6';
       } else if (edge.useCustomColor && edge.customColor) {
@@ -922,7 +1002,6 @@
       ctx.fillStyle = edgeColor;
       ctx.fill();
 
-      // ラベルとネオン発光の描画
       const rect = getLabelRect(edge);
       if (rect) {
         let isGlowing = false;
@@ -956,7 +1035,7 @@
         ctx.strokeRect(rect.x, rect.y, rect.w, rect.h);
         
         ctx.shadowBlur = 0; 
-        ctx.fillStyle = isGlowing ? '#93c5fd' : (isSelected ? '#fff' : '#94a3b8');
+        ctx.fillStyle = isGlowing ? '#93c5fd' : (isSelected ? '#ffffff' : '#94a3b8');
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.fillText(edge.label, rect.midX, rect.midY);
@@ -1020,12 +1099,17 @@
       if (outgoingEdges.length === 0) return;
       
       outgoingEdges.forEach(edge => {
-        state.signals.push({ 
-          fromId: edge.from, 
-          toId: edge.to, 
-          progress: 0, 
-          speed: (0.005 + Math.random() * 0.002) 
-        });
+        const vol = edge.volume !== undefined ? edge.volume : 1;
+        const spd = edge.speed !== undefined ? edge.speed : 1.0;
+        
+        for (let k = 0; k < vol; k++) {
+          state.signals.push({ 
+            fromId: edge.from, 
+            toId: edge.to, 
+            progress: 0, 
+            speed: (0.005 + Math.random() * 0.002) * spd
+          });
+        }
       });
     }
 
@@ -1058,7 +1142,18 @@
           if (toNode) {
             const nextEdges = state.edges.filter(e => e.from === toNode.id);
             if (nextEdges.length > 0) {
-              nextEdges.forEach(edge => state.signals.push({ fromId: edge.from, toId: edge.to, progress: 0, speed: sig.speed }));
+              nextEdges.forEach(edge => {
+                const vol = edge.volume !== undefined ? edge.volume : 1;
+                const spd = edge.speed !== undefined ? edge.speed : 1.0;
+                for (let k = 0; k < vol; k++) {
+                  state.signals.push({ 
+                    fromId: edge.from, 
+                    toId: edge.to, 
+                    progress: 0, 
+                    speed: (0.005 + Math.random() * 0.002) * spd 
+                  });
+                }
+              });
             } else {
               if (toNode.isGoal) toNode.successCount++;
               else toNode.errorCount++;
@@ -1138,7 +1233,9 @@
             
             state.edges = contents.edges.map(e => ({ 
               ...e, label: e.label || '', labelPos: e.labelPos !== undefined ? e.labelPos : 0.5,
-              useCustomColor: e.useCustomColor || false, customColor: e.customColor || '#ef4444'
+              useCustomColor: e.useCustomColor || false, customColor: e.customColor || '#ef4444',
+              speed: e.speed !== undefined ? e.speed : 1.0,
+              volume: e.volume !== undefined ? e.volume : 1
             }));
             
             if (contents.settings) {
