@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cycle Flow Simulator (Advanced)</title>
+  <style>
+    :root {
+      --bg-color: #0f172a;
+      --panel-bg: #1e293b;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --accent: #38bdf8;
+      --accent-hover: #0284c7;
+      --danger: #ef4444;
+      --success: #22c55e;
+      --warning: #f59e0b;
+      --border-color: #334155;
+      --highlight: rgba(56, 189, 248, 0.3);
+    }
+    
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, sans-serif; }
+    
+    body {
+      background-color: var(--bg-color); color: var(--text-main);
+      display: flex; height: 100vh; overflow: hidden; user-select: none;
+    }
+
+    #sidebar {
+      width: 320px; background-color: var(--panel-bg); border-right: 1px solid var(--border-color);
+      display: flex; flex-direction: column; padding: 20px; z-index: 10;
+      box-shadow: 4px 0 15px rgba(0, 0, 0, 0.5); overflow-y: auto;
+    }
+
+    h1 { font-size: 1.2rem; font-weight: 600; margin-bottom: 15px; color: var(--accent); }
+
+    .section {
+      background: rgba(15, 23, 42, 0.5); border: 1px solid var(--border-color);
+      border-radius: 8px; padding: 15px; margin-bottom: 15px;
+    }
+    
+    .section h2 { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 10px; text-transform: uppercase; }
+
+    .form-group { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
+    .form-group label { font-size: 0.8rem; color: var(--text-muted); }
+
+    input[type="text"], input[type="range"] {
+      background-color: #0f172a; border: 1px solid var(--border-color);
+      color: var(--text-main); padding: 8px; border-radius: 4px; outline: none;
+    }
+    input[type="text"]:focus { border-color: var(--accent); }
+
+    /* Custom Range Slider */
+    input[type="range"] { -webkit-appearance: none; height: 6px; background: var(--border-color); border-radius: 3px; padding: 0; border: none; }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%;
+      background: var(--accent); cursor: pointer;
+    }
+
+    .btn-row { display: flex; gap: 8px; }
+    button {
+      flex: 1; background-color: var(--border-color); color: var(--text-main);
+      border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-size: 0.85rem; transition: 0.2s;
+    }
+    button:hover { background-color: #475569; }
+    button.primary { background-color: var(--accent); color: #fff; }
+    button.primary:hover { background-color: var(--accent-hover); box-shadow: 0 0 10px var(--accent-hover); }
+    button.success { background-color: var(--success); color: #fff; }
+    button.danger { background-color: transparent; border: 1px solid var(--danger); color: var(--danger); }
+    button.danger:hover { background-color: var(--danger); color: #fff; }
+    
+    #canvas-container { flex: 1; position: relative; }
+    canvas { display: block; width: 100%; height: 100%; cursor: default; }
+    
+    .instructions {
+      position: absolute; bottom: 20px; left: 20px; background: rgba(15,23,42,0.8);
+      padding: 15px; border-radius: 8px; border: 1px solid var(--border-color);
+      font-size: 0.8rem; color: var(--text-muted); pointer-events: none; line-height: 1.6;
+    }
+    .instructions span { color: var(--accent); font-weight: bold; }
+
+    #toast {
+      position: absolute; top: 20px; right: 20px; background: var(--success); color: white;
+      padding: 10px 20px; border-radius: 4px; font-size: 0.9rem; opacity: 0; transition: opacity 0.3s;
+      pointer-events: none; transform: translateY(-10px);
+    }
+    #toast.show { opacity: 1; transform: translateY(0); }
+  </style>
+</head>
+<body>
+
+  <div id="sidebar">
+    <h1>Flow Simulator</h1>
+    
+    <!-- 実行コントロール -->
+    <div class="section">
+      <h2>Simulation Control</h2>
+      <button id="btn-toggle-sim" class="success" style="width: 100%; padding: 12px; margin-bottom: 10px; font-weight: bold;">
+        ▶ 実行する (Play)
+      </button>
+      <div class="btn-row">
+        <button id="btn-clear-signals" class="danger">シグナル消去</button>
+      </div>
+      
+      <div class="form-group" style="margin-top: 15px;">
+        <label>発生間隔 (Spawn Rate): <span id="val-spawn">1.5s</span></label>
+        <input type="range" id="slider-spawn" min="0.1" max="5.0" step="0.1" value="1.5">
+      </div>
+      <div class="form-group">
+        <label>移動速度 (Speed): <span id="val-speed">1.0x</span></label>
+        <input type="range" id="slider-speed" min="0.1" max="5.0" step="0.1" value="1.0">
+      </div>
+    </div>
+
+    <!-- 選択オブジェクトのプロパティ -->
+    <div class="section" id="panel-properties">
+      <h2>Properties</h2>
+      <div id="no-selection" style="color: var(--text-muted); font-size: 0.8rem;">要素を選択してください</div>
+      <div id="node-editor" style="display: none;">
+        <div class="form-group">
+          <label>拠点名</label>
+          <input type="text" id="input-node-name" placeholder="名前を入力">
+        </div>
+        <button id="btn-delete-element" class="danger" style="width: 100%;">この要素を削除</button>
+      </div>
+    </div>
+
+    <!-- ファイル保存・読込 -->
+    <div class="section" style="margin-top: auto;">
+      <h2>Save / Load</h2>
+      <div class="btn-row">
+        <button id="btn-save" class="primary">保存 (JSON)</button>
+        <button id="btn-load">読込 (JSON)</button>
+      </div>
+      <input type="file" id="file-input" accept=".json" style="display: none;">
+    </div>
+    
+    <div style="font-size: 0.8rem; color: var(--text-muted); text-align: center;">
+      Entities: <span id="entity-count">0</span>
+    </div>
+  </div>
+
+  <div id="canvas-container">
+    <canvas id="sim-canvas"></canvas>
+    <div class="instructions">
+      【操作方法】<br>
+      ・<span>何もない場所をダブルクリック</span>：新規拠点の作成<br>
+      ・<span>Shift + 拠点からドラッグ</span>：拠点を結ぶ線（フロー）を作成<br>
+      ・<span>拠点をドラッグ</span>：移動<br>
+      ・<span>要素をクリックして選択</span>：左パネルで名前変更<br>
+      ・<span>Delete / Backspaceキー</span>：選択中の要素を削除
+    </div>
+    <div id="toast">メッセージ</div>
+  </div>
+
+  <script>
+    'use strict';
+
+    class Node {
+      constructor(id, label, x, y) {
+        this.id = id || generateId();
+        this.label = label || '新規拠点';
+        this.x = x;
+        this.y = y;
+        this.radius = 30;
+        this.stuckCount = 0; // 行き止まりの滞留数
+      }
+    }
+
+    class Edge {
+      constructor(id, fromId, toId) {
+        this.id = id || generateId();
+        this.fromId = fromId;
+        this.toId = toId;
+      }
+    }
+
+    class Signal {
+      constructor(edgeId) {
+        this.id = generateId();
+        this.edgeId = edgeId;
+        this.progress = 0.0;
+      }
+    }
+
+    const state = {
+      nodes: [],
+      edges: [],
+      signals: [],
+      
+      // シミュレーション設定
+      isRunning: false,
+      lastTime: 0,
+      generateTimer: 0,
+      spawnInterval: 1.5, // 秒
+      simulationSpeed: 1.0, // 倍率
+      
+      // インタラクション状態
+      selectedElement: null, // Node | Edge
+      draggedNode: null,
+      isDragging: false,
+      
+      // 結線（線引き）状態
+      isConnecting: false,
+      connectFromNode: null,
+      mouseX: 0,
+      mouseY: 0
+    };
+
+    // DOM Elements
+    const canvas = document.getElementById('sim-canvas');
+    const ctx = canvas.getContext('2d');
+    
+    const ui = {
+      btnToggle: document.getElementById('btn-toggle-sim'),
+      btnClear: document.getElementById('btn-clear-signals'),
+      sliderSpawn: document.getElementById('slider-spawn'),
+      valSpawn: document.getElementById('val-spawn'),
+      sliderSpeed: document.getElementById('slider-speed'),
+      valSpeed: document.getElementById('val-speed'),
+      
+      panelNoSel: document.getElementById('no-selection'),
+      panelEditor: document.getElementById('node-editor'),
+      inputName: document.getElementById('input-node-name'),
+      btnDelete: document.getElementById('btn-delete-element'),
+      
+      btnSave: document.getElementById('btn-save'),
+      btnLoad: document.getElementById('btn-load'),
+      fileInput: document.getElementById('file-input'),
+      
+      entityCount: document.getElementById('entity-count'),
+      toast: document.getElementById('toast')
+    };
+
+    function init() {
+      resizeCanvas();
+      window.addEventListener('resize', resizeCanvas);
+      
+      setupUIEvents();
+      setupCanvasEvents();
+      
+      // 初期サンプルの配置
+      createSampleFlow();
+      
+      requestAnimationFrame(gameLoop);
+    }
+
+    function generateId() {
+      return Math.random().toString(36).substr(2, 9);
+    }
+
+    function resizeCanvas() {
+      const dpr = window.devicePixelRatio || 1;
+      const rect = canvas.parentElement.getBoundingClientRect();
+      canvas.width = rect.width * dpr;
+      canvas.height = rect.height * dpr;
+      ctx.scale(dpr, dpr);
+      canvas.style.width = `${rect.width}px`;
+      canvas.style.height = `${rect.height}px`;
+    }
+
+    function showToast(msg, isError = false) {
+      ui.toast.textContent = msg;
+      ui.toast.style.background = isError ? 'var(--danger)' : 'var(--success)';
+      ui.toast.classList.add('show');
+      setTimeout(() => ui.toast.classList.remove('show'), 3000);
+    }
+
+    function setupCanvasEvents() {
+      canvas.addEventListener('mousedown', handleMouseDown);
+      canvas.addEventListener('mousemove', handleMouseMove);
+      canvas.addEventListener('mouseup', handleMouseUp);
+      canvas.addEventListener('dblclick', handleDoubleClick);
+      
+      // キーボードでの削除 (Delete / Backspace)
+      window.addEventListener('keydown', (e) => {
+        // 入力フォームにフォーカスがある時は無効化
+        if (document.activeElement.tagName === 'INPUT') return;
+        
+        if (e.key === 'Delete' || e.key === 'Backspace') {
+          deleteSelectedElement();
+        }
+      });
+    }
+
+    function getMousePos(e) {
+      const rect = canvas.getBoundingClientRect();
+      return { x: e.clientX - rect.left, y: e.clientY - rect.top };
+    }
+
+    // 要素の当たり判定ヘルパー
+    function hitTestNode(x, y) {
+      return state.nodes.find(n => {
+        const dx = x - n.x; const dy = y - n.y;
+        return (dx * dx + dy * dy) <= (n.radius * n.radius);
+      });
+    }
+
+    function hitTestEdge(x, y) {
+      // 線分との距離計算。許容範囲を設定。
+      const TOLERANCE = 8;
+      for (const edge of state.edges) {
+        const from = state.nodes.find(n => n.id === edge.fromId);
+        const to = state.nodes.find(n => n.id === edge.toId);
+        if (!from || !to) continue;
+
+        if (from.id === to.id) {
+          // 自己ループの当たり判定（簡易的に上部の円形領域）
+          const dx = x - from.x; const dy = y - (from.y - 45);
+          const dist = Math.sqrt(dx*dx + dy*dy);
+          if (Math.abs(dist - 30) < TOLERANCE) return edge;
+          continue;
+        }
+
+        // 点と線分の距離
+        const A = x - from.x; const B = y - from.y;
+        const C = to.x - from.x; const D = to.y - from.y;
+        
+        const dot = A * C + B * D;
+        const lenSq = C * C + D * D;
+        let param = -1;
+        if (lenSq !== 0) param = dot / lenSq;
+
+        let xx, yy;
+        if (param < 0) { xx = from.x; yy = from.y; }
+        else if (param > 1) { xx = to.x; yy = to.y; }
+        else { xx = from.x + param * C; yy = from.y + param * D; }
+
+        const dx = x - xx; const dy = y - yy;
+        if (Math.sqrt(dx*dx + dy*dy) < TOLERANCE) return edge;
+      }
+      return null;
+    }
+
+    function handleMouseDown(e) {
+      const { x, y } = getMousePos(e);
+      const clickedNode = hitTestNode(x, y);
+      const clickedEdge = clickedNode ? null : hitTestEdge(x, y);
+
+      // 選択状態の更新
+      state.selectedElement = clickedNode || clickedEdge || null;
+      updatePropertiesPanel();
+
+      if (clickedNode) {
+        if (e.shiftKey) {
+          // 結線モード開始
+          state.isConnecting = true;
+          state.connectFromNode = clickedNode;
+          state.mouseX = x; state.mouseY = y;
+        } else {
+          // ドラッグ移動モード開始
+          state.isDragging = true;
+          state.draggedNode = clickedNode;
+          canvas.style.cursor = 'grabbing';
+        }
+      }
+    }
+
+    function handleMouseMove(e) {
+      const { x, y } = getMousePos(e);
+      state.mouseX = x; state.mouseY = y;
+
+      if (state.isDragging && state.draggedNode) {
+        state.draggedNode.x = x;
+        state.draggedNode.y = y;
+      }
+    }
+
+    function handleMouseUp(e) {
+      if (state.isConnecting && state.connectFromNode) {
+        const { x, y } = getMousePos(e);
+        const targetNode = hitTestNode(x, y);
+        
+        // ターゲットがあり、重複するエッジが無ければ結線
+        if (targetNode) {
+          const exists = state.edges.some(edge => edge.fromId === state.connectFromNode.id && edge.toId === targetNode.id);
+          if (!exists) {
+            state.edges.push(new Edge(null, state.connectFromNode.id, targetNode.id));
+            state.connectFromNode.stuckCount = 0; // 行き止まり解消
+          }
+        }
+      }
+
+      // 状態リセット
+      state.isDragging = false;
+      state.draggedNode = null;
+      state.isConnecting = false;
+      state.connectFromNode = null;
+      canvas.style.cursor = 'default';
+    }
+
+    function handleDoubleClick(e) {
+      const { x, y } = getMousePos(e);
+      const clickedNode = hitTestNode(x, y);
+      
+      if (!clickedNode) {
+        // 空白をダブルクリックで新規ノード作成
+        const newNode = new Node(null, `拠点${state.nodes.length + 1}`, x, y);
+        state.nodes.push(newNode);
+        state.selectedElement = newNode;
+        updatePropertiesPanel();
+      }
+    }
+
+    function setupUIEvents() {
+      ui.btnToggle.addEventListener('click', toggleSimulation);
+      ui.btnClear.addEventListener('click', () => {
+        state.signals = [];
+        state.nodes.forEach(n => n.stuckCount = 0);
+      });
+
+      // スライダー連動
+      ui.sliderSpawn.addEventListener('input', (e) => {
+        state.spawnInterval = parseFloat(e.target.value);
+        ui.valSpawn.textContent = `${state.spawnInterval.toFixed(1)}s`;
+      });
+      ui.sliderSpeed.addEventListener('input', (e) => {
+        state.simulationSpeed = parseFloat(e.target.value);
+        ui.valSpeed.textContent = `${state.simulationSpeed.toFixed(1)}x`;
+      });
+
+      // エディタ連携
+      ui.inputName.addEventListener('input', (e) => {
+        if (state.selectedElement instanceof Node) {
+          state.selectedElement.label = e.target.value;
+        }
+      });
+      ui.btnDelete.addEventListener('click', deleteSelectedElement);
+
+      // JSON保存と読み込み
+      ui.btnSave.addEventListener('click', exportData);
+      ui.btnLoad.addEventListener('click', () => ui.fileInput.click());
+      ui.fileInput.addEventListener('change', importData);
+    }
+
+    function updatePropertiesPanel() {
+      if (state.selectedElement) {
+        ui.panelNoSel.style.display = 'none';
+        ui.panelEditor.style.display = 'block';
+        
+        if (state.selectedElement instanceof Node) {
+          ui.inputName.style.display = 'block';
+          ui.inputName.value = state.selectedElement.label;
+          ui.inputName.focus();
+        } else if (state.selectedElement instanceof Edge) {
+          ui.inputName.style.display = 'none'; // エッジは名前なし
+        }
+      } else {
+        ui.panelNoSel.style.display = 'block';
+        ui.panelEditor.style.display = 'none';
+      }
+    }
+
+    function deleteSelectedElement() {
+      if (!state.selectedElement) return;
+
+      if (state.selectedElement instanceof Node) {
+        const id = state.selectedElement.id;
+        // ノード本体の削除
+        state.nodes = state.nodes.filter(n => n.id !== id);
+        // 関連するエッジの削除
+        state.edges = state.edges.filter(e => e.fromId !== id && e.toId !== id);
+      } else if (state.selectedElement instanceof Edge) {
+        state.edges = state.edges.filter(e => e.id !== state.selectedElement.id);
+      }
+      
+      // 無効になったシグナルをクリーンアップ
+      cleanUpSignals();
+
+      state.selectedElement = null;
+      updatePropertiesPanel();
+    }
+
+    function cleanUpSignals() {
+      const validEdgeIds = new Set(state.edges.map(e => e.id));
+      state.signals = state.signals.filter(s => validEdgeIds.has(s.edgeId));
+    }
+
+    function toggleSimulation() {
+      state.isRunning = !state.isRunning;
+      
+      if (state.isRunning) {
+        ui.btnToggle.innerHTML = '⏸ 停止 (Pause)';
+        ui.btnToggle.style.backgroundColor = 'var(--warning)';
+        state.lastTime = performance.now(); // ワープ防止
+      } else {
+        ui.btnToggle.innerHTML = '▶ 実行する (Play)';
+        ui.btnToggle.style.backgroundColor = 'var(--success)';
+      }
+    }
+
+    function update(dt) {
+      // 1. 新規シグナル発生処理
+      state.generateTimer += dt;
+      if (state.generateTimer >= state.spawnInterval) {
+        state.generateTimer = 0;
+        
+        // どのノードからも指されていない「起点」を探す
+        const destinationIds = new Set(state.edges.map(e => e.toId));
+        const rootNodes = state.nodes.filter(n => !destinationIds.has(n.id));
+        
+        // ループだけで起点が無い場合は、ランダムに1つ選ぶ
+        const startNodes = rootNodes.length > 0 ? rootNodes : (state.nodes.length > 0 ? [state.nodes[0]] : []);
+
+        startNodes.forEach(node => {
+          fireSignalsFromNode(node.id);
+        });
+      }
+
+      // 2. 既存シグナルの進行・分岐処理
+      const nextSignals = [];
+      const PIXELS_PER_SEC = 100 * state.simulationSpeed;
+
+      state.signals.forEach(sig => {
+        const edge = state.edges.find(e => e.id === sig.edgeId);
+        if (!edge) return; // セーフティネット
+
+        const from = state.nodes.find(n => n.id === edge.fromId);
+        const to = state.nodes.find(n => n.id === edge.toId);
+        if (!from || !to) return;
+
+        // 距離の計算（自己ループの場合は円周、直線なら直線距離）
+        let distance;
+        if (from.id === to.id) {
+          distance = 2 * Math.PI * 30; // 簡易的な円周
+        } else {
+          const dx = to.x - from.x; const dy = to.y - from.y;
+          distance = Math.sqrt(dx * dx + dy * dy);
+        }
+        
+        // 速度計算（距離によらず一定のピクセル速度で動かす）
+        const speedRatio = distance > 0 ? (PIXELS_PER_SEC / distance) : 1;
+        
+        sig.progress += speedRatio * dt;
+
+        if (sig.progress >= 1.0) {
+          // 終点ノードに到達
+          const targetNodeId = edge.toId;
+          const targetNode = state.nodes.find(n => n.id === targetNodeId);
+          
+          // そのノードから出る次のエッジを探す
+          const outgoingEdges = state.edges.filter(e => e.fromId === targetNodeId);
+          
+          if (outgoingEdges.length > 0) {
+            // パラレル分岐：すべての行き先へシグナル複製
+            outgoingEdges.forEach(outEdge => {
+              // ブラウザ負荷防止のリミッター(最大1000個)
+              if (state.signals.length + nextSignals.length < 1000) {
+                 nextSignals.push(new Signal(outEdge.id));
+              }
+            });
+          } else if (targetNode) {
+            // 行き止まり
+            targetNode.stuckCount += 1;
+          }
+        } else {
+          nextSignals.push(sig);
+        }
+      });
+      
+      state.signals = nextSignals;
+      ui.entityCount.textContent = state.signals.length;
+    }
+
+    function fireSignalsFromNode(nodeId) {
+      const outgoingEdges = state.edges.filter(e => e.fromId === nodeId);
+      outgoingEdges.forEach(edge => {
+        if (state.signals.length < 1000) {
+          state.signals.push(new Signal(edge.id));
+        }
+      });
+    }
+
+    function draw() {
+      const rect = canvas.parentElement.getBoundingClientRect();
+      ctx.clearRect(0, 0, rect.width, rect.height);
+      
+      // 1. エッジの描画
+      state.edges.forEach(edge => drawEdge(edge));
+      
+      // 仮の線（結線ドラッグ中）
+      if (state.isConnecting && state.connectFromNode) {
+        ctx.beginPath();
+        ctx.moveTo(state.connectFromNode.x, state.connectFromNode.y);
+        ctx.lineTo(state.mouseX, state.mouseY);
+        ctx.strokeStyle = 'rgba(56, 189, 248, 0.5)';
+        ctx.setLineDash([5, 5]); // 点線
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        ctx.setLineDash([]);
+      }
+      
+      // 2. ノードの描画
+      state.nodes.forEach(node => drawNode(node));
+      
+      // 3. シグナルの描画
+      state.signals.forEach(sig => drawSignal(sig));
+    }
+
+    function drawEdge(edge) {
+      const from = state.nodes.find(n => n.id === edge.fromId);
+      const to = state.nodes.find(n => n.id === edge.toId);
+      if (!from || !to) return;
+
+      const isSelected = state.selectedElement && state.selectedElement.id === edge.id;
+      
+      ctx.beginPath();
+      if (from.id === to.id) {
+        // 自己ループ描画
+        ctx.arc(from.x, from.y - 45, 30, Math.PI / 2, Math.PI * 2.5);
+      } else {
+        ctx.moveTo(from.x, from.y);
+        ctx.lineTo(to.x, to.y);
+      }
+      
+      ctx.strokeStyle = isSelected ? 'var(--accent)' : 'rgba(100, 116, 139, 0.4)';
+      ctx.lineWidth = isSelected ? 3 : 2;
+      ctx.stroke();
+      
+      // 矢印（中間地点）
+      if (from.id !== to.id) {
+        const midX = (from.x + to.x) / 2;
+        const midY = (from.y + to.y) / 2;
+        const angle = Math.atan2(to.y - from.y, to.x - from.x);
+        
+        ctx.save();
+        ctx.translate(midX, midY);
+        ctx.rotate(angle);
+        ctx.beginPath();
+        ctx.moveTo(-6, -5); ctx.lineTo(6, 0); ctx.lineTo(-6, 5);
+        ctx.fillStyle = isSelected ? 'var(--accent)' : 'rgba(148, 163, 184, 0.8)';
+        ctx.fill();
+        ctx.restore();
+      }
+    }
+
+    function drawNode(node) {
+      const isSelected = state.selectedElement && state.selectedElement.id === node.id;
+      const isStuck = node.stuckCount > 0;
+      
+      ctx.save();
+      
+      // ネオン効果
+      const glow = isStuck ? Math.min(node.stuckCount * 2, 20) + 10 : (isSelected ? 15 : 0);
+      ctx.shadowBlur = glow;
+      ctx.shadowColor = isStuck ? '#ef4444' : '#38bdf8';
+      
+      ctx.beginPath();
+      ctx.arc(node.x, node.y, node.radius, 0, Math.PI * 2);
+      ctx.fillStyle = '#1e293b';
+      ctx.fill();
+      
+      ctx.lineWidth = isSelected ? 3 : 2;
+      ctx.strokeStyle = isStuck ? '#ef4444' : (isSelected ? '#fff' : '#38bdf8');
+      ctx.stroke();
+      
+      // テキスト
+      ctx.shadowBlur = 0;
+      ctx.fillStyle = '#f8fafc';
+      ctx.font = '12px system-ui, sans-serif';
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      
+      // はみ出し防止のテキストクリップ処理（簡易）
+      let text = node.label;
+      if (text.length > 8) text = text.substr(0, 7) + '..';
+      ctx.fillText(text, node.x, node.y);
+      
+      // 滞留カウント
+      if (isStuck) {
+        ctx.fillStyle = '#ef4444';
+        ctx.font = 'bold 11px sans-serif';
+        ctx.fillText(`+${node.stuckCount}`, node.x + 25, node.y - 25);
+      }
+      
+      ctx.restore();
+    }
+
+    function drawSignal(sig) {
+      const edge = state.edges.find(e => e.id === sig.edgeId);
+      if (!edge) return;
+      const from = state.nodes.find(n => n.id === edge.fromId);
+      const to = state.nodes.find(n => n.id === edge.toId);
+      if (!from || !to) return;
+
+      let x, y;
+      if (from.id === to.id) {
+        const angle = (Math.PI / 2) + (sig.progress * Math.PI * 2);
+        x = from.x + Math.cos(angle) * 30;
+        y = (from.y - 45) + Math.sin(angle) * 30;
+      } else {
+        x = from.x + (to.x - from.x) * sig.progress;
+        y = from.y + (to.y - from.y) * sig.progress;
+      }
+
+      ctx.save();
+      ctx.shadowBlur = 12; ctx.shadowColor = '#fbbf24';
+      ctx.beginPath(); ctx.arc(x, y, 5, 0, Math.PI * 2);
+      ctx.fillStyle = '#fde68a'; ctx.fill();
+      ctx.restore();
+    }
+
+    function gameLoop(timestamp) {
+      if (!state.lastTime) state.lastTime = timestamp;
+      const dt = (timestamp - state.lastTime) / 1000.0;
+      state.lastTime = timestamp;
+
+      // バックグラウンド等でのワープ防止
+      const safeDt = Math.min(dt, 0.1); 
+
+      if (state.isRunning) {
+        update(safeDt);
+      }
+      draw();
+      requestAnimationFrame(gameLoop);
+    }
+
+    function exportData() {
+      // 循環参照を持たないデータ構造なのでそのままstringify可能
+      const data = {
+        nodes: state.nodes.map(n => ({ id: n.id, label: n.label, x: n.x, y: n.y })),
+        edges: state.edges.map(e => ({ id: e.id, fromId: e.fromId, toId: e.toId }))
+      };
+      
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `flow_simulation_${new Date().toISOString().slice(0,10)}.json`;
+      a.click();
+      
+      URL.revokeObjectURL(url);
+      showToast('フローを保存しました');
+    }
+
+    function importData(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        try {
+          const data = JSON.parse(event.target.result);
+          if (!data.nodes || !data.edges) throw new Error("無効なフォーマット");
+          
+          // 状態のリセットと上書き
+          state.nodes = data.nodes.map(n => new Node(n.id, n.label, n.x, n.y));
+          state.edges = data.edges.map(e => new Edge(e.id, e.fromId, e.toId));
+          state.signals = [];
+          state.selectedElement = null;
+          updatePropertiesPanel();
+          
+          showToast('フローを読み込みました');
+        } catch (err) {
+          showToast('ファイルの読み込みに失敗しました', true);
+        }
+        ui.fileInput.value = ''; // Reset input
+      };
+      reader.readAsText(file);
+    }
+
+    function createSampleFlow() {
+      const id1 = generateId(), id2 = generateId(), id3 = generateId(), id4 = generateId(), id5 = generateId();
+      
+      state.nodes.push(
+        new Node(id1, '① 発注', 200, 200),
+        new Node(id2, '② 承認待ち', 400, 200),
+        new Node(id3, '③ 決裁済', 600, 150),
+        new Node(id4, '④ 差し戻し', 600, 280), // ボトルネック例
+        new Node(id5, '⑤ 納品完了', 800, 150)
+      );
+      
+      state.edges.push(
+        new Edge(null, id1, id2),
+        new Edge(null, id2, id3),
+        new Edge(null, id2, id4), // パラレル分岐
+        new Edge(null, id3, id5),
+        new Edge(null, id5, id1)  // サイクル形成
+      );
+    }
+
+    // アプリ起動
+    window.onload = init;
+
+  </script>
+</body>
+</html>
