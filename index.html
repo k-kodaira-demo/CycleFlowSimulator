@@ -3,366 +3,501 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Cycle Flow Simulator (Advanced)</title>
+  <title>Cycle Flow Simulator</title>
+  <script src="https://cdn.tailwindcss.com"></script>
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+    
     :root {
       --bg-color: #0f172a;
       --panel-bg: #1e293b;
       --text-main: #f8fafc;
       --text-muted: #94a3b8;
-      --accent: #38bdf8;
-      --accent-hover: #0284c7;
+      --accent: #3b82f6;
+      --accent-hover: #2563eb;
       --danger: #ef4444;
-      --success: #22c55e;
-      --warning: #f59e0b;
-      --border-color: #334155;
-      --highlight: rgba(56, 189, 248, 0.3);
+      --success: #10b981;
+      --node-circle: #334155;
+      --grid-color: rgba(255, 255, 255, 0.05);
     }
-    
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, sans-serif; }
-    
+
     body {
-      background-color: var(--bg-color); color: var(--text-main);
-      display: flex; height: 100vh; overflow: hidden; user-select: none;
+      margin: 0;
+      padding: 0;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      font-family: 'Inter', sans-serif;
+      overflow: hidden;
+      display: flex;
+      height: 100vh;
     }
 
+    /* ツールパネル（左側） */
     #sidebar {
-      width: 320px; background-color: var(--panel-bg); border-right: 1px solid var(--border-color);
-      display: flex; flex-direction: column; padding: 20px; z-index: 10;
-      box-shadow: 4px 0 15px rgba(0, 0, 0, 0.5); overflow-y: auto;
+      width: 320px;
+      background-color: var(--panel-bg);
+      border-right: 1px solid #334155;
+      display: flex;
+      flex-direction: column;
+      z-index: 10;
+      box-shadow: 2px 0 10px rgba(0,0,0,0.5);
     }
 
-    h1 { font-size: 1.2rem; font-weight: 600; margin-bottom: 15px; color: var(--accent); }
-
-    .section {
-      background: rgba(15, 23, 42, 0.5); border: 1px solid var(--border-color);
-      border-radius: 8px; padding: 15px; margin-bottom: 15px;
-    }
-    
-    .section h2 { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 10px; text-transform: uppercase; }
-
-    .form-group { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
-    .form-group label { font-size: 0.8rem; color: var(--text-muted); }
-    .checkbox-label { display: flex; align-items: center; gap: 8px; font-size: 0.85rem; cursor: pointer; color: var(--text-main); }
-    .checkbox-label input { cursor: pointer; width: 16px; height: 16px; accent-color: var(--success); }
-
-    input[type="text"], input[type="range"], select {
-      background-color: #0f172a; border: 1px solid var(--border-color);
-      color: var(--text-main); padding: 8px; border-radius: 4px; outline: none; width: 100%;
-    }
-    input[type="text"]:focus, select:focus { border-color: var(--accent); }
-
-    input[type="range"] { -webkit-appearance: none; height: 6px; background: var(--border-color); border-radius: 3px; padding: 0; border: none; }
-    input[type="range"]::-webkit-slider-thumb {
-      -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%;
-      background: var(--accent); cursor: pointer;
+    .panel-section {
+      padding: 20px;
+      border-bottom: 1px solid #334155;
     }
 
-    .btn-row { display: flex; gap: 8px; }
-    button {
-      flex: 1; background-color: var(--border-color); color: var(--text-main);
-      border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-size: 0.85rem; transition: 0.2s;
+    .panel-title {
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      margin-bottom: 15px;
+      font-weight: 600;
     }
-    button:hover { background-color: #475569; }
-    button.primary { background-color: var(--accent); color: #fff; }
-    button.primary:hover { background-color: var(--accent-hover); box-shadow: 0 0 10px var(--accent-hover); }
-    button.success { background-color: var(--success); color: #fff; }
-    button.danger { background-color: transparent; border: 1px solid var(--danger); color: var(--danger); }
-    button.danger:hover { background-color: var(--danger); color: #fff; }
-    
-    #canvas-container { flex: 1; position: relative; }
-    canvas { display: block; width: 100%; height: 100%; cursor: default; }
-    
-    .instructions {
-      position: absolute; bottom: 20px; left: 20px; background: rgba(15,23,42,0.8);
-      padding: 15px; border-radius: 8px; border: 1px solid var(--border-color);
-      font-size: 0.8rem; color: var(--text-muted); pointer-events: none; line-height: 1.6;
-    }
-    .instructions span { color: var(--accent); font-weight: bold; }
 
-    #toast {
-      position: absolute; top: 20px; right: 20px; background: var(--success); color: white;
-      padding: 10px 20px; border-radius: 4px; font-size: 0.9rem; opacity: 0; transition: opacity 0.3s;
-      pointer-events: none; transform: translateY(-10px);
+    /* キャンバス（右側） */
+    #canvas-container {
+      flex-grow: 1;
+      position: relative;
+      background-image: 
+        radial-gradient(var(--grid-color) 1px, transparent 1px),
+        radial-gradient(var(--grid-color) 1px, transparent 1px);
+      background-size: 20px 20px;
+      background-position: 0 0, 10px 10px;
     }
-    #toast.show { opacity: 1; transform: translateY(0); }
+
+    canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+
+    /* UI部品 */
+    .btn {
+      width: 100%;
+      padding: 10px;
+      border-radius: 6px;
+      border: none;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn-primary {
+      background-color: var(--accent);
+      color: white;
+    }
+    .btn-primary:hover { background-color: var(--accent-hover); }
+
+    .btn-danger {
+      background-color: rgba(239, 68, 68, 0.2);
+      color: var(--danger);
+      border: 1px solid var(--danger);
+    }
+    .btn-danger:hover { background-color: var(--danger); color: white; }
+
+    .btn-secondary {
+      background-color: transparent;
+      color: var(--text-main);
+      border: 1px solid #475569;
+    }
+    .btn-secondary:hover { background-color: #334155; }
+
+    .form-group {
+      margin-bottom: 15px;
+    }
+    .form-group label {
+      display: block;
+      font-size: 0.85rem;
+      margin-bottom: 5px;
+      color: var(--text-muted);
+    }
+    .form-group input[type="text"],
+    .form-group select {
+      width: 100%;
+      padding: 8px 12px;
+      background-color: #0f172a;
+      border: 1px solid #475569;
+      border-radius: 4px;
+      color: white;
+      font-size: 0.9rem;
+      outline: none;
+    }
+    .form-group input[type="text"]:focus,
+    .form-group select:focus {
+      border-color: var(--accent);
+    }
+    .form-group input[type="range"] {
+      width: 100%;
+      accent-color: var(--accent);
+    }
+
+    .checkbox-label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+    .checkbox-label input[type="checkbox"] {
+      accent-color: var(--accent);
+      width: 16px;
+      height: 16px;
+    }
+
+    .info-box {
+      background-color: rgba(59, 130, 246, 0.1);
+      border-left: 3px solid var(--accent);
+      padding: 10px;
+      font-size: 0.8rem;
+      color: #cbd5e1;
+      margin-bottom: 15px;
+      line-height: 1.4;
+    }
+
+    /* パネルの表示切り替え用 */
+    .hidden { display: none !important; }
   </style>
 </head>
 <body>
 
   <div id="sidebar">
-    <h1>Flow Simulator</h1>
-    
-    <!-- 実行コントロール -->
-    <div class="section">
-      <h2>Simulation Control</h2>
-      <button id="btn-toggle-sim" class="success" style="width: 100%; padding: 12px; margin-bottom: 10px; font-weight: bold;">
-        ▶ 実行する (Play)
-      </button>
-      <div class="btn-row">
-        <button id="btn-clear-signals" class="danger">シグナル消去</button>
+    <div class="panel-section" style="padding-bottom: 10px;">
+      <h1 class="text-xl font-bold text-white mb-1">Cycle Flow</h1>
+      <p class="text-xs text-slate-400">プロセスマイニング・シミュレーター</p>
+    </div>
+
+    <div class="panel-section">
+      <div class="info-box">
+        <b>操作方法:</b><br>
+        ・空白をダブルクリック：ノード追加<br>
+        ・Shift+ドラッグ：ノード間を繋ぐ<br>
+        ・選択してDelete：削除
       </div>
       
-      <div class="form-group" style="margin-top: 15px;">
-        <label>発生間隔 (Spawn Rate): <span id="val-spawn">1.5s</span></label>
-        <input type="range" id="slider-spawn" min="0.1" max="5.0" step="0.1" value="1.5">
+      <button id="btn-toggle-sim" class="btn btn-primary mb-3">
+        ▶ シミュレーション開始
+      </button>
+
+      <div class="form-group">
+        <label>シグナル発生頻度: <span id="val-spawn">中</span></label>
+        <input type="range" id="slider-spawn" min="10" max="120" value="60">
       </div>
       <div class="form-group">
         <label>移動速度 (Speed): <span id="val-speed">1.0x</span></label>
         <input type="range" id="slider-speed" min="0.1" max="5.0" step="0.1" value="1.0">
       </div>
-    </div>
-
-    <!-- 選択オブジェクトのプロパティ -->
-    <div class="section" id="panel-properties">
-      <h2>Properties</h2>
-      <div id="no-selection" style="color: var(--text-muted); font-size: 0.8rem;">要素を選択してください</div>
-      <div id="node-editor" style="display: none;">
-        <div class="form-group">
-          <label>拠点名</label>
-          <input type="text" id="input-node-name" placeholder="名前を入力">
-        </div>
-        <div class="form-group">
-          <label>形状</label>
-          <select id="select-node-shape">
-            <option value="circle">丸 (Circle)</option>
-            <option value="rectangle">四角 (Rectangle - 自動幅)</option>
-          </select>
-        </div>
-        <!-- 追加: ゴール設定のチェックボックス -->
-        <div class="form-group" style="margin-top: 10px; padding: 10px; background: rgba(0,0,0,0.2); border-radius: 4px;">
-          <label class="checkbox-label">
-            <input type="checkbox" id="check-node-goal">
-            <span>この拠点を「ゴール」に設定する</span>
-          </label>
-          <div style="font-size: 0.7rem; color: var(--text-muted); margin-top: 5px; margin-left: 24px;">
-            チェックを入れると、行き止まりでもエラー(赤色)になりません。
-          </div>
-        </div>
-        <button id="btn-delete-element" class="danger" style="width: 100%; margin-top: 15px;">この要素を削除</button>
+      
+      <div class="form-group" style="margin-top: 10px; padding: 10px; background: rgba(0,0,0,0.2); border-radius: 4px;">
+        <label class="checkbox-label">
+          <input type="checkbox" id="check-snap" checked>
+          <span>整列アシスト (スマートガイド)</span>
+        </label>
       </div>
     </div>
 
-    <!-- ファイル保存・読込 -->
-    <div class="section" style="margin-top: auto;">
-      <h2>Save / Load</h2>
-      <div class="btn-row">
-        <button id="btn-save" class="primary">保存 (JSON)</button>
-        <button id="btn-load">読込 (JSON)</button>
+    <!-- ノード非選択時 -->
+    <div id="no-selection" class="panel-section" style="flex-grow: 1; display: flex; align-items: center; justify-content: center; text-align: center; color: var(--text-muted); font-size: 0.9rem;">
+      ノードまたは線をクリックすると<br>プロパティを編集できます
+    </div>
+
+    <!-- ノード選択時のプロパティ -->
+    <div id="node-properties" class="panel-section hidden" style="flex-grow: 1;">
+      <div class="panel-title">ノード設定</div>
+      <div class="form-group">
+        <label>拠点名</label>
+        <input type="text" id="input-node-name" placeholder="例: 受注処理">
       </div>
+      <div class="form-group">
+        <label>形状</label>
+        <select id="select-node-shape">
+          <option value="circle">丸 (Circle)</option>
+          <option value="rect">四角 (Rectangle)</option>
+        </select>
+      </div>
+      
+      <div class="form-group" style="margin-top: 15px; padding: 10px; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 4px;">
+        <label class="checkbox-label" style="color: var(--success);">
+          <input type="checkbox" id="check-is-goal">
+          <span class="font-bold">この拠点を「ゴール」にする</span>
+        </label>
+        <div style="font-size: 0.75rem; color: #94a3b8; margin-top: 5px; margin-left: 24px;">
+          行き先がない場合でもエラーにならず、正常完了として処理されます。
+        </div>
+      </div>
+
+      <div style="margin-top: auto; padding-top: 20px;">
+        <button id="btn-delete-node" class="btn btn-danger">ノードを削除 (Del)</button>
+      </div>
+    </div>
+
+    <div id="edge-properties" class="panel-section hidden" style="flex-grow: 1;">
+      <div class="panel-title">線の設定 (フロー条件)</div>
+      <div class="form-group">
+        <label>この線の意味・条件 (メモ)</label>
+        <input type="text" id="input-edge-label" placeholder="例: 承認された場合">
+        <div style="font-size: 0.75rem; color: #94a3b8; margin-top: 5px;">
+          入力したテキストが線の上に表示されます。
+        </div>
+      </div>
+      <div style="margin-top: auto; padding-top: 20px;">
+        <button id="btn-delete-edge" class="btn btn-danger">この線を削除 (Del)</button>
+      </div>
+    </div>
+
+    <div class="panel-section" style="display: flex; gap: 10px;">
+      <button id="btn-save" class="btn btn-secondary" style="flex: 1; font-size: 0.8rem;">保存</button>
+      <button id="btn-load" class="btn btn-secondary" style="flex: 1; font-size: 0.8rem;">読込</button>
       <input type="file" id="file-input" accept=".json" style="display: none;">
-    </div>
-    
-    <div style="font-size: 0.8rem; color: var(--text-muted); text-align: center;">
-      Entities: <span id="entity-count">0</span>
     </div>
   </div>
 
   <div id="canvas-container">
     <canvas id="sim-canvas"></canvas>
-    <div class="instructions">
-      【操作方法】<br>
-      ・<span>何もない場所をダブルクリック</span>：新規拠点の作成<br>
-      ・<span>Shift + 拠点からドラッグ</span>：拠点を結ぶ線（フロー）を作成<br>
-      ・<span>拠点をドラッグ</span>：移動<br>
-      ・<span>要素をクリックして選択</span>：左パネルで名前・形状・ゴール設定<br>
-      ・<span>Delete / Backspaceキー</span>：選択中の要素を削除
-    </div>
-    <div id="toast">メッセージ</div>
   </div>
 
   <script>
-    'use strict';
-
-    class Node {
-      constructor(id, label, x, y, shape = 'circle', isGoal = false) {
-        this.id = id || generateId();
-        this.label = label || '新規拠点';
-        this.x = x;
-        this.y = y;
-        this.shape = shape; // 'circle' or 'rectangle'
-        this.isGoal = isGoal; // ゴール判定（行き止まりでもエラーにしない）
-        this.radius = 30; // 丸の時の半径
-        this.width = 120; // 四角の時の幅 (描画時に動的計算される)
-        this.height = 40; // 四角の時の高さ
-        this.stuckCount = 0; // 滞留数（到着数）
-      }
-    }
-
-    class Edge {
-      constructor(id, fromId, toId) {
-        this.id = id || generateId();
-        this.fromId = fromId;
-        this.toId = toId;
-      }
-    }
-
-    class Signal {
-      constructor(edgeId) {
-        this.id = generateId();
-        this.edgeId = edgeId;
-        this.progress = 0.0;
-      }
-    }
-
+    // システムの内部状態（State）
     const state = {
       nodes: [],
       edges: [],
       signals: [],
-      
       isRunning: false,
-      lastTime: 0,
-      generateTimer: 0,
-      spawnInterval: 1.5,
       simulationSpeed: 1.0,
+      spawnRate: 60, // フレーム間隔
+      frameCount: 0,
       
-      selectedElement: null,
-      draggedNode: null,
+      // 選択・操作状態
+      selectedNode: null,
+      selectedEdge: null, // エッジ選択状態を追加
       isDragging: false,
-      
+      draggedNode: null,
       isConnecting: false,
       connectFromNode: null,
       mouseX: 0,
-      mouseY: 0
+      mouseY: 0,
+      
+      // スマートガイド状態
+      enableSnap: true,
+      alignGuides: [],
+
+      // アニメーションループ用
+      lastTime: 0
     };
 
     const canvas = document.getElementById('sim-canvas');
     const ctx = canvas.getContext('2d');
-    
+
+    // UI要素の取得
     const ui = {
       btnToggle: document.getElementById('btn-toggle-sim'),
-      btnClear: document.getElementById('btn-clear-signals'),
       sliderSpawn: document.getElementById('slider-spawn'),
       valSpawn: document.getElementById('val-spawn'),
       sliderSpeed: document.getElementById('slider-speed'),
       valSpeed: document.getElementById('val-speed'),
+      checkSnap: document.getElementById('check-snap'),
       
       panelNoSel: document.getElementById('no-selection'),
-      panelEditor: document.getElementById('node-editor'),
-      inputName: document.getElementById('input-node-name'),
-      selectShape: document.getElementById('select-node-shape'),
-      checkGoal: document.getElementById('check-node-goal'),
-      btnDelete: document.getElementById('btn-delete-element'),
+      panelNode: document.getElementById('node-properties'),
+      panelEdge: document.getElementById('edge-properties'), // 追加
+      
+      inputNodeName: document.getElementById('input-node-name'),
+      selectNodeShape: document.getElementById('select-node-shape'),
+      checkIsGoal: document.getElementById('check-is-goal'),
+      btnDeleteNode: document.getElementById('btn-delete-node'),
+
+      inputEdgeLabel: document.getElementById('input-edge-label'), // 追加
+      btnDeleteEdge: document.getElementById('btn-delete-edge'),   // 追加
       
       btnSave: document.getElementById('btn-save'),
       btnLoad: document.getElementById('btn-load'),
-      fileInput: document.getElementById('file-input'),
-      
-      entityCount: document.getElementById('entity-count'),
-      toast: document.getElementById('toast')
+      fileInput: document.getElementById('file-input')
     };
 
-    function init() {
-      resizeCanvas();
-      window.addEventListener('resize', resizeCanvas);
-      setupUIEvents();
-      setupCanvasEvents();
-      createSampleFlow();
-      requestAnimationFrame(gameLoop);
+    // 初期サンプルデータ
+    function loadSampleData() {
+      state.nodes = [
+        { id: 'n1', x: 150, y: 300, name: '① 入庫', shape: 'circle', isGoal: false, errorCount: 0, successCount: 0 },
+        { id: 'n2', x: 350, y: 300, name: '② 検品', shape: 'circle', isGoal: false, errorCount: 0, successCount: 0 },
+        { id: 'n3', x: 550, y: 150, name: '③ 梱包作業', shape: 'rect', isGoal: false, errorCount: 0, successCount: 0 },
+        { id: 'n4', x: 550, y: 450, name: '④ 異常品対応 (保留)', shape: 'rect', isGoal: false, errorCount: 0, successCount: 0 },
+        { id: 'n5', x: 800, y: 150, name: '⑤ 出荷完了', shape: 'rect', isGoal: true, errorCount: 0, successCount: 0 }
+      ];
+      // サンプルエッジにラベル(メモ)を付与
+      state.edges = [
+        { from: 'n1', to: 'n2', label: '' },
+        { from: 'n2', to: 'n3', label: '合格' },
+        { from: 'n2', to: 'n4', label: '不合格' },
+        { from: 'n3', to: 'n5', label: '' },
+        { from: 'n5', to: 'n1', label: 'サイクル戻り' } // サイクル
+      ];
     }
 
-    function generateId() {
-      return Math.random().toString(36).substr(2, 9);
-    }
-
+    // キャンバスのリサイズ処理
     function resizeCanvas() {
-      const dpr = window.devicePixelRatio || 1;
-      const rect = canvas.parentElement.getBoundingClientRect();
-      canvas.width = rect.width * dpr;
-      canvas.height = rect.height * dpr;
-      ctx.scale(dpr, dpr);
-      canvas.style.width = `${rect.width}px`;
-      canvas.style.height = `${rect.height}px`;
+      canvas.width = canvas.parentElement.clientWidth;
+      canvas.height = canvas.parentElement.clientHeight;
     }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
 
-    function showToast(msg, isError = false) {
-      ui.toast.textContent = msg;
-      ui.toast.style.background = isError ? 'var(--danger)' : 'var(--success)';
-      ui.toast.classList.add('show');
-      setTimeout(() => ui.toast.classList.remove('show'), 3000);
-    }
+    function setupEventListeners() {
+      // コントロールパネル
+      ui.btnToggle.addEventListener('click', toggleSimulation);
+      
+      ui.sliderSpawn.addEventListener('input', (e) => {
+        const val = parseInt(e.target.value);
+        state.spawnRate = 130 - val; // スライダー右で頻度高く(値は小さく)
+        let text = '中';
+        if (val < 40) text = '低 (ゆっくり)';
+        if (val > 90) text = '高 (激しい)';
+        ui.valSpawn.textContent = text;
+      });
 
-    function setupCanvasEvents() {
+      ui.sliderSpeed.addEventListener('input', (e) => {
+        state.simulationSpeed = parseFloat(e.target.value);
+        ui.valSpeed.textContent = `${state.simulationSpeed.toFixed(1)}x`;
+      });
+
+      ui.checkSnap.addEventListener('change', (e) => {
+        state.enableSnap = e.target.checked;
+      });
+
+      // ノードプロパティ編集
+      ui.inputNodeName.addEventListener('input', (e) => {
+        if (state.selectedNode) state.selectedNode.name = e.target.value;
+      });
+      ui.selectNodeShape.addEventListener('change', (e) => {
+        if (state.selectedNode) state.selectedNode.shape = e.target.value;
+      });
+      ui.checkIsGoal.addEventListener('change', (e) => {
+        if (state.selectedNode) state.selectedNode.isGoal = e.target.checked;
+      });
+      ui.btnDeleteNode.addEventListener('click', deleteSelectedNode);
+
+      // エッジプロパティ編集
+      ui.inputEdgeLabel.addEventListener('input', (e) => {
+        if (state.selectedEdge) state.selectedEdge.label = e.target.value;
+      });
+      ui.btnDeleteEdge.addEventListener('click', deleteSelectedEdge);
+
+      // 保存・読込
+      ui.btnSave.addEventListener('click', saveToFile);
+      ui.btnLoad.addEventListener('click', () => ui.fileInput.click());
+      ui.fileInput.addEventListener('change', loadFromFile);
+
+      // キャンバス上のマウス操作
       canvas.addEventListener('mousedown', handleMouseDown);
       canvas.addEventListener('mousemove', handleMouseMove);
       canvas.addEventListener('mouseup', handleMouseUp);
       canvas.addEventListener('dblclick', handleDoubleClick);
       
+      // キーボードショートカット
       window.addEventListener('keydown', (e) => {
-        if (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'SELECT') return;
-        if (e.key === 'Delete' || e.key === 'Backspace') deleteSelectedElement();
+        if (e.key === 'Delete' || e.key === 'Backspace') {
+          // input入力中でない場合のみ削除実行
+          if (document.activeElement.tagName !== 'INPUT') {
+            if (state.selectedNode) deleteSelectedNode();
+            if (state.selectedEdge) deleteSelectedEdge();
+          }
+        }
       });
     }
 
     function getMousePos(e) {
       const rect = canvas.getBoundingClientRect();
-      return { x: e.clientX - rect.left, y: e.clientY - rect.top };
+      return {
+        x: e.clientX - rect.left,
+        y: e.clientY - rect.top
+      };
     }
 
-    function hitTestNode(x, y) {
-      return state.nodes.find(n => {
-        if (n.shape === 'rectangle') {
-          return x >= n.x - n.width/2 && x <= n.x + n.width/2 &&
-                 y >= n.y - n.height/2 && y <= n.y + n.height/2;
-        } else {
-          const dx = x - n.x; const dy = y - n.y;
-          return (dx * dx + dy * dy) <= (n.radius * n.radius);
-        }
-      });
-    }
-
-    function hitTestEdge(x, y) {
-      const TOLERANCE = 8;
-      for (const edge of state.edges) {
-        const from = state.nodes.find(n => n.id === edge.fromId);
-        const to = state.nodes.find(n => n.id === edge.toId);
-        if (!from || !to) continue;
-
-        if (from.id === to.id) {
-          const yOffset = from.shape === 'rectangle' ? (from.height/2 + 25) : 45;
-          const dx = x - from.x; const dy = y - (from.y - yOffset);
-          const dist = Math.sqrt(dx*dx + dy*dy);
-          if (Math.abs(dist - 30) < TOLERANCE) return edge;
-          continue;
-        }
-
-        const A = x - from.x; const B = y - from.y;
-        const C = to.x - from.x; const D = to.y - from.y;
-        const dot = A * C + B * D;
-        const lenSq = C * C + D * D;
-        let param = -1;
-        if (lenSq !== 0) param = dot / lenSq;
-
-        let xx, yy;
-        if (param < 0) { xx = from.x; yy = from.y; }
-        else if (param > 1) { xx = to.x; yy = to.y; }
-        else { xx = from.x + param * C; yy = from.y + param * D; }
-
-        const dx = x - xx; const dy = y - yy;
-        if (Math.sqrt(dx*dx + dy*dy) < TOLERANCE) return edge;
+    // 形状に合わせたヒットテスト（当たり判定）
+    function isMouseOnNode(x, y, node) {
+      if (node.shape === 'rect') {
+        const { width, height } = getRectSize(node);
+        return x >= node.x - width/2 && x <= node.x + width/2 &&
+               y >= node.y - height/2 && y <= node.y + height/2;
+      } else {
+        const radius = 35;
+        const dx = x - node.x;
+        const dy = y - node.y;
+        return (dx * dx + dy * dy) <= (radius * radius);
       }
-      return null;
+    }
+
+    // 線分と点の距離（エッジのクリック判定用）
+    function getDistToSegment(x, y, x1, y1, x2, y2) {
+      const A = x - x1;
+      const B = y - y1;
+      const C = x2 - x1;
+      const D = y2 - y1;
+      const dot = A * C + B * D;
+      const len_sq = C * C + D * D;
+      let param = -1;
+      if (len_sq != 0) param = dot / len_sq;
+      let xx, yy;
+      if (param < 0) { xx = x1; yy = y1; }
+      else if (param > 1) { xx = x2; yy = y2; }
+      else { xx = x1 + param * C; yy = y1 + param * D; }
+      const dx = x - xx;
+      const dy = y - yy;
+      return Math.sqrt(dx * dx + dy * dy);
     }
 
     function handleMouseDown(e) {
       const { x, y } = getMousePos(e);
-      const clickedNode = hitTestNode(x, y);
-      const clickedEdge = clickedNode ? null : hitTestEdge(x, y);
-
-      state.selectedElement = clickedNode || clickedEdge || null;
-      updatePropertiesPanel();
+      
+      // 1. まずノードのクリック判定
+      let clickedNode = null;
+      for (let i = state.nodes.length - 1; i >= 0; i--) {
+        if (isMouseOnNode(x, y, state.nodes[i])) {
+          clickedNode = state.nodes[i];
+          break;
+        }
+      }
 
       if (clickedNode) {
         if (e.shiftKey) {
+          // 結線モード開始
           state.isConnecting = true;
           state.connectFromNode = clickedNode;
-          state.mouseX = x; state.mouseY = y;
         } else {
+          // ドラッグ＆選択
+          selectNode(clickedNode);
           state.isDragging = true;
           state.draggedNode = clickedNode;
-          canvas.style.cursor = 'grabbing';
+        }
+        return;
+      }
+
+      // 2. ノードが無ければエッジのクリック判定
+      let clickedEdge = null;
+      for (const edge of state.edges) {
+        const from = state.nodes.find(n => n.id === edge.from);
+        const to = state.nodes.find(n => n.id === edge.to);
+        if (from && to) {
+          const dist = getDistToSegment(x, y, from.x, from.y, to.x, to.y);
+          if (dist < 10) { // 10ピクセル以内のクリック許容
+            clickedEdge = edge;
+            break;
+          }
         }
       }
+
+      if (clickedEdge) {
+        selectEdge(clickedEdge);
+        return;
+      }
+
+      // 3. どちらもクリックされなければ選択解除
+      clearSelection();
     }
 
     function handleMouseMove(e) {
@@ -370,20 +505,56 @@
       state.mouseX = x; state.mouseY = y;
 
       if (state.isDragging && state.draggedNode) {
-        state.draggedNode.x = x;
-        state.draggedNode.y = y;
+        let newX = x;
+        let newY = y;
+        state.alignGuides = []; // ガイドリセット
+
+        // スマートガイド機能（吸着）
+        if (state.enableSnap) {
+          const SNAP_DIST = 15; // 15px以内で吸着
+          for (const node of state.nodes) {
+            if (node.id === state.draggedNode.id) continue;
+            
+            // X軸（垂直ガイド）
+            if (Math.abs(newX - node.x) < SNAP_DIST) {
+              newX = node.x;
+              state.alignGuides.push({ type: 'x', x: node.x, y1: node.y, y2: newY });
+            }
+            // Y軸（水平ガイド）
+            if (Math.abs(newY - node.y) < SNAP_DIST) {
+              newY = node.y;
+              state.alignGuides.push({ type: 'y', y: node.y, x1: node.x, x2: newX });
+            }
+          }
+        }
+
+        state.draggedNode.x = newX;
+        state.draggedNode.y = newY;
       }
     }
 
     function handleMouseUp(e) {
       if (state.isConnecting && state.connectFromNode) {
         const { x, y } = getMousePos(e);
-        const targetNode = hitTestNode(x, y);
-        
+        let targetNode = null;
+        for (const node of state.nodes) {
+          if (isMouseOnNode(x, y, node) && node.id !== state.connectFromNode.id) {
+            targetNode = node;
+            break;
+          }
+        }
+
         if (targetNode) {
-          const exists = state.edges.some(edge => edge.fromId === state.connectFromNode.id && edge.toId === targetNode.id);
+          // 重複チェック
+          const exists = state.edges.some(edge => 
+            edge.from === state.connectFromNode.id && edge.to === targetNode.id
+          );
           if (!exists) {
-            state.edges.push(new Edge(null, state.connectFromNode.id, targetNode.id));
+            state.edges.push({ 
+              from: state.connectFromNode.id, 
+              to: targetNode.id,
+              label: '' // デフォルトは空メモ
+            });
           }
         }
       }
@@ -392,402 +563,482 @@
       state.draggedNode = null;
       state.isConnecting = false;
       state.connectFromNode = null;
-      canvas.style.cursor = 'default';
+      state.alignGuides = []; // ドラッグ終了でガイド消去
     }
 
     function handleDoubleClick(e) {
       const { x, y } = getMousePos(e);
-      const clickedNode = hitTestNode(x, y);
-      
-      if (!clickedNode) {
-        const newNode = new Node(null, `拠点${state.nodes.length + 1}`, x, y);
+      // ノードがない場所なら新規作成
+      const clicked = state.nodes.some(node => isMouseOnNode(x, y, node));
+      if (!clicked) {
+        const newNode = {
+          id: 'node_' + Date.now(),
+          x: x,
+          y: y,
+          name: '新規拠点',
+          shape: 'rect', // デフォルト四角形
+          isGoal: false,
+          errorCount: 0,
+          successCount: 0
+        };
         state.nodes.push(newNode);
-        state.selectedElement = newNode;
-        updatePropertiesPanel();
+        selectNode(newNode);
       }
     }
 
-    function setupUIEvents() {
-      ui.btnToggle.addEventListener('click', toggleSimulation);
-      ui.btnClear.addEventListener('click', () => {
-        state.signals = [];
-        state.nodes.forEach(n => n.stuckCount = 0);
-      });
-
-      ui.sliderSpawn.addEventListener('input', (e) => {
-        state.spawnInterval = parseFloat(e.target.value);
-        ui.valSpawn.textContent = `${state.spawnInterval.toFixed(1)}s`;
-      });
-      ui.sliderSpeed.addEventListener('input', (e) => {
-        state.simulationSpeed = parseFloat(e.target.value);
-        ui.valSpeed.textContent = `${state.simulationSpeed.toFixed(1)}x`;
-      });
-
-      ui.inputName.addEventListener('input', (e) => {
-        if (state.selectedElement instanceof Node) {
-          state.selectedElement.label = e.target.value;
-        }
-      });
-      ui.selectShape.addEventListener('change', (e) => {
-        if (state.selectedElement instanceof Node) {
-          state.selectedElement.shape = e.target.value;
-        }
-      });
-      // ゴール判定のトグル
-      ui.checkGoal.addEventListener('change', (e) => {
-        if (state.selectedElement instanceof Node) {
-          state.selectedElement.isGoal = e.target.checked;
-        }
-      });
-
-      ui.btnDelete.addEventListener('click', deleteSelectedElement);
-      ui.btnSave.addEventListener('click', exportData);
-      ui.btnLoad.addEventListener('click', () => ui.fileInput.click());
-      ui.fileInput.addEventListener('change', importData);
-    }
-
-    function updatePropertiesPanel() {
-      if (state.selectedElement) {
-        ui.panelNoSel.style.display = 'none';
-        ui.panelEditor.style.display = 'block';
-        
-        if (state.selectedElement instanceof Node) {
-          ui.inputName.style.display = 'block';
-          ui.selectShape.style.display = 'block';
-          ui.checkGoal.parentElement.parentElement.style.display = 'block';
-          ui.inputName.value = state.selectedElement.label;
-          ui.selectShape.value = state.selectedElement.shape;
-          ui.checkGoal.checked = state.selectedElement.isGoal;
-        } else if (state.selectedElement instanceof Edge) {
-          ui.inputName.style.display = 'none';
-          ui.selectShape.style.display = 'none';
-          ui.checkGoal.parentElement.parentElement.style.display = 'none';
-        }
-      } else {
-        ui.panelNoSel.style.display = 'block';
-        ui.panelEditor.style.display = 'none';
-      }
-    }
-
-    function deleteSelectedElement() {
-      if (!state.selectedElement) return;
-
-      if (state.selectedElement instanceof Node) {
-        const id = state.selectedElement.id;
-        state.nodes = state.nodes.filter(n => n.id !== id);
-        state.edges = state.edges.filter(e => e.fromId !== id && e.toId !== id);
-      } else if (state.selectedElement instanceof Edge) {
-        state.edges = state.edges.filter(e => e.id !== state.selectedElement.id);
-      }
+    function selectNode(node) {
+      state.selectedNode = node;
+      state.selectedEdge = null;
+      ui.panelNoSel.classList.add('hidden');
+      ui.panelEdge.classList.add('hidden');
+      ui.panelNode.classList.remove('hidden');
       
-      cleanUpSignals();
-      state.selectedElement = null;
-      updatePropertiesPanel();
+      ui.inputNodeName.value = node.name;
+      ui.selectNodeShape.value = node.shape || 'circle';
+      ui.checkIsGoal.checked = node.isGoal || false;
     }
 
-    function cleanUpSignals() {
-      const validEdgeIds = new Set(state.edges.map(e => e.id));
-      state.signals = state.signals.filter(s => validEdgeIds.has(s.edgeId));
+    function selectEdge(edge) {
+      state.selectedEdge = edge;
+      state.selectedNode = null;
+      ui.panelNoSel.classList.add('hidden');
+      ui.panelNode.classList.add('hidden');
+      ui.panelEdge.classList.remove('hidden');
+
+      ui.inputEdgeLabel.value = edge.label || '';
+    }
+
+    function clearSelection() {
+      state.selectedNode = null;
+      state.selectedEdge = null;
+      ui.panelNode.classList.add('hidden');
+      ui.panelEdge.classList.add('hidden');
+      ui.panelNoSel.classList.remove('hidden');
+    }
+
+    function deleteSelectedNode() {
+      if (!state.selectedNode) return;
+      const id = state.selectedNode.id;
+      // ノード削除
+      state.nodes = state.nodes.filter(n => n.id !== id);
+      // 関連エッジ削除
+      state.edges = state.edges.filter(e => e.from !== id && e.to !== id);
+      // 関連シグナル削除
+      state.signals = state.signals.filter(s => s.fromId !== id && s.toId !== id);
+      
+      clearSelection();
+    }
+
+    function deleteSelectedEdge() {
+      if (!state.selectedEdge) return;
+      state.edges = state.edges.filter(e => e !== state.selectedEdge);
+      clearSelection();
+    }
+
+    function getRectSize(node) {
+      ctx.font = '600 14px Inter, sans-serif';
+      const textWidth = ctx.measureText(node.name).width;
+      // 文字幅に合わせて枠を伸縮（最小幅100px）
+      const width = Math.max(100, textWidth + 40); 
+      return { width, height: 50 };
+    }
+
+    function drawNode(node) {
+      ctx.save();
+      const isSelected = state.selectedNode === node;
+      
+      // 行き先がなく、かつゴールでない場合はエラー（滞留）判定
+      const hasOutgoing = state.edges.some(e => e.from === node.id);
+      const isError = !hasOutgoing && node.errorCount > 0 && !node.isGoal;
+      const isSuccess = !hasOutgoing && node.isGoal && node.successCount > 0;
+
+      // 影と光彩の設定
+      ctx.shadowColor = 'rgba(0,0,0,0.5)';
+      ctx.shadowBlur = 10;
+      ctx.shadowOffsetY = 4;
+
+      if (isSelected) {
+        ctx.shadowColor = 'rgba(59, 130, 246, 0.8)'; // 青光り
+        ctx.shadowBlur = 15;
+      }
+      if (isError) {
+        ctx.shadowColor = 'rgba(239, 68, 68, 0.8)'; // 赤警告
+        ctx.shadowBlur = 20;
+      }
+      if (isSuccess) {
+        ctx.shadowColor = 'rgba(16, 185, 129, 0.6)'; // 緑成功
+        ctx.shadowBlur = 15;
+      }
+
+      ctx.fillStyle = 'var(--node-circle)';
+      // 枠線の色決定
+      if (isSelected) ctx.strokeStyle = 'var(--accent)';
+      else if (isError) ctx.strokeStyle = 'var(--danger)';
+      else if (isSuccess) ctx.strokeStyle = 'var(--success)';
+      else if (node.isGoal) ctx.strokeStyle = '#4ade80'; // ゴール設定されているだけの状態
+      else ctx.strokeStyle = '#475569';
+      
+      ctx.lineWidth = isSelected || isError || isSuccess ? 3 : 2;
+
+      // 形状別の描画
+      if (node.shape === 'rect') {
+        const { width, height } = getRectSize(node);
+        const r = 8; // 角丸
+        const x = node.x - width/2;
+        const y = node.y - height/2;
+        ctx.beginPath();
+        ctx.moveTo(x + r, y);
+        ctx.lineTo(x + width - r, y);
+        ctx.arcTo(x + width, y, x + width, y + height, r);
+        ctx.lineTo(x + width, y + height - r);
+        ctx.arcTo(x + width, y + height, x, y + height, r);
+        ctx.lineTo(x + r, y + height);
+        ctx.arcTo(x, y + height, x, y, r);
+        ctx.lineTo(x, y + r);
+        ctx.arcTo(x, y, x + width, y, r);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+      } else {
+        // 丸描画
+        const radius = 35;
+        ctx.beginPath();
+        ctx.arc(node.x, node.y, radius, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+      }
+
+      // テキストの描画
+      ctx.shadowBlur = 0; // テキストに影はつけない
+      ctx.fillStyle = 'white';
+      ctx.font = '600 13px Inter, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      
+      let displayName = node.name;
+      if (node.shape !== 'rect' && displayName.length > 8) {
+        displayName = displayName.substring(0, 7) + '..'; // 丸の場合は文字数制限
+      }
+      ctx.fillText(displayName, node.x, node.y);
+
+      // バッジの描画（エラー滞留 または 完了数）
+      if (isError) {
+        drawBadge(node, node.errorCount, 'var(--danger)');
+      } else if (isSuccess || node.isGoal) {
+        if (node.successCount > 0) drawBadge(node, node.successCount, 'var(--success)');
+      }
+
+      ctx.restore();
+    }
+
+    function drawBadge(node, count, color) {
+      const offsetX = node.shape === 'rect' ? getRectSize(node).width/2 - 10 : 25;
+      const offsetY = node.shape === 'rect' ? -getRectSize(node).height/2 + 5 : -25;
+      
+      ctx.beginPath();
+      ctx.arc(node.x + offsetX, node.y + offsetY, 12, 0, Math.PI*2);
+      ctx.fillStyle = color;
+      ctx.fill();
+      ctx.strokeStyle = '#fff';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+      
+      ctx.fillStyle = 'white';
+      ctx.font = 'bold 11px sans-serif';
+      ctx.fillText(count > 99 ? '99+' : count, node.x + offsetX, node.y + offsetY);
+    }
+
+    function drawEdge(edge) {
+      const from = state.nodes.find(n => n.id === edge.from);
+      const to = state.nodes.find(n => n.id === edge.to);
+      if (!from || !to) return;
+
+      ctx.save();
+      const isSelected = state.selectedEdge === edge;
+      
+      ctx.beginPath();
+      ctx.moveTo(from.x, from.y);
+      ctx.lineTo(to.x, to.y);
+      ctx.strokeStyle = isSelected ? 'var(--accent)' : 'rgba(148, 163, 184, 0.4)';
+      ctx.lineWidth = isSelected ? 3 : 2;
+      ctx.stroke();
+
+      // 矢印の描画
+      const angle = Math.atan2(to.y - from.y, to.x - from.x);
+      // 形状を考慮して矢印の位置を少し手前に
+      let offset = 40;
+      if (to.shape === 'rect') offset = Math.min(getRectSize(to).width/2, 60);
+      
+      const arrowX = to.x - Math.cos(angle) * offset;
+      const arrowY = to.y - Math.sin(angle) * offset;
+      
+      ctx.beginPath();
+      ctx.moveTo(arrowX, arrowY);
+      ctx.lineTo(arrowX - 10 * Math.cos(angle - Math.PI/6), arrowY - 10 * Math.sin(angle - Math.PI/6));
+      ctx.lineTo(arrowX - 10 * Math.cos(angle + Math.PI/6), arrowY - 10 * Math.sin(angle + Math.PI/6));
+      ctx.closePath();
+      ctx.fillStyle = isSelected ? 'var(--accent)' : 'rgba(148, 163, 184, 0.8)';
+      ctx.fill();
+
+      // 追加：メモ（ラベル）の描画
+      if (edge.label && edge.label.trim() !== "") {
+        const midX = (from.x + to.x) / 2;
+        const midY = (from.y + to.y) / 2;
+        
+        ctx.font = '12px Inter, sans-serif';
+        const textWidth = ctx.measureText(edge.label).width;
+        
+        // 半透明の背景座布団
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.85)'; // 背景が見えるダーク
+        ctx.fillRect(midX - textWidth/2 - 6, midY - 12, textWidth + 12, 24);
+        
+        // 座布団の枠線
+        ctx.strokeStyle = isSelected ? 'var(--accent)' : '#475569';
+        ctx.lineWidth = 1;
+        ctx.strokeRect(midX - textWidth/2 - 6, midY - 12, textWidth + 12, 24);
+        
+        // テキスト
+        ctx.fillStyle = isSelected ? '#fff' : 'var(--text-muted)';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(edge.label, midX, midY);
+      }
+
+      ctx.restore();
+    }
+
+    // ドラッグ中の結線プレビュー
+    function drawConnectingLine() {
+      if (!state.isConnecting || !state.connectFromNode) return;
+      ctx.save();
+      ctx.beginPath();
+      ctx.moveTo(state.connectFromNode.x, state.connectFromNode.y);
+      ctx.lineTo(state.mouseX, state.mouseY);
+      ctx.strokeStyle = 'rgba(59, 130, 246, 0.8)';
+      ctx.lineWidth = 2;
+      ctx.setLineDash([5, 5]);
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    // スマートガイドの描画
+    function drawAlignGuides() {
+      if (!state.alignGuides || state.alignGuides.length === 0) return;
+      ctx.save();
+      ctx.strokeStyle = '#f472b6'; // ピンク色
+      ctx.setLineDash([4, 4]);
+      ctx.lineWidth = 1;
+      
+      for (const guide of state.alignGuides) {
+        ctx.beginPath();
+        if (guide.type === 'x') {
+          const minY = Math.min(guide.y1, guide.y2) - 100;
+          const maxY = Math.max(guide.y1, guide.y2) + 100;
+          ctx.moveTo(guide.x, minY);
+          ctx.lineTo(guide.x, maxY);
+        } else {
+          const minX = Math.min(guide.x1, guide.x2) - 100;
+          const maxX = Math.max(guide.x1, guide.x2) + 100;
+          ctx.moveTo(minX, guide.y);
+          ctx.lineTo(maxX, guide.y);
+        }
+        ctx.stroke();
+      }
+      ctx.restore();
     }
 
     function toggleSimulation() {
       state.isRunning = !state.isRunning;
       if (state.isRunning) {
-        ui.btnToggle.innerHTML = '⏸ 停止 (Pause)';
-        ui.btnToggle.style.backgroundColor = 'var(--warning)';
+        ui.btnToggle.textContent = '■ シミュレーション停止';
+        ui.btnToggle.classList.replace('btn-primary', 'btn-danger');
+        
+        // リセット
+        state.signals = [];
+        state.nodes.forEach(n => { n.errorCount = 0; n.successCount = 0; });
+        state.frameCount = 0;
         state.lastTime = performance.now();
+        requestAnimationFrame(simulationLoop);
       } else {
-        ui.btnToggle.innerHTML = '▶ 実行する (Play)';
-        ui.btnToggle.style.backgroundColor = 'var(--success)';
+        ui.btnToggle.textContent = '▶ シミュレーション開始';
+        ui.btnToggle.classList.replace('btn-danger', 'btn-primary');
       }
     }
 
-    function update(dt) {
-      state.generateTimer += dt;
-      if (state.generateTimer >= state.spawnInterval) {
-        state.generateTimer = 0;
-        const destinationIds = new Set(state.edges.map(e => e.toId));
-        const rootNodes = state.nodes.filter(n => !destinationIds.has(n.id));
-        const startNodes = rootNodes.length > 0 ? rootNodes : (state.nodes.length > 0 ? [state.nodes[0]] : []);
+    function spawnSignal(startNode) {
+      // 負荷対策：シグナルが多すぎる場合は生成をスキップ
+      if (state.signals.length > 500) return;
+      
+      const outgoingEdges = state.edges.filter(e => e.from === startNode.id);
+      if (outgoingEdges.length === 0) return;
 
-        startNodes.forEach(node => fireSignalsFromNode(node.id));
+      // パラレル分岐：すべての行き先に対してシグナルを生成
+      outgoingEdges.forEach(edge => {
+        state.signals.push({
+          fromId: edge.from,
+          toId: edge.to,
+          progress: 0, // 0.0 to 1.0
+          speed: (0.005 + Math.random() * 0.002) // 基本速度 + 若干の揺らぎ
+        });
+      });
+    }
+
+    function simulationLoop(timestamp) {
+      if (!state.isRunning) return;
+
+      // デルタタイム計算（タブ非表示時のワープバグ対策）
+      let deltaTime = timestamp - state.lastTime;
+      if (deltaTime > 100) deltaTime = 16; // 限界キャップ
+      state.lastTime = timestamp;
+      const timeScale = (deltaTime / 16.6) * state.simulationSpeed;
+
+      state.frameCount += timeScale;
+
+      // 指定頻度でスタートノード（どこからも矢印が来ていないノード）から発射
+      if (state.frameCount >= state.spawnRate) {
+        state.frameCount = 0;
+        const startNodes = state.nodes.filter(n => !state.edges.some(e => e.to === n.id));
+        if(startNodes.length === 0 && state.nodes.length > 0) {
+           // 完全に循環している場合は適当なノードから発射
+           spawnSignal(state.nodes[0]);
+        } else {
+           startNodes.forEach(node => spawnSignal(node));
+        }
       }
 
-      const nextSignals = [];
-      const PIXELS_PER_SEC = 100 * state.simulationSpeed;
-
-      state.signals.forEach(sig => {
-        const edge = state.edges.find(e => e.id === sig.edgeId);
-        if (!edge) return;
-
-        const from = state.nodes.find(n => n.id === edge.fromId);
-        const to = state.nodes.find(n => n.id === edge.toId);
-        if (!from || !to) return;
-
-        let distance;
-        if (from.id === to.id) distance = 2 * Math.PI * 30;
-        else distance = Math.sqrt(Math.pow(to.x - from.x, 2) + Math.pow(to.y - from.y, 2));
-        
-        const speedRatio = distance > 0 ? (PIXELS_PER_SEC / distance) : 1;
-        sig.progress += speedRatio * dt;
+      // シグナルの移動計算
+      for (let i = state.signals.length - 1; i >= 0; i--) {
+        const sig = state.signals[i];
+        sig.progress += sig.speed * timeScale;
 
         if (sig.progress >= 1.0) {
-          const targetNodeId = edge.toId;
-          const targetNode = state.nodes.find(n => n.id === targetNodeId);
-          const outgoingEdges = state.edges.filter(e => e.fromId === targetNodeId);
-          
-          if (outgoingEdges.length > 0) {
-            // 次の行き先がある場合はゴール設定に関わらず進む（分身する）
-            outgoingEdges.forEach(outEdge => {
-              if (state.signals.length + nextSignals.length < 1000) nextSignals.push(new Signal(outEdge.id));
-            });
-          } else if (targetNode) {
-            // 行き先がない場合は滞留カウントを増やす
-            targetNode.stuckCount += 1;
+          // 目的地に到達
+          const toNode = state.nodes.find(n => n.id === sig.toId);
+          if (toNode) {
+            const nextEdges = state.edges.filter(e => e.from === toNode.id);
+            if (nextEdges.length > 0) {
+              // 次へ進む（パラレル分岐）
+              nextEdges.forEach(edge => {
+                state.signals.push({
+                  fromId: edge.from,
+                  toId: edge.to,
+                  progress: 0,
+                  speed: sig.speed
+                });
+              });
+            } else {
+              // 行き止まり到達（ゴール判定）
+              if (toNode.isGoal) {
+                toNode.successCount++;
+              } else {
+                toNode.errorCount++;
+              }
+            }
           }
-        } else {
-          nextSignals.push(sig);
+          // 現在のシグナルは消滅
+          state.signals.splice(i, 1);
         }
-      });
-      
-      state.signals = nextSignals;
-      ui.entityCount.textContent = state.signals.length;
+      }
+
+      render(); // 描画更新
+      requestAnimationFrame(simulationLoop);
     }
 
-    function fireSignalsFromNode(nodeId) {
-      const outgoingEdges = state.edges.filter(e => e.fromId === nodeId);
-      outgoingEdges.forEach(edge => {
-        if (state.signals.length < 1000) state.signals.push(new Signal(edge.id));
-      });
-    }
+    function render() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    function draw() {
-      const rect = canvas.parentElement.getBoundingClientRect();
-      ctx.clearRect(0, 0, rect.width, rect.height);
-      
+      // 1. エッジ
       state.edges.forEach(edge => drawEdge(edge));
       
-      if (state.isConnecting && state.connectFromNode) {
-        ctx.beginPath();
-        ctx.moveTo(state.connectFromNode.x, state.connectFromNode.y);
-        ctx.lineTo(state.mouseX, state.mouseY);
-        ctx.strokeStyle = 'rgba(56, 189, 248, 0.5)';
-        ctx.setLineDash([5, 5]);
-        ctx.lineWidth = 2;
-        ctx.stroke();
-        ctx.setLineDash([]);
-      }
-      
-      state.nodes.forEach(node => drawNode(node));
-      state.signals.forEach(sig => drawSignal(sig));
-    }
+      // 2. ドラッグ中の線とガイド
+      drawConnectingLine();
+      drawAlignGuides();
 
-    function drawEdge(edge) {
-      const from = state.nodes.find(n => n.id === edge.fromId);
-      const to = state.nodes.find(n => n.id === edge.toId);
-      if (!from || !to) return;
+      // 3. シグナル（光の玉）
+      ctx.shadowBlur = 15;
+      ctx.shadowColor = '#60a5fa';
+      ctx.fillStyle = '#eff6ff';
 
-      const isSelected = state.selectedElement && state.selectedElement.id === edge.id;
-      
-      ctx.beginPath();
-      if (from.id === to.id) {
-        const yOffset = from.shape === 'rectangle' ? (from.height/2 + 25) : 45;
-        ctx.arc(from.x, from.y - yOffset, 30, Math.PI / 2, Math.PI * 2.5);
-      } else {
-        ctx.moveTo(from.x, from.y);
-        ctx.lineTo(to.x, to.y);
-      }
-      
-      ctx.strokeStyle = isSelected ? 'var(--accent)' : 'rgba(100, 116, 139, 0.4)';
-      ctx.lineWidth = isSelected ? 3 : 2;
-      ctx.stroke();
-      
-      if (from.id !== to.id) {
-        const midX = (from.x + to.x) / 2;
-        const midY = (from.y + to.y) / 2;
-        const angle = Math.atan2(to.y - from.y, to.x - from.x);
-        
-        ctx.save();
-        ctx.translate(midX, midY);
-        ctx.rotate(angle);
-        ctx.beginPath();
-        ctx.moveTo(-6, -5); ctx.lineTo(6, 0); ctx.lineTo(-6, 5);
-        ctx.fillStyle = isSelected ? 'var(--accent)' : 'rgba(148, 163, 184, 0.8)';
-        ctx.fill();
-        ctx.restore();
-      }
-    }
-
-    function drawNode(node) {
-      const isSelected = state.selectedElement && state.selectedElement.id === node.id;
-      const hasStuckSignals = node.stuckCount > 0;
-      
-      // ★ ゴールかどうかの判定によって「異常(赤)」か「正常完了(緑)」かを分ける
-      const isError = hasStuckSignals && !node.isGoal;     // 行き場のない迷子（無駄作業）
-      const isGoalReached = hasStuckSignals && node.isGoal; // ゴールへの正常な到達
-      
-      ctx.save();
-      
-      // 文字フォントを設定（幅を測るため）
-      ctx.font = '12px system-ui, sans-serif';
-      
-      // ★ 枠サイズの動的計算（四角形の場合、文字幅に合わせて伸びる）
-      if (node.shape === 'rectangle') {
-        const textWidth = ctx.measureText(node.label).width;
-        // 最低120px、それ以上は文字の長さ ＋ 左右の余白(40px)
-        // 画面外まで伸びないように最大幅(400px)のストッパーをかける
-        node.width = Math.min(Math.max(120, textWidth + 40), 400); 
-      }
-      
-      // 発光エフェクト（エラーは赤、ゴール到達は緑、それ以外は青）
-      const glow = hasStuckSignals ? Math.min(node.stuckCount * 2, 20) + 10 : (isSelected ? 15 : 0);
-      ctx.shadowBlur = glow;
-      ctx.shadowColor = isError ? '#ef4444' : (isGoalReached ? '#22c55e' : '#38bdf8');
-      
-      ctx.beginPath();
-      if (node.shape === 'rectangle') {
-        if (ctx.roundRect) {
-          ctx.roundRect(node.x - node.width/2, node.y - node.height/2, node.width, node.height, 8);
-        } else {
-          ctx.rect(node.x - node.width/2, node.y - node.height/2, node.width, node.height);
+      state.signals.forEach(sig => {
+        const from = state.nodes.find(n => n.id === sig.fromId);
+        const to = state.nodes.find(n => n.id === sig.toId);
+        if (from && to) {
+          // 進捗度合に応じた座標の計算
+          const currentX = from.x + (to.x - from.x) * sig.progress;
+          const currentY = from.y + (to.y - from.y) * sig.progress;
+          
+          ctx.beginPath();
+          ctx.arc(currentX, currentY, 5, 0, Math.PI * 2);
+          ctx.fill();
         }
-      } else {
-        ctx.arc(node.x, node.y, node.radius, 0, Math.PI * 2);
-      }
-      
-      ctx.fillStyle = '#1e293b';
-      ctx.fill();
-      
-      ctx.lineWidth = isSelected ? 3 : 2;
-      // 枠線の色（エラーは赤、ゴールは緑、選択中は白、基本は青）
-      ctx.strokeStyle = isError ? '#ef4444' : (node.isGoal ? '#22c55e' : (isSelected ? '#fff' : '#38bdf8'));
-      ctx.stroke();
-      
-      ctx.shadowBlur = 0;
-      ctx.fillStyle = '#f8fafc';
-      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-      
-      // 文字の描画
-      let text = node.label;
-      if (node.shape === 'circle') {
-        if (text.length > 8) text = text.substr(0, 7) + '..'; // 丸ははみ出るので省略
-      } else {
-        // 四角は枠が伸びるので基本省略しないが、最大400px制限に引っかかった時だけ省略
-        if (ctx.measureText(text).width > 360) text = text.substr(0, 30) + '..'; 
-      }
-      ctx.fillText(text, node.x, node.y);
-      
-      // 滞留カウントのバッジ（エラーなら赤色バッジ、ゴール到達なら緑色バッジ）
-      if (hasStuckSignals) {
-        ctx.fillStyle = isError ? '#ef4444' : '#22c55e';
-        ctx.font = 'bold 11px sans-serif';
-        const badgeX = node.shape === 'rectangle' ? node.x + node.width/2 - 10 : node.x + 25;
-        const badgeY = node.shape === 'rectangle' ? node.y - node.height/2 + 10 : node.y - 25;
-        ctx.fillText(`+${node.stuckCount}`, badgeX, badgeY);
-      }
-      
-      ctx.restore();
+      });
+      ctx.shadowBlur = 0; // リセット
+
+      // 4. ノード（一番上に描画）
+      state.nodes.forEach(node => drawNode(node));
     }
 
-    function drawSignal(sig) {
-      const edge = state.edges.find(e => e.id === sig.edgeId);
-      if (!edge) return;
-      const from = state.nodes.find(n => n.id === edge.fromId);
-      const to = state.nodes.find(n => n.id === edge.toId);
-      if (!from || !to) return;
-
-      let x, y;
-      if (from.id === to.id) {
-        const angle = (Math.PI / 2) + (sig.progress * Math.PI * 2);
-        const yOffset = from.shape === 'rectangle' ? (from.height/2 + 25) : 45;
-        x = from.x + Math.cos(angle) * 30;
-        y = (from.y - yOffset) + Math.sin(angle) * 30;
-      } else {
-        x = from.x + (to.x - from.x) * sig.progress;
-        y = from.y + (to.y - from.y) * sig.progress;
-      }
-
-      ctx.save();
-      ctx.shadowBlur = 12; ctx.shadowColor = '#fbbf24';
-      ctx.beginPath(); ctx.arc(x, y, 5, 0, Math.PI * 2);
-      ctx.fillStyle = '#fde68a'; ctx.fill();
-      ctx.restore();
-    }
-
-    function gameLoop(timestamp) {
-      if (!state.lastTime) state.lastTime = timestamp;
-      const dt = (timestamp - state.lastTime) / 1000.0;
-      state.lastTime = timestamp;
-      const safeDt = Math.min(dt, 0.1); 
-
-      if (state.isRunning) update(safeDt);
-      draw();
-      requestAnimationFrame(gameLoop);
-    }
-
-    function exportData() {
-      const data = {
-        // ★ 保存時に isGoal も含める
-        nodes: state.nodes.map(n => ({ id: n.id, label: n.label, x: n.x, y: n.y, shape: n.shape, isGoal: n.isGoal })),
-        edges: state.edges.map(e => ({ id: e.id, fromId: e.fromId, toId: e.toId }))
-      };
+    // ファイル保存（JSONダウンロード）
+    function saveToFile() {
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({
+        nodes: state.nodes,
+        edges: state.edges
+      }, null, 2));
       
-      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `flow_simulation_${new Date().toISOString().slice(0,10)}.json`;
-      a.click();
-      URL.revokeObjectURL(url);
-      showToast('フローを保存しました');
+      const downloadAnchorNode = document.createElement('a');
+      downloadAnchorNode.setAttribute("href", dataStr);
+      downloadAnchorNode.setAttribute("download", "cycle_flow_data.json");
+      document.body.appendChild(downloadAnchorNode);
+      downloadAnchorNode.click();
+      downloadAnchorNode.remove();
     }
 
-    function importData(e) {
-      const file = e.target.files[0];
+    // ファイル読込
+    function loadFromFile(event) {
+      const file = event.target.files[0];
       if (!file) return;
 
       const reader = new FileReader();
-      reader.onload = (event) => {
+      reader.onload = function(e) {
         try {
-          const data = JSON.parse(event.target.result);
-          if (!data.nodes || !data.edges) throw new Error("無効なフォーマット");
-          
-          // ★ 読み込み時に古いデータとの互換性を保ちつつ isGoal を反映
-          state.nodes = data.nodes.map(n => new Node(n.id, n.label, n.x, n.y, n.shape || 'circle', !!n.isGoal));
-          state.edges = data.edges.map(e => new Edge(e.id, e.fromId, e.toId));
-          state.signals = [];
-          state.selectedElement = null;
-          updatePropertiesPanel();
-          
-          showToast('フローを読み込みました');
+          const contents = JSON.parse(e.target.result);
+          if (contents.nodes && contents.edges) {
+            // 過去データの互換性担保（無いプロパティを補完）
+            state.nodes = contents.nodes.map(n => ({
+              ...n,
+              shape: n.shape || 'circle',
+              isGoal: n.isGoal || false,
+              errorCount: 0,
+              successCount: 0
+            }));
+            state.edges = contents.edges.map(e => ({
+              ...e,
+              label: e.label || '' // メモ用プロパティ補完
+            }));
+            
+            state.signals = [];
+            clearSelection();
+            render();
+          }
         } catch (err) {
-          showToast('ファイルの読み込みに失敗しました', true);
+          alert("ファイルの読み込みに失敗しました。正しいデータ形式か確認してください。");
         }
-        ui.fileInput.value = ''; 
       };
       reader.readAsText(file);
+      ui.fileInput.value = ""; // リセット
     }
 
-    function createSampleFlow() {
-      const id1 = generateId(), id2 = generateId(), id3 = generateId(), id4 = generateId(), id5 = generateId();
-      
-      state.nodes.push(
-        new Node(id1, '① 発注', 200, 200, 'circle'),
-        new Node(id2, '② 検品', 400, 200, 'rectangle'),
-        new Node(id3, '③ 承認済', 600, 150, 'circle'),
-        new Node(id4, '④ 異常品対応 (ボトルネック)', 600, 280, 'rectangle'), 
-        new Node(id5, '⑤ 出荷完了 (ゴール)', 800, 150, 'rectangle', true) // 最初からゴールに設定
-      );
-      
-      state.edges.push(
-        new Edge(null, id1, id2),
-        new Edge(null, id2, id3),
-        new Edge(null, id2, id4), // ここが行き止まりのエラーになる
-        new Edge(null, id3, id5)  // ここが行き止まりだがゴールなので緑になる
-      );
+    // 初期化実行
+    setupEventListeners();
+    loadSampleData();
+    render(); // 最初の描画
+    
+    // アニメーション非実行時でも60fpsで描画更新（ドラッグなどの操作反映のため）
+    function staticRenderLoop() {
+      if (!state.isRunning) render();
+      requestAnimationFrame(staticRenderLoop);
     }
-
-    window.onload = init;
+    staticRenderLoop();
 
   </script>
 </body>
