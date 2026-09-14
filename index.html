@@ -43,6 +43,8 @@
 
     .form-group { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
     .form-group label { font-size: 0.8rem; color: var(--text-muted); }
+    .checkbox-label { display: flex; align-items: center; gap: 8px; font-size: 0.85rem; cursor: pointer; color: var(--text-main); }
+    .checkbox-label input { cursor: pointer; width: 16px; height: 16px; accent-color: var(--success); }
 
     input[type="text"], input[type="range"], select {
       background-color: #0f172a; border: 1px solid var(--border-color);
@@ -50,7 +52,6 @@
     }
     input[type="text"]:focus, select:focus { border-color: var(--accent); }
 
-    /* Custom Range Slider */
     input[type="range"] { -webkit-appearance: none; height: 6px; background: var(--border-color); border-radius: 3px; padding: 0; border: none; }
     input[type="range"]::-webkit-slider-thumb {
       -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%;
@@ -125,10 +126,20 @@
           <label>形状</label>
           <select id="select-node-shape">
             <option value="circle">丸 (Circle)</option>
-            <option value="rectangle">四角 (Rectangle)</option>
+            <option value="rectangle">四角 (Rectangle - 自動幅)</option>
           </select>
         </div>
-        <button id="btn-delete-element" class="danger" style="width: 100%; margin-top: 10px;">この要素を削除</button>
+        <!-- 追加: ゴール設定のチェックボックス -->
+        <div class="form-group" style="margin-top: 10px; padding: 10px; background: rgba(0,0,0,0.2); border-radius: 4px;">
+          <label class="checkbox-label">
+            <input type="checkbox" id="check-node-goal">
+            <span>この拠点を「ゴール」に設定する</span>
+          </label>
+          <div style="font-size: 0.7rem; color: var(--text-muted); margin-top: 5px; margin-left: 24px;">
+            チェックを入れると、行き止まりでもエラー(赤色)になりません。
+          </div>
+        </div>
+        <button id="btn-delete-element" class="danger" style="width: 100%; margin-top: 15px;">この要素を削除</button>
       </div>
     </div>
 
@@ -154,7 +165,7 @@
       ・<span>何もない場所をダブルクリック</span>：新規拠点の作成<br>
       ・<span>Shift + 拠点からドラッグ</span>：拠点を結ぶ線（フロー）を作成<br>
       ・<span>拠点をドラッグ</span>：移動<br>
-      ・<span>要素をクリックして選択</span>：左パネルで名前・形状変更<br>
+      ・<span>要素をクリックして選択</span>：左パネルで名前・形状・ゴール設定<br>
       ・<span>Delete / Backspaceキー</span>：選択中の要素を削除
     </div>
     <div id="toast">メッセージ</div>
@@ -164,16 +175,17 @@
     'use strict';
 
     class Node {
-      constructor(id, label, x, y, shape = 'circle') {
+      constructor(id, label, x, y, shape = 'circle', isGoal = false) {
         this.id = id || generateId();
         this.label = label || '新規拠点';
         this.x = x;
         this.y = y;
         this.shape = shape; // 'circle' or 'rectangle'
+        this.isGoal = isGoal; // ゴール判定（行き止まりでもエラーにしない）
         this.radius = 30; // 丸の時の半径
-        this.width = 120; // 四角の時の幅
+        this.width = 120; // 四角の時の幅 (描画時に動的計算される)
         this.height = 40; // 四角の時の高さ
-        this.stuckCount = 0; // 行き止まりの滞留数
+        this.stuckCount = 0; // 滞留数（到着数）
       }
     }
 
@@ -229,6 +241,7 @@
       panelEditor: document.getElementById('node-editor'),
       inputName: document.getElementById('input-node-name'),
       selectShape: document.getElementById('select-node-shape'),
+      checkGoal: document.getElementById('check-node-goal'),
       btnDelete: document.getElementById('btn-delete-element'),
       
       btnSave: document.getElementById('btn-save'),
@@ -286,7 +299,6 @@
       return { x: e.clientX - rect.left, y: e.clientY - rect.top };
     }
 
-    // 当たり判定：形状によって計算方法を変える
     function hitTestNode(x, y) {
       return state.nodes.find(n => {
         if (n.shape === 'rectangle') {
@@ -307,7 +319,8 @@
         if (!from || !to) continue;
 
         if (from.id === to.id) {
-          const dx = x - from.x; const dy = y - (from.y - 45);
+          const yOffset = from.shape === 'rectangle' ? (from.height/2 + 25) : 45;
+          const dx = x - from.x; const dy = y - (from.y - yOffset);
           const dist = Math.sqrt(dx*dx + dy*dy);
           if (Math.abs(dist - 30) < TOLERANCE) return edge;
           continue;
@@ -371,7 +384,6 @@
           const exists = state.edges.some(edge => edge.fromId === state.connectFromNode.id && edge.toId === targetNode.id);
           if (!exists) {
             state.edges.push(new Edge(null, state.connectFromNode.id, targetNode.id));
-            state.connectFromNode.stuckCount = 0;
           }
         }
       }
@@ -421,6 +433,12 @@
           state.selectedElement.shape = e.target.value;
         }
       });
+      // ゴール判定のトグル
+      ui.checkGoal.addEventListener('change', (e) => {
+        if (state.selectedElement instanceof Node) {
+          state.selectedElement.isGoal = e.target.checked;
+        }
+      });
 
       ui.btnDelete.addEventListener('click', deleteSelectedElement);
       ui.btnSave.addEventListener('click', exportData);
@@ -436,11 +454,14 @@
         if (state.selectedElement instanceof Node) {
           ui.inputName.style.display = 'block';
           ui.selectShape.style.display = 'block';
+          ui.checkGoal.parentElement.parentElement.style.display = 'block';
           ui.inputName.value = state.selectedElement.label;
           ui.selectShape.value = state.selectedElement.shape;
+          ui.checkGoal.checked = state.selectedElement.isGoal;
         } else if (state.selectedElement instanceof Edge) {
           ui.inputName.style.display = 'none';
           ui.selectShape.style.display = 'none';
+          ui.checkGoal.parentElement.parentElement.style.display = 'none';
         }
       } else {
         ui.panelNoSel.style.display = 'block';
@@ -516,10 +537,12 @@
           const outgoingEdges = state.edges.filter(e => e.fromId === targetNodeId);
           
           if (outgoingEdges.length > 0) {
+            // 次の行き先がある場合はゴール設定に関わらず進む（分身する）
             outgoingEdges.forEach(outEdge => {
               if (state.signals.length + nextSignals.length < 1000) nextSignals.push(new Signal(outEdge.id));
             });
           } else if (targetNode) {
+            // 行き先がない場合は滞留カウントを増やす
             targetNode.stuckCount += 1;
           }
         } else {
@@ -568,7 +591,6 @@
       
       ctx.beginPath();
       if (from.id === to.id) {
-        // 自己ループ描画 (ノードの上に小さな円を描く)
         const yOffset = from.shape === 'rectangle' ? (from.height/2 + 25) : 45;
         ctx.arc(from.x, from.y - yOffset, 30, Math.PI / 2, Math.PI * 2.5);
       } else {
@@ -598,21 +620,36 @@
 
     function drawNode(node) {
       const isSelected = state.selectedElement && state.selectedElement.id === node.id;
-      const isStuck = node.stuckCount > 0;
+      const hasStuckSignals = node.stuckCount > 0;
+      
+      // ★ ゴールかどうかの判定によって「異常(赤)」か「正常完了(緑)」かを分ける
+      const isError = hasStuckSignals && !node.isGoal;     // 行き場のない迷子（無駄作業）
+      const isGoalReached = hasStuckSignals && node.isGoal; // ゴールへの正常な到達
       
       ctx.save();
       
-      const glow = isStuck ? Math.min(node.stuckCount * 2, 20) + 10 : (isSelected ? 15 : 0);
+      // 文字フォントを設定（幅を測るため）
+      ctx.font = '12px system-ui, sans-serif';
+      
+      // ★ 枠サイズの動的計算（四角形の場合、文字幅に合わせて伸びる）
+      if (node.shape === 'rectangle') {
+        const textWidth = ctx.measureText(node.label).width;
+        // 最低120px、それ以上は文字の長さ ＋ 左右の余白(40px)
+        // 画面外まで伸びないように最大幅(400px)のストッパーをかける
+        node.width = Math.min(Math.max(120, textWidth + 40), 400); 
+      }
+      
+      // 発光エフェクト（エラーは赤、ゴール到達は緑、それ以外は青）
+      const glow = hasStuckSignals ? Math.min(node.stuckCount * 2, 20) + 10 : (isSelected ? 15 : 0);
       ctx.shadowBlur = glow;
-      ctx.shadowColor = isStuck ? '#ef4444' : '#38bdf8';
+      ctx.shadowColor = isError ? '#ef4444' : (isGoalReached ? '#22c55e' : '#38bdf8');
       
       ctx.beginPath();
       if (node.shape === 'rectangle') {
-        // 角丸四角形
         if (ctx.roundRect) {
           ctx.roundRect(node.x - node.width/2, node.y - node.height/2, node.width, node.height, 8);
         } else {
-          ctx.rect(node.x - node.width/2, node.y - node.height/2, node.width, node.height); // 古いブラウザ用
+          ctx.rect(node.x - node.width/2, node.y - node.height/2, node.width, node.height);
         }
       } else {
         ctx.arc(node.x, node.y, node.radius, 0, Math.PI * 2);
@@ -622,26 +659,27 @@
       ctx.fill();
       
       ctx.lineWidth = isSelected ? 3 : 2;
-      ctx.strokeStyle = isStuck ? '#ef4444' : (isSelected ? '#fff' : '#38bdf8');
+      // 枠線の色（エラーは赤、ゴールは緑、選択中は白、基本は青）
+      ctx.strokeStyle = isError ? '#ef4444' : (node.isGoal ? '#22c55e' : (isSelected ? '#fff' : '#38bdf8'));
       ctx.stroke();
       
       ctx.shadowBlur = 0;
       ctx.fillStyle = '#f8fafc';
-      ctx.font = '12px system-ui, sans-serif';
       ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
       
-      // 文字数に応じてはみ出し防止
+      // 文字の描画
       let text = node.label;
       if (node.shape === 'circle') {
-        if (text.length > 8) text = text.substr(0, 7) + '..';
+        if (text.length > 8) text = text.substr(0, 7) + '..'; // 丸ははみ出るので省略
       } else {
-        if (text.length > 18) text = text.substr(0, 17) + '..'; // 四角は多めに入る
+        // 四角は枠が伸びるので基本省略しないが、最大400px制限に引っかかった時だけ省略
+        if (ctx.measureText(text).width > 360) text = text.substr(0, 30) + '..'; 
       }
       ctx.fillText(text, node.x, node.y);
       
-      // 滞留カウントのバッジ位置
-      if (isStuck) {
-        ctx.fillStyle = '#ef4444';
+      // 滞留カウントのバッジ（エラーなら赤色バッジ、ゴール到達なら緑色バッジ）
+      if (hasStuckSignals) {
+        ctx.fillStyle = isError ? '#ef4444' : '#22c55e';
         ctx.font = 'bold 11px sans-serif';
         const badgeX = node.shape === 'rectangle' ? node.x + node.width/2 - 10 : node.x + 25;
         const badgeY = node.shape === 'rectangle' ? node.y - node.height/2 + 10 : node.y - 25;
@@ -689,7 +727,8 @@
 
     function exportData() {
       const data = {
-        nodes: state.nodes.map(n => ({ id: n.id, label: n.label, x: n.x, y: n.y, shape: n.shape })),
+        // ★ 保存時に isGoal も含める
+        nodes: state.nodes.map(n => ({ id: n.id, label: n.label, x: n.x, y: n.y, shape: n.shape, isGoal: n.isGoal })),
         edges: state.edges.map(e => ({ id: e.id, fromId: e.fromId, toId: e.toId }))
       };
       
@@ -713,8 +752,8 @@
           const data = JSON.parse(event.target.result);
           if (!data.nodes || !data.edges) throw new Error("無効なフォーマット");
           
-          // 古いファイルとの互換性のため shape をデフォルト丸とする
-          state.nodes = data.nodes.map(n => new Node(n.id, n.label, n.x, n.y, n.shape || 'circle'));
+          // ★ 読み込み時に古いデータとの互換性を保ちつつ isGoal を反映
+          state.nodes = data.nodes.map(n => new Node(n.id, n.label, n.x, n.y, n.shape || 'circle', !!n.isGoal));
           state.edges = data.edges.map(e => new Edge(e.id, e.fromId, e.toId));
           state.signals = [];
           state.selectedElement = null;
@@ -734,18 +773,17 @@
       
       state.nodes.push(
         new Node(id1, '① 発注', 200, 200, 'circle'),
-        new Node(id2, '② 承認待ち (時間経過で次へ)', 400, 200, 'rectangle'),
-        new Node(id3, '③ 決裁済', 600, 150, 'circle'),
-        new Node(id4, '④ 差し戻し (手直し)', 600, 280, 'rectangle'), 
-        new Node(id5, '⑤ 納品完了', 800, 150, 'circle')
+        new Node(id2, '② 検品', 400, 200, 'rectangle'),
+        new Node(id3, '③ 承認済', 600, 150, 'circle'),
+        new Node(id4, '④ 異常品対応 (ボトルネック)', 600, 280, 'rectangle'), 
+        new Node(id5, '⑤ 出荷完了 (ゴール)', 800, 150, 'rectangle', true) // 最初からゴールに設定
       );
       
       state.edges.push(
         new Edge(null, id1, id2),
         new Edge(null, id2, id3),
-        new Edge(null, id2, id4),
-        new Edge(null, id3, id5),
-        new Edge(null, id5, id1)
+        new Edge(null, id2, id4), // ここが行き止まりのエラーになる
+        new Edge(null, id3, id5)  // ここが行き止まりだがゴールなので緑になる
       );
     }
 
