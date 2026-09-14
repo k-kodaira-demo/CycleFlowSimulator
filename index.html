@@ -17,7 +17,6 @@
       --accent-hover: #2563eb;
       --danger: #ef4444;
       --success: #10b981;
-      --node-circle: #334155;
       --grid-color: rgba(255, 255, 255, 0.05);
     }
 
@@ -161,7 +160,6 @@
       line-height: 1.4;
     }
 
-    /* パネルの表示切り替え用 */
     .hidden { display: none !important; }
   </style>
 </head>
@@ -173,12 +171,13 @@
       <p class="text-xs text-slate-400">プロセスマイニング・シミュレーター</p>
     </div>
 
+    <!-- 共通設定パネル -->
     <div class="panel-section">
       <div class="info-box">
         <b>操作方法:</b><br>
-        ・空白をダブルクリック：ノード追加<br>
-        ・Shift+ドラッグ：ノード間を繋ぐ<br>
-        ・選択してDelete：削除
+        ・空白をダブルクリック：拠点追加<br>
+        ・<b>Shiftキーを押しながらドラッグ：線で繋ぐ</b><br>
+        ・クリックしてDelete：削除
       </div>
       
       <button id="btn-toggle-sim" class="btn btn-primary mb-3">
@@ -193,7 +192,7 @@
         <label>移動速度 (Speed): <span id="val-speed">1.0x</span></label>
         <input type="range" id="slider-speed" min="0.1" max="5.0" step="0.1" value="1.0">
       </div>
-      
+
       <div class="form-group" style="margin-top: 10px; padding: 10px; background: rgba(0,0,0,0.2); border-radius: 4px;">
         <label class="checkbox-label">
           <input type="checkbox" id="check-snap" checked>
@@ -202,14 +201,14 @@
       </div>
     </div>
 
-    <!-- ノード非選択時 -->
+    <!-- 非選択時 -->
     <div id="no-selection" class="panel-section" style="flex-grow: 1; display: flex; align-items: center; justify-content: center; text-align: center; color: var(--text-muted); font-size: 0.9rem;">
-      ノードまたは線をクリックすると<br>プロパティを編集できます
+      拠点 または 線 をクリックすると<br>詳細を設定できます
     </div>
 
-    <!-- ノード選択時のプロパティ -->
+    <!-- 拠点プロパティ -->
     <div id="node-properties" class="panel-section hidden" style="flex-grow: 1;">
-      <div class="panel-title">ノード設定</div>
+      <div class="panel-title">拠点の設定</div>
       <div class="form-group">
         <label>拠点名</label>
         <input type="text" id="input-node-name" placeholder="例: 受注処理">
@@ -221,29 +220,28 @@
           <option value="rect">四角 (Rectangle)</option>
         </select>
       </div>
-      
       <div class="form-group" style="margin-top: 15px; padding: 10px; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 4px;">
         <label class="checkbox-label" style="color: var(--success);">
           <input type="checkbox" id="check-is-goal">
           <span class="font-bold">この拠点を「ゴール」にする</span>
         </label>
         <div style="font-size: 0.75rem; color: #94a3b8; margin-top: 5px; margin-left: 24px;">
-          行き先がない場合でもエラーにならず、正常完了として処理されます。
+          行き先がない場合でも警告にならず、正常完了として扱われます。
         </div>
       </div>
-
       <div style="margin-top: auto; padding-top: 20px;">
-        <button id="btn-delete-node" class="btn btn-danger">ノードを削除 (Del)</button>
+        <button id="btn-delete-node" class="btn btn-danger">拠点を削除 (Del)</button>
       </div>
     </div>
 
+    <!-- 繋がりプロパティ -->
     <div id="edge-properties" class="panel-section hidden" style="flex-grow: 1;">
-      <div class="panel-title">線の設定 (フロー条件)</div>
+      <div class="panel-title">線の設定 (意味・条件)</div>
       <div class="form-group">
-        <label>この線の意味・条件 (メモ)</label>
+        <label>フローの解説メモ (ラベル)</label>
         <input type="text" id="input-edge-label" placeholder="例: 承認された場合">
         <div style="font-size: 0.75rem; color: #94a3b8; margin-top: 5px;">
-          入力したテキストが線の上に表示されます。
+          入力したテキストが線の中央に表示されます。
         </div>
       </div>
       <div style="margin-top: auto; padding-top: 20px;">
@@ -251,6 +249,7 @@
       </div>
     </div>
 
+    <!-- 保存・読込 -->
     <div class="panel-section" style="display: flex; gap: 10px;">
       <button id="btn-save" class="btn btn-secondary" style="flex: 1; font-size: 0.8rem;">保存</button>
       <button id="btn-load" class="btn btn-secondary" style="flex: 1; font-size: 0.8rem;">読込</button>
@@ -263,19 +262,18 @@
   </div>
 
   <script>
-    // システムの内部状態（State）
+    // システムの内部状態
     const state = {
       nodes: [],
       edges: [],
       signals: [],
       isRunning: false,
       simulationSpeed: 1.0,
-      spawnRate: 60, // フレーム間隔
+      spawnRate: 60,
       frameCount: 0,
       
-      // 選択・操作状態
       selectedNode: null,
-      selectedEdge: null, // エッジ選択状態を追加
+      selectedEdge: null,
       isDragging: false,
       draggedNode: null,
       isConnecting: false,
@@ -283,18 +281,14 @@
       mouseX: 0,
       mouseY: 0,
       
-      // スマートガイド状態
       enableSnap: true,
       alignGuides: [],
-
-      // アニメーションループ用
       lastTime: 0
     };
 
     const canvas = document.getElementById('sim-canvas');
     const ctx = canvas.getContext('2d');
 
-    // UI要素の取得
     const ui = {
       btnToggle: document.getElementById('btn-toggle-sim'),
       sliderSpawn: document.getElementById('slider-spawn'),
@@ -302,44 +296,37 @@
       sliderSpeed: document.getElementById('slider-speed'),
       valSpeed: document.getElementById('val-speed'),
       checkSnap: document.getElementById('check-snap'),
-      
       panelNoSel: document.getElementById('no-selection'),
       panelNode: document.getElementById('node-properties'),
-      panelEdge: document.getElementById('edge-properties'), // 追加
-      
+      panelEdge: document.getElementById('edge-properties'),
       inputNodeName: document.getElementById('input-node-name'),
       selectNodeShape: document.getElementById('select-node-shape'),
       checkIsGoal: document.getElementById('check-is-goal'),
       btnDeleteNode: document.getElementById('btn-delete-node'),
-
-      inputEdgeLabel: document.getElementById('input-edge-label'), // 追加
-      btnDeleteEdge: document.getElementById('btn-delete-edge'),   // 追加
-      
+      inputEdgeLabel: document.getElementById('input-edge-label'),
+      btnDeleteEdge: document.getElementById('btn-delete-edge'),
       btnSave: document.getElementById('btn-save'),
       btnLoad: document.getElementById('btn-load'),
       fileInput: document.getElementById('file-input')
     };
 
-    // 初期サンプルデータ
     function loadSampleData() {
       state.nodes = [
         { id: 'n1', x: 150, y: 300, name: '① 入庫', shape: 'circle', isGoal: false, errorCount: 0, successCount: 0 },
         { id: 'n2', x: 350, y: 300, name: '② 検品', shape: 'circle', isGoal: false, errorCount: 0, successCount: 0 },
         { id: 'n3', x: 550, y: 150, name: '③ 梱包作業', shape: 'rect', isGoal: false, errorCount: 0, successCount: 0 },
-        { id: 'n4', x: 550, y: 450, name: '④ 異常品対応 (保留)', shape: 'rect', isGoal: false, errorCount: 0, successCount: 0 },
+        { id: 'n4', x: 550, y: 450, name: '④ 異常品対応', shape: 'rect', isGoal: false, errorCount: 0, successCount: 0 },
         { id: 'n5', x: 800, y: 150, name: '⑤ 出荷完了', shape: 'rect', isGoal: true, errorCount: 0, successCount: 0 }
       ];
-      // サンプルエッジにラベル(メモ)を付与
       state.edges = [
         { from: 'n1', to: 'n2', label: '' },
         { from: 'n2', to: 'n3', label: '合格' },
         { from: 'n2', to: 'n4', label: '不合格' },
         { from: 'n3', to: 'n5', label: '' },
-        { from: 'n5', to: 'n1', label: 'サイクル戻り' } // サイクル
+        { from: 'n5', to: 'n1', label: 'サイクル戻り' }
       ];
     }
 
-    // キャンバスのリサイズ処理
     function resizeCanvas() {
       canvas.width = canvas.parentElement.clientWidth;
       canvas.height = canvas.parentElement.clientHeight;
@@ -348,60 +335,37 @@
     resizeCanvas();
 
     function setupEventListeners() {
-      // コントロールパネル
       ui.btnToggle.addEventListener('click', toggleSimulation);
-      
       ui.sliderSpawn.addEventListener('input', (e) => {
         const val = parseInt(e.target.value);
-        state.spawnRate = 130 - val; // スライダー右で頻度高く(値は小さく)
+        state.spawnRate = 130 - val;
         let text = '中';
         if (val < 40) text = '低 (ゆっくり)';
         if (val > 90) text = '高 (激しい)';
         ui.valSpawn.textContent = text;
       });
-
       ui.sliderSpeed.addEventListener('input', (e) => {
         state.simulationSpeed = parseFloat(e.target.value);
         ui.valSpeed.textContent = `${state.simulationSpeed.toFixed(1)}x`;
       });
-
-      ui.checkSnap.addEventListener('change', (e) => {
-        state.enableSnap = e.target.checked;
-      });
-
-      // ノードプロパティ編集
-      ui.inputNodeName.addEventListener('input', (e) => {
-        if (state.selectedNode) state.selectedNode.name = e.target.value;
-      });
-      ui.selectNodeShape.addEventListener('change', (e) => {
-        if (state.selectedNode) state.selectedNode.shape = e.target.value;
-      });
-      ui.checkIsGoal.addEventListener('change', (e) => {
-        if (state.selectedNode) state.selectedNode.isGoal = e.target.checked;
-      });
+      ui.checkSnap.addEventListener('change', (e) => state.enableSnap = e.target.checked);
+      ui.inputNodeName.addEventListener('input', (e) => { if (state.selectedNode) state.selectedNode.name = e.target.value; });
+      ui.selectNodeShape.addEventListener('change', (e) => { if (state.selectedNode) state.selectedNode.shape = e.target.value; });
+      ui.checkIsGoal.addEventListener('change', (e) => { if (state.selectedNode) state.selectedNode.isGoal = e.target.checked; });
       ui.btnDeleteNode.addEventListener('click', deleteSelectedNode);
-
-      // エッジプロパティ編集
-      ui.inputEdgeLabel.addEventListener('input', (e) => {
-        if (state.selectedEdge) state.selectedEdge.label = e.target.value;
-      });
+      ui.inputEdgeLabel.addEventListener('input', (e) => { if (state.selectedEdge) state.selectedEdge.label = e.target.value; });
       ui.btnDeleteEdge.addEventListener('click', deleteSelectedEdge);
-
-      // 保存・読込
       ui.btnSave.addEventListener('click', saveToFile);
       ui.btnLoad.addEventListener('click', () => ui.fileInput.click());
       ui.fileInput.addEventListener('change', loadFromFile);
 
-      // キャンバス上のマウス操作
       canvas.addEventListener('mousedown', handleMouseDown);
       canvas.addEventListener('mousemove', handleMouseMove);
       canvas.addEventListener('mouseup', handleMouseUp);
       canvas.addEventListener('dblclick', handleDoubleClick);
       
-      // キーボードショートカット
       window.addEventListener('keydown', (e) => {
         if (e.key === 'Delete' || e.key === 'Backspace') {
-          // input入力中でない場合のみ削除実行
           if (document.activeElement.tagName !== 'INPUT') {
             if (state.selectedNode) deleteSelectedNode();
             if (state.selectedEdge) deleteSelectedEdge();
@@ -412,13 +376,9 @@
 
     function getMousePos(e) {
       const rect = canvas.getBoundingClientRect();
-      return {
-        x: e.clientX - rect.left,
-        y: e.clientY - rect.top
-      };
+      return { x: e.clientX - rect.left, y: e.clientY - rect.top };
     }
 
-    // 形状に合わせたヒットテスト（当たり判定）
     function isMouseOnNode(x, y, node) {
       if (node.shape === 'rect') {
         const { width, height } = getRectSize(node);
@@ -432,12 +392,9 @@
       }
     }
 
-    // 線分と点の距離（エッジのクリック判定用）
     function getDistToSegment(x, y, x1, y1, x2, y2) {
-      const A = x - x1;
-      const B = y - y1;
-      const C = x2 - x1;
-      const D = y2 - y1;
+      const A = x - x1; const B = y - y1;
+      const C = x2 - x1; const D = y2 - y1;
       const dot = A * C + B * D;
       const len_sq = C * C + D * D;
       let param = -1;
@@ -446,15 +403,12 @@
       if (param < 0) { xx = x1; yy = y1; }
       else if (param > 1) { xx = x2; yy = y2; }
       else { xx = x1 + param * C; yy = y1 + param * D; }
-      const dx = x - xx;
-      const dy = y - yy;
+      const dx = x - xx; const dy = y - yy;
       return Math.sqrt(dx * dx + dy * dy);
     }
 
     function handleMouseDown(e) {
       const { x, y } = getMousePos(e);
-      
-      // 1. まずノードのクリック判定
       let clickedNode = null;
       for (let i = state.nodes.length - 1; i >= 0; i--) {
         if (isMouseOnNode(x, y, state.nodes[i])) {
@@ -465,11 +419,9 @@
 
       if (clickedNode) {
         if (e.shiftKey) {
-          // 結線モード開始
           state.isConnecting = true;
           state.connectFromNode = clickedNode;
         } else {
-          // ドラッグ＆選択
           selectNode(clickedNode);
           state.isDragging = true;
           state.draggedNode = clickedNode;
@@ -477,14 +429,13 @@
         return;
       }
 
-      // 2. ノードが無ければエッジのクリック判定
       let clickedEdge = null;
       for (const edge of state.edges) {
         const from = state.nodes.find(n => n.id === edge.from);
         const to = state.nodes.find(n => n.id === edge.to);
         if (from && to) {
           const dist = getDistToSegment(x, y, from.x, from.y, to.x, to.y);
-          if (dist < 10) { // 10ピクセル以内のクリック許容
+          if (dist < 10) {
             clickedEdge = edge;
             break;
           }
@@ -495,8 +446,6 @@
         selectEdge(clickedEdge);
         return;
       }
-
-      // 3. どちらもクリックされなければ選択解除
       clearSelection();
     }
 
@@ -505,29 +454,22 @@
       state.mouseX = x; state.mouseY = y;
 
       if (state.isDragging && state.draggedNode) {
-        let newX = x;
-        let newY = y;
-        state.alignGuides = []; // ガイドリセット
-
-        // スマートガイド機能（吸着）
+        let newX = x; let newY = y;
+        state.alignGuides = [];
         if (state.enableSnap) {
-          const SNAP_DIST = 15; // 15px以内で吸着
+          const SNAP_DIST = 15;
           for (const node of state.nodes) {
             if (node.id === state.draggedNode.id) continue;
-            
-            // X軸（垂直ガイド）
             if (Math.abs(newX - node.x) < SNAP_DIST) {
               newX = node.x;
               state.alignGuides.push({ type: 'x', x: node.x, y1: node.y, y2: newY });
             }
-            // Y軸（水平ガイド）
             if (Math.abs(newY - node.y) < SNAP_DIST) {
               newY = node.y;
               state.alignGuides.push({ type: 'y', y: node.y, x1: node.x, x2: newX });
             }
           }
         }
-
         state.draggedNode.x = newX;
         state.draggedNode.y = newY;
       }
@@ -543,43 +485,31 @@
             break;
           }
         }
-
         if (targetNode) {
-          // 重複チェック
-          const exists = state.edges.some(edge => 
-            edge.from === state.connectFromNode.id && edge.to === targetNode.id
-          );
+          const exists = state.edges.some(edge => edge.from === state.connectFromNode.id && edge.to === targetNode.id);
           if (!exists) {
-            state.edges.push({ 
-              from: state.connectFromNode.id, 
-              to: targetNode.id,
-              label: '' // デフォルトは空メモ
-            });
+            state.edges.push({ from: state.connectFromNode.id, to: targetNode.id, label: '' });
           }
         }
       }
-
       state.isDragging = false;
       state.draggedNode = null;
       state.isConnecting = false;
       state.connectFromNode = null;
-      state.alignGuides = []; // ドラッグ終了でガイド消去
+      state.alignGuides = [];
     }
 
     function handleDoubleClick(e) {
       const { x, y } = getMousePos(e);
-      // ノードがない場所なら新規作成
       const clicked = state.nodes.some(node => isMouseOnNode(x, y, node));
       if (!clicked) {
         const newNode = {
           id: 'node_' + Date.now(),
-          x: x,
-          y: y,
+          x: x, y: y,
           name: '新規拠点',
-          shape: 'rect', // デフォルト四角形
+          shape: 'rect',
           isGoal: false,
-          errorCount: 0,
-          successCount: 0
+          errorCount: 0, successCount: 0
         };
         state.nodes.push(newNode);
         selectNode(newNode);
@@ -587,45 +517,30 @@
     }
 
     function selectNode(node) {
-      state.selectedNode = node;
-      state.selectedEdge = null;
-      ui.panelNoSel.classList.add('hidden');
-      ui.panelEdge.classList.add('hidden');
-      ui.panelNode.classList.remove('hidden');
-      
+      state.selectedNode = node; state.selectedEdge = null;
+      ui.panelNoSel.classList.add('hidden'); ui.panelEdge.classList.add('hidden'); ui.panelNode.classList.remove('hidden');
       ui.inputNodeName.value = node.name;
       ui.selectNodeShape.value = node.shape || 'circle';
       ui.checkIsGoal.checked = node.isGoal || false;
     }
 
     function selectEdge(edge) {
-      state.selectedEdge = edge;
-      state.selectedNode = null;
-      ui.panelNoSel.classList.add('hidden');
-      ui.panelNode.classList.add('hidden');
-      ui.panelEdge.classList.remove('hidden');
-
+      state.selectedEdge = edge; state.selectedNode = null;
+      ui.panelNoSel.classList.add('hidden'); ui.panelNode.classList.add('hidden'); ui.panelEdge.classList.remove('hidden');
       ui.inputEdgeLabel.value = edge.label || '';
     }
 
     function clearSelection() {
-      state.selectedNode = null;
-      state.selectedEdge = null;
-      ui.panelNode.classList.add('hidden');
-      ui.panelEdge.classList.add('hidden');
-      ui.panelNoSel.classList.remove('hidden');
+      state.selectedNode = null; state.selectedEdge = null;
+      ui.panelNode.classList.add('hidden'); ui.panelEdge.classList.add('hidden'); ui.panelNoSel.classList.remove('hidden');
     }
 
     function deleteSelectedNode() {
       if (!state.selectedNode) return;
       const id = state.selectedNode.id;
-      // ノード削除
       state.nodes = state.nodes.filter(n => n.id !== id);
-      // 関連エッジ削除
       state.edges = state.edges.filter(e => e.from !== id && e.to !== id);
-      // 関連シグナル削除
       state.signals = state.signals.filter(s => s.fromId !== id && s.toId !== id);
-      
       clearSelection();
     }
 
@@ -638,57 +553,44 @@
     function getRectSize(node) {
       ctx.font = '600 14px Inter, sans-serif';
       const textWidth = ctx.measureText(node.name).width;
-      // 文字幅に合わせて枠を伸縮（最小幅100px）
-      const width = Math.max(100, textWidth + 40); 
+      const width = Math.max(120, textWidth + 40);
       return { width, height: 50 };
     }
 
     function drawNode(node) {
       ctx.save();
       const isSelected = state.selectedNode === node;
-      
-      // 行き先がなく、かつゴールでない場合はエラー（滞留）判定
       const hasOutgoing = state.edges.some(e => e.from === node.id);
+      
       const isError = !hasOutgoing && node.errorCount > 0 && !node.isGoal;
-      const isSuccess = !hasOutgoing && node.isGoal && node.successCount > 0;
+      const isSuccess = (!hasOutgoing && node.isGoal && node.successCount > 0) || (node.isGoal && node.successCount > 0);
 
-      // 影と光彩の設定
       ctx.shadowColor = 'rgba(0,0,0,0.5)';
       ctx.shadowBlur = 10;
       ctx.shadowOffsetY = 4;
 
-      if (isSelected) {
-        ctx.shadowColor = 'rgba(59, 130, 246, 0.8)'; // 青光り
-        ctx.shadowBlur = 15;
-      }
-      if (isError) {
-        ctx.shadowColor = 'rgba(239, 68, 68, 0.8)'; // 赤警告
-        ctx.shadowBlur = 20;
-      }
-      if (isSuccess) {
-        ctx.shadowColor = 'rgba(16, 185, 129, 0.6)'; // 緑成功
-        ctx.shadowBlur = 15;
-      }
+      if (isSelected) { ctx.shadowColor = 'rgba(59, 130, 246, 0.8)'; ctx.shadowBlur = 15; }
+      if (isError) { ctx.shadowColor = 'rgba(239, 68, 68, 0.9)'; ctx.shadowBlur = 20; }
+      if (isSuccess) { ctx.shadowColor = 'rgba(16, 185, 129, 0.6)'; ctx.shadowBlur = 15; }
 
-      ctx.fillStyle = 'var(--node-circle)';
-      // 枠線の色決定
-      if (isSelected) ctx.strokeStyle = 'var(--accent)';
-      else if (isError) ctx.strokeStyle = 'var(--danger)';
-      else if (isSuccess) ctx.strokeStyle = 'var(--success)';
-      else if (node.isGoal) ctx.strokeStyle = '#4ade80'; // ゴール設定されているだけの状態
+      // ★修正: Canvasが直接認識できるカラーコードを明記★
+      ctx.fillStyle = '#334155'; // 元の var(--node-circle) の色
+      
+      if (isSelected) ctx.strokeStyle = '#3b82f6'; // var(--accent)
+      else if (isError) ctx.strokeStyle = '#ef4444'; // var(--danger)
+      else if (isSuccess) ctx.strokeStyle = '#10b981'; // var(--success)
+      else if (node.isGoal) ctx.strokeStyle = '#4ade80';
       else ctx.strokeStyle = '#475569';
       
       ctx.lineWidth = isSelected || isError || isSuccess ? 3 : 2;
 
-      // 形状別の描画
       if (node.shape === 'rect') {
         const { width, height } = getRectSize(node);
-        const r = 8; // 角丸
+        const r = 8;
         const x = node.x - width/2;
         const y = node.y - height/2;
         ctx.beginPath();
-        ctx.moveTo(x + r, y);
-        ctx.lineTo(x + width - r, y);
+        ctx.moveTo(x + r, y); ctx.lineTo(x + width - r, y);
         ctx.arcTo(x + width, y, x + width, y + height, r);
         ctx.lineTo(x + width, y + height - r);
         ctx.arcTo(x + width, y + height, x, y + height, r);
@@ -697,44 +599,34 @@
         ctx.lineTo(x, y + r);
         ctx.arcTo(x, y, x + width, y, r);
         ctx.closePath();
-        ctx.fill();
-        ctx.stroke();
+        ctx.fill(); ctx.stroke();
       } else {
-        // 丸描画
         const radius = 35;
         ctx.beginPath();
         ctx.arc(node.x, node.y, radius, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.stroke();
+        ctx.fill(); ctx.stroke();
       }
 
-      // テキストの描画
-      ctx.shadowBlur = 0; // テキストに影はつけない
+      ctx.shadowBlur = 0;
       ctx.fillStyle = 'white';
       ctx.font = '600 13px Inter, sans-serif';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       
       let displayName = node.name;
-      if (node.shape !== 'rect' && displayName.length > 8) {
-        displayName = displayName.substring(0, 7) + '..'; // 丸の場合は文字数制限
-      }
+      if (node.shape !== 'rect' && displayName.length > 8) displayName = displayName.substring(0, 7) + '..';
       ctx.fillText(displayName, node.x, node.y);
 
-      // バッジの描画（エラー滞留 または 完了数）
-      if (isError) {
-        drawBadge(node, node.errorCount, 'var(--danger)');
-      } else if (isSuccess || node.isGoal) {
-        if (node.successCount > 0) drawBadge(node, node.successCount, 'var(--success)');
+      if (isError) drawBadge(node, node.errorCount, '#ef4444');
+      else if (isSuccess || node.isGoal) {
+        if (node.successCount > 0) drawBadge(node, node.successCount, '#10b981');
       }
-
       ctx.restore();
     }
 
     function drawBadge(node, count, color) {
       const offsetX = node.shape === 'rect' ? getRectSize(node).width/2 - 10 : 25;
       const offsetY = node.shape === 'rect' ? -getRectSize(node).height/2 + 5 : -25;
-      
       ctx.beginPath();
       ctx.arc(node.x + offsetX, node.y + offsetY, 12, 0, Math.PI*2);
       ctx.fillStyle = color;
@@ -759,13 +651,11 @@
       ctx.beginPath();
       ctx.moveTo(from.x, from.y);
       ctx.lineTo(to.x, to.y);
-      ctx.strokeStyle = isSelected ? 'var(--accent)' : 'rgba(148, 163, 184, 0.4)';
+      ctx.strokeStyle = isSelected ? '#3b82f6' : 'rgba(148, 163, 184, 0.4)';
       ctx.lineWidth = isSelected ? 3 : 2;
       ctx.stroke();
 
-      // 矢印の描画
       const angle = Math.atan2(to.y - from.y, to.x - from.x);
-      // 形状を考慮して矢印の位置を少し手前に
       let offset = 40;
       if (to.shape === 'rect') offset = Math.min(getRectSize(to).width/2, 60);
       
@@ -777,37 +667,30 @@
       ctx.lineTo(arrowX - 10 * Math.cos(angle - Math.PI/6), arrowY - 10 * Math.sin(angle - Math.PI/6));
       ctx.lineTo(arrowX - 10 * Math.cos(angle + Math.PI/6), arrowY - 10 * Math.sin(angle + Math.PI/6));
       ctx.closePath();
-      ctx.fillStyle = isSelected ? 'var(--accent)' : 'rgba(148, 163, 184, 0.8)';
+      ctx.fillStyle = isSelected ? '#3b82f6' : 'rgba(148, 163, 184, 0.8)';
       ctx.fill();
 
-      // 追加：メモ（ラベル）の描画
       if (edge.label && edge.label.trim() !== "") {
         const midX = (from.x + to.x) / 2;
         const midY = (from.y + to.y) / 2;
-        
         ctx.font = '12px Inter, sans-serif';
         const textWidth = ctx.measureText(edge.label).width;
         
-        // 半透明の背景座布団
-        ctx.fillStyle = 'rgba(15, 23, 42, 0.85)'; // 背景が見えるダーク
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.85)';
         ctx.fillRect(midX - textWidth/2 - 6, midY - 12, textWidth + 12, 24);
         
-        // 座布団の枠線
-        ctx.strokeStyle = isSelected ? 'var(--accent)' : '#475569';
+        ctx.strokeStyle = isSelected ? '#3b82f6' : '#475569';
         ctx.lineWidth = 1;
         ctx.strokeRect(midX - textWidth/2 - 6, midY - 12, textWidth + 12, 24);
         
-        // テキスト
-        ctx.fillStyle = isSelected ? '#fff' : 'var(--text-muted)';
+        ctx.fillStyle = isSelected ? '#fff' : '#94a3b8';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.fillText(edge.label, midX, midY);
       }
-
       ctx.restore();
     }
 
-    // ドラッグ中の結線プレビュー
     function drawConnectingLine() {
       if (!state.isConnecting || !state.connectFromNode) return;
       ctx.save();
@@ -821,26 +704,22 @@
       ctx.restore();
     }
 
-    // スマートガイドの描画
     function drawAlignGuides() {
       if (!state.alignGuides || state.alignGuides.length === 0) return;
       ctx.save();
-      ctx.strokeStyle = '#f472b6'; // ピンク色
+      ctx.strokeStyle = '#f472b6';
       ctx.setLineDash([4, 4]);
       ctx.lineWidth = 1;
-      
       for (const guide of state.alignGuides) {
         ctx.beginPath();
         if (guide.type === 'x') {
           const minY = Math.min(guide.y1, guide.y2) - 100;
           const maxY = Math.max(guide.y1, guide.y2) + 100;
-          ctx.moveTo(guide.x, minY);
-          ctx.lineTo(guide.x, maxY);
+          ctx.moveTo(guide.x, minY); ctx.lineTo(guide.x, maxY);
         } else {
           const minX = Math.min(guide.x1, guide.x2) - 100;
           const maxX = Math.max(guide.x1, guide.x2) + 100;
-          ctx.moveTo(minX, guide.y);
-          ctx.lineTo(maxX, guide.y);
+          ctx.moveTo(minX, guide.y); ctx.lineTo(maxX, guide.y);
         }
         ctx.stroke();
       }
@@ -852,8 +731,6 @@
       if (state.isRunning) {
         ui.btnToggle.textContent = '■ シミュレーション停止';
         ui.btnToggle.classList.replace('btn-primary', 'btn-danger');
-        
-        // リセット
         state.signals = [];
         state.nodes.forEach(n => { n.errorCount = 0; n.successCount = 0; });
         state.frameCount = 0;
@@ -866,180 +743,126 @@
     }
 
     function spawnSignal(startNode) {
-      // 負荷対策：シグナルが多すぎる場合は生成をスキップ
       if (state.signals.length > 500) return;
-      
       const outgoingEdges = state.edges.filter(e => e.from === startNode.id);
       if (outgoingEdges.length === 0) return;
-
-      // パラレル分岐：すべての行き先に対してシグナルを生成
       outgoingEdges.forEach(edge => {
-        state.signals.push({
-          fromId: edge.from,
-          toId: edge.to,
-          progress: 0, // 0.0 to 1.0
-          speed: (0.005 + Math.random() * 0.002) // 基本速度 + 若干の揺らぎ
-        });
+        state.signals.push({ fromId: edge.from, toId: edge.to, progress: 0, speed: (0.005 + Math.random() * 0.002) });
       });
     }
 
     function simulationLoop(timestamp) {
       if (!state.isRunning) return;
-
-      // デルタタイム計算（タブ非表示時のワープバグ対策）
       let deltaTime = timestamp - state.lastTime;
-      if (deltaTime > 100) deltaTime = 16; // 限界キャップ
+      if (deltaTime > 100) deltaTime = 16;
       state.lastTime = timestamp;
       const timeScale = (deltaTime / 16.6) * state.simulationSpeed;
 
       state.frameCount += timeScale;
-
-      // 指定頻度でスタートノード（どこからも矢印が来ていないノード）から発射
       if (state.frameCount >= state.spawnRate) {
         state.frameCount = 0;
         const startNodes = state.nodes.filter(n => !state.edges.some(e => e.to === n.id));
-        if(startNodes.length === 0 && state.nodes.length > 0) {
-           // 完全に循環している場合は適当なノードから発射
-           spawnSignal(state.nodes[0]);
-        } else {
-           startNodes.forEach(node => spawnSignal(node));
-        }
+        if(startNodes.length === 0 && state.nodes.length > 0) spawnSignal(state.nodes[0]);
+        else startNodes.forEach(node => spawnSignal(node));
       }
 
-      // シグナルの移動計算
       for (let i = state.signals.length - 1; i >= 0; i--) {
         const sig = state.signals[i];
         sig.progress += sig.speed * timeScale;
-
         if (sig.progress >= 1.0) {
-          // 目的地に到達
           const toNode = state.nodes.find(n => n.id === sig.toId);
           if (toNode) {
             const nextEdges = state.edges.filter(e => e.from === toNode.id);
             if (nextEdges.length > 0) {
-              // 次へ進む（パラレル分岐）
-              nextEdges.forEach(edge => {
-                state.signals.push({
-                  fromId: edge.from,
-                  toId: edge.to,
-                  progress: 0,
-                  speed: sig.speed
-                });
-              });
+              nextEdges.forEach(edge => state.signals.push({ fromId: edge.from, toId: edge.to, progress: 0, speed: sig.speed }));
             } else {
-              // 行き止まり到達（ゴール判定）
-              if (toNode.isGoal) {
-                toNode.successCount++;
-              } else {
-                toNode.errorCount++;
-              }
+              if (toNode.isGoal) toNode.successCount++;
+              else toNode.errorCount++;
             }
           }
-          // 現在のシグナルは消滅
           state.signals.splice(i, 1);
         }
       }
-
-      render(); // 描画更新
+      render();
       requestAnimationFrame(simulationLoop);
     }
 
     function render() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-      // 1. エッジ
       state.edges.forEach(edge => drawEdge(edge));
-      
-      // 2. ドラッグ中の線とガイド
       drawConnectingLine();
       drawAlignGuides();
 
-      // 3. シグナル（光の玉）
-      ctx.shadowBlur = 15;
-      ctx.shadowColor = '#60a5fa';
-      ctx.fillStyle = '#eff6ff';
-
+      ctx.shadowBlur = 15; ctx.shadowColor = '#60a5fa'; ctx.fillStyle = '#eff6ff';
       state.signals.forEach(sig => {
         const from = state.nodes.find(n => n.id === sig.fromId);
         const to = state.nodes.find(n => n.id === sig.toId);
         if (from && to) {
-          // 進捗度合に応じた座標の計算
           const currentX = from.x + (to.x - from.x) * sig.progress;
           const currentY = from.y + (to.y - from.y) * sig.progress;
-          
-          ctx.beginPath();
-          ctx.arc(currentX, currentY, 5, 0, Math.PI * 2);
-          ctx.fill();
+          ctx.beginPath(); ctx.arc(currentX, currentY, 5, 0, Math.PI * 2); ctx.fill();
         }
       });
-      ctx.shadowBlur = 0; // リセット
-
-      // 4. ノード（一番上に描画）
+      ctx.shadowBlur = 0;
       state.nodes.forEach(node => drawNode(node));
     }
 
-    // ファイル保存（JSONダウンロード）
     function saveToFile() {
-      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({
+      const saveData = {
         nodes: state.nodes,
-        edges: state.edges
-      }, null, 2));
-      
+        edges: state.edges,
+        settings: { spawnRate: state.spawnRate, simulationSpeed: state.simulationSpeed }
+      };
+      const jsonStr = JSON.stringify(saveData, null, 2);
+      const blob = new Blob([jsonStr], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
       const downloadAnchorNode = document.createElement('a');
-      downloadAnchorNode.setAttribute("href", dataStr);
-      downloadAnchorNode.setAttribute("download", "cycle_flow_data.json");
-      document.body.appendChild(downloadAnchorNode);
-      downloadAnchorNode.click();
-      downloadAnchorNode.remove();
+      downloadAnchorNode.href = url; downloadAnchorNode.download = "cycle_flow_data.json";
+      document.body.appendChild(downloadAnchorNode); downloadAnchorNode.click();
+      document.body.removeChild(downloadAnchorNode); URL.revokeObjectURL(url);
     }
 
-    // ファイル読込
     function loadFromFile(event) {
       const file = event.target.files[0];
       if (!file) return;
-
       const reader = new FileReader();
       reader.onload = function(e) {
         try {
           const contents = JSON.parse(e.target.result);
           if (contents.nodes && contents.edges) {
-            // 過去データの互換性担保（無いプロパティを補完）
-            state.nodes = contents.nodes.map(n => ({
-              ...n,
-              shape: n.shape || 'circle',
-              isGoal: n.isGoal || false,
-              errorCount: 0,
-              successCount: 0
-            }));
-            state.edges = contents.edges.map(e => ({
-              ...e,
-              label: e.label || '' // メモ用プロパティ補完
-            }));
-            
-            state.signals = [];
-            clearSelection();
-            render();
+            state.nodes = contents.nodes.map(n => ({ ...n, shape: n.shape || 'circle', isGoal: n.isGoal || false, errorCount: 0, successCount: 0 }));
+            state.edges = contents.edges.map(e => ({ ...e, label: e.label || '' }));
+            if (contents.settings) {
+              state.spawnRate = contents.settings.spawnRate;
+              state.simulationSpeed = contents.settings.simulationSpeed;
+              ui.sliderSpeed.value = state.simulationSpeed;
+              ui.valSpeed.textContent = `${state.simulationSpeed.toFixed(1)}x`;
+              const spawnVal = 130 - state.spawnRate;
+              ui.sliderSpawn.value = spawnVal;
+              let text = '中';
+              if (spawnVal < 40) text = '低 (ゆっくり)';
+              if (spawnVal > 90) text = '高 (激しい)';
+              ui.valSpawn.textContent = text;
+            }
+            state.signals = []; clearSelection(); render();
           }
         } catch (err) {
           alert("ファイルの読み込みに失敗しました。正しいデータ形式か確認してください。");
         }
       };
       reader.readAsText(file);
-      ui.fileInput.value = ""; // リセット
+      ui.fileInput.value = "";
     }
 
-    // 初期化実行
     setupEventListeners();
     loadSampleData();
-    render(); // 最初の描画
+    render();
     
-    // アニメーション非実行時でも60fpsで描画更新（ドラッグなどの操作反映のため）
     function staticRenderLoop() {
       if (!state.isRunning) render();
       requestAnimationFrame(staticRenderLoop);
     }
     staticRenderLoop();
-
   </script>
 </body>
 </html>
