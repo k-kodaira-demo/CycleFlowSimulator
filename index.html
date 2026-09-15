@@ -17,6 +17,25 @@
       --accent-hover: #2563eb;
       --danger: #ef4444;
       --success: #10b981;
+      --border-color: #334155;
+      --input-bg: #0f172a;
+      --info-bg: rgba(59, 130, 246, 0.1);
+      --info-text: #cbd5e1;
+    }
+
+    :root.light-mode {
+      --bg-color: #f1f5f9;
+      --panel-bg: #ffffff;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --accent: #2563eb;
+      --accent-hover: #1d4ed8;
+      --danger: #dc2626;
+      --success: #059669;
+      --border-color: #cbd5e1;
+      --input-bg: #f8fafc;
+      --info-bg: #eff6ff;
+      --info-text: #334155;
     }
 
     body {
@@ -28,26 +47,29 @@
       overflow: hidden;
       display: flex;
       height: 100vh;
+      transition: background-color 0.3s, color 0.3s;
     }
 
     #sidebar {
       width: 320px;
+      min-width: 320px;
       background-color: var(--panel-bg);
-      border-right: 1px solid #334155;
+      border-right: 1px solid var(--border-color);
       display: flex;
       flex-direction: column;
       z-index: 10;
-      box-shadow: 2px 0 10px rgba(0,0,0,0.5);
+      box-shadow: 2px 0 10px rgba(0,0,0,0.1);
       overflow-y: auto;
+      transition: background-color 0.3s, border-color 0.3s;
     }
 
     #sidebar::-webkit-scrollbar { width: 6px; }
     #sidebar::-webkit-scrollbar-track { background: var(--panel-bg); }
-    #sidebar::-webkit-scrollbar-thumb { background: #475569; border-radius: 3px; }
+    #sidebar::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 3px; }
 
     .panel-section {
-      padding: 20px;
-      border-bottom: 1px solid #334155;
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border-color);
     }
 
     .panel-title {
@@ -63,13 +85,13 @@
       flex-grow: 1;
       position: relative;
       background-color: var(--bg-color);
+      overflow: hidden;
     }
 
     canvas {
       display: block;
       width: 100%;
       height: 100%;
-      cursor: crosshair;
     }
 
     .btn {
@@ -90,7 +112,7 @@
     .btn-primary:hover { background-color: var(--accent-hover); }
 
     .btn-danger {
-      background-color: rgba(239, 68, 68, 0.2);
+      background-color: rgba(239, 68, 68, 0.1);
       color: var(--danger);
       border: 1px solid var(--danger);
     }
@@ -99,9 +121,9 @@
     .btn-secondary {
       background-color: transparent;
       color: var(--text-main);
-      border: 1px solid #475569;
+      border: 1px solid var(--border-color);
     }
-    .btn-secondary:hover { background-color: #334155; }
+    .btn-secondary:hover { background-color: var(--border-color); }
 
     .form-group { margin-bottom: 15px; }
     .form-group label {
@@ -114,12 +136,13 @@
     .form-group select {
       width: 100%;
       padding: 8px 12px;
-      background-color: #0f172a;
-      border: 1px solid #475569;
+      background-color: var(--input-bg);
+      border: 1px solid var(--border-color);
       border-radius: 4px;
-      color: white;
+      color: var(--text-main);
       font-size: 0.9rem;
       outline: none;
+      transition: background-color 0.3s, color 0.3s, border-color 0.3s;
     }
     .form-group input[type="text"]:focus,
     .form-group select:focus { border-color: var(--accent); }
@@ -129,10 +152,10 @@
       display: flex;
       align-items: center;
       gap: 10px;
-      background: rgba(0,0,0,0.2);
+      background: rgba(128,128,128,0.1);
       padding: 10px;
       border-radius: 4px;
-      border: 1px solid #334155;
+      border: 1px solid var(--border-color);
     }
     .color-picker-group input[type="color"] {
       width: 32px; height: 32px; padding: 0; border: none; border-radius: 4px; background: none; cursor: pointer;
@@ -142,19 +165,20 @@
     .checkbox-label input[type="checkbox"] { accent-color: var(--accent); width: 16px; height: 16px; }
 
     .info-box {
-      background-color: rgba(59, 130, 246, 0.1);
+      background-color: var(--info-bg);
       border-left: 3px solid var(--accent);
       padding: 10px;
       font-size: 0.8rem;
-      color: #cbd5e1;
+      color: var(--info-text);
       margin-bottom: 15px;
-      line-height: 1.4;
+      line-height: 1.5;
+      border-radius: 0 4px 4px 0;
     }
 
     #inline-editor {
       position: absolute;
       background-color: var(--panel-bg);
-      color: white;
+      color: var(--text-main);
       border: 2px solid var(--accent);
       border-radius: 4px;
       padding: 0 5px;
@@ -164,27 +188,65 @@
       text-align: center;
       outline: none;
       z-index: 100;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
     }
 
     .hidden { display: none !important; }
+
+    /* ズームコントローラーUI */
+    #zoom-controls {
+      position: absolute;
+      bottom: 20px;
+      right: 20px;
+      background: var(--panel-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      display: flex;
+      overflow: hidden;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+      z-index: 50;
+    }
+    #zoom-controls button {
+      background: none;
+      border: none;
+      padding: 8px 12px;
+      color: var(--text-main);
+      cursor: pointer;
+      font-weight: bold;
+      transition: background-color 0.2s;
+    }
+    #zoom-controls button:hover { background-color: var(--border-color); }
+    #zoom-controls span {
+      padding: 8px 12px;
+      font-size: 0.85rem;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      border-left: 1px solid var(--border-color);
+      border-right: 1px solid var(--border-color);
+      min-width: 60px;
+      justify-content: center;
+    }
   </style>
 </head>
 <body>
   <div id="sidebar">
     <div class="panel-section" style="padding-bottom: 10px;">
-      <h1 class="text-xl font-bold text-white mb-1">Cycle Flow</h1>
-      <p class="text-xs text-slate-400">プロセスマイニング・シミュレーター</p>
+      <h1 class="text-xl font-bold mb-1">Cycle Flow</h1>
+      <p class="text-xs" style="color: var(--text-muted);">プロセスマイニング・シミュレーター</p>
     </div>
 
     <div class="panel-section">
       <div class="info-box">
-        <b>操作方法:</b><br>
-        ・空白ダブルクリック：拠点追加<br>
-        ・<b>拠点/線をダブルクリック：名前編集</b><br>
-        ・Shift ＋ ドラッグ：線を引く<br>
-        ・線の端(●)をドラッグ：付け替え<br>
-        ・線のラベルをドラッグ：位置調整
+        <b>基本操作:</b><br>
+        ・空白[Wクリック]：拠点追加<br>
+        ・拠点/文字[Wクリック]：直接編集<br>
+        ・[Shift+ドラッグ]：線を引く<br>
+        ・線の端(●)ドラッグ：付け替え<br>
+        <b>新機能:</b><br>
+        ・空白[ドラッグ]：まとめて選択<br>
+        ・[右クリック]＋ドラッグ：画面移動<br>
+        ・[ホイール]：拡大縮小
       </div>
       
       <button id="btn-toggle-sim" class="btn btn-primary mb-3">
@@ -192,16 +254,30 @@
       </button>
 
       <div class="form-group">
-        <label>シグナル発生頻度: <span id="val-spawn">中</span></label>
+        <label>発生頻度: <span id="val-spawn">中</span></label>
         <input type="range" id="slider-spawn" min="10" max="120" value="60">
       </div>
       <div class="form-group">
-        <label>全体の基本速度: <span id="val-speed">1.0x</span></label>
+        <label>基本速度: <span id="val-speed">1.0x</span></label>
         <input type="range" id="slider-speed" min="0.1" max="5.0" step="0.1" value="1.0">
       </div>
+    </div>
 
-      <div class="form-group" style="margin-top: 10px; padding: 10px; background: rgba(0,0,0,0.2); border-radius: 4px;">
+    <div class="panel-section">
+      <div class="panel-title">表示設定</div>
+      <div class="form-group">
+        <label>テーマカラー</label>
+        <select id="select-theme">
+          <option value="dark">ダークモード (Dark)</option>
+          <option value="light">ライトモード (Light)</option>
+        </select>
+      </div>
+      <div class="form-group" style="padding: 10px; background: rgba(128,128,128,0.1); border-radius: 4px;">
         <label class="checkbox-label">
+          <input type="checkbox" id="check-enable-glow" checked>
+          <span>ネオン・陰影効果 (Glow)</span>
+        </label>
+        <label class="checkbox-label" style="margin-top: 8px;">
           <input type="checkbox" id="check-snap" checked>
           <span>整列アシスト (スマートガイド)</span>
         </label>
@@ -229,7 +305,6 @@
           <option value="rect">四角 (Rectangle)</option>
         </select>
       </div>
-      
       <div class="form-group">
         <label>テーマカラー</label>
         <div class="color-picker-group">
@@ -240,7 +315,6 @@
           </label>
         </div>
       </div>
-
       <div class="form-group" style="margin-top: 15px; padding: 10px; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 4px;">
         <label class="checkbox-label" style="color: var(--success);">
           <input type="checkbox" id="check-is-goal">
@@ -254,20 +328,17 @@
 
     <div id="edge-properties" class="panel-section hidden" style="flex-grow: 1;">
       <div class="panel-title">線の設定</div>
-      
-      <div class="form-group" style="margin-bottom: 20px; padding: 12px; background: rgba(0,0,0,0.2); border-radius: 6px; border: 1px solid #334155;">
-        <label>玉の通過速度: <span id="val-edge-speed" style="color: #60a5fa; font-weight: bold;">1.0x</span></label>
+      <div class="form-group" style="margin-bottom: 20px; padding: 12px; background: rgba(128,128,128,0.1); border-radius: 6px; border: 1px solid var(--border-color);">
+        <label>玉の通過速度: <span id="val-edge-speed" style="color: var(--accent); font-weight: bold;">1.0x</span></label>
         <input type="range" id="slider-edge-speed" min="0.1" max="3.0" step="0.1" value="1.0">
         
-        <label style="margin-top: 10px;">1回の発生量: <span id="val-edge-volume" style="color: #60a5fa; font-weight: bold;">1個</span></label>
+        <label style="margin-top: 10px;">1回の発生量: <span id="val-edge-volume" style="color: var(--accent); font-weight: bold;">1個</span></label>
         <input type="range" id="slider-edge-volume" min="1" max="10" step="1" value="1">
       </div>
-
       <div class="form-group">
         <label>フローの解説メモ (ラベル)</label>
         <input type="text" id="input-edge-label" placeholder="例: 承認された場合">
       </div>
-
       <div class="form-group">
         <label>テーマカラー</label>
         <div class="color-picker-group">
@@ -278,9 +349,18 @@
           </label>
         </div>
       </div>
-
       <div style="margin-top: auto; padding-top: 20px;">
         <button id="btn-delete-edge" class="btn btn-danger">この線を削除 (Del)</button>
+      </div>
+    </div>
+
+    <div id="multi-selection-properties" class="panel-section hidden" style="flex-grow: 1;">
+      <div class="panel-title">複数選択中</div>
+      <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 20px;">
+        <span id="multi-sel-count" style="font-weight:bold; color: var(--text-main);">0</span> 個の拠点が選択されています。
+      </p>
+      <div style="margin-top: auto; padding-top: 20px;">
+        <button id="btn-delete-multi" class="btn btn-danger">まとめて削除 (Del)</button>
       </div>
     </div>
 
@@ -300,6 +380,13 @@
   <div id="canvas-container">
     <canvas id="sim-canvas"></canvas>
     <input type="text" id="inline-editor" class="hidden">
+    
+    <div id="zoom-controls">
+      <button id="btn-zoom-out" title="縮小">－</button>
+      <span id="zoom-level">100%</span>
+      <button id="btn-zoom-in" title="拡大">＋</button>
+      <button id="btn-zoom-reset" title="全体表示">🎯</button>
+    </div>
   </div>
 
   <script>
@@ -314,8 +401,12 @@
       
       selectedNode: null,
       selectedEdge: null,
+      selectedGroup: [], // 複数選択されたノードの配列
+      
       isDragging: false,
       draggedNode: null,
+      dragOffsetX: 0,
+      dragOffsetY: 0,
       
       isDraggingLabel: false,
       draggedLabelEdge: null,
@@ -326,11 +417,31 @@
       
       isConnecting: false,
       connectFromNode: null,
+      
+      // Box Selection
+      isBoxSelecting: false,
+      boxStartX: 0,
+      boxStartY: 0,
+      boxCurrentX: 0,
+      boxCurrentY: 0,
+
+      // Pan & Zoom
+      panX: 0,
+      panY: 0,
+      zoom: 1.0,
+      isPanning: false,
+      panStartX: 0,
+      panStartY: 0,
+
       mouseX: 0,
       mouseY: 0,
       
+      // View Settings
+      theme: 'dark',
+      enableGlow: true,
       enableSnap: true,
       showCountBadge: true,
+      
       alignGuides: [],
       lastTime: 0,
 
@@ -342,6 +453,39 @@
       recordedChunks: []
     };
 
+    const THEME_COLORS = {
+      dark: {
+        bg: '#0f172a',
+        nodeBg: '#334155',
+        nodeDefaultBorder: '#475569',
+        text: '#ffffff',
+        edgeLine: 'rgba(148, 163, 184, 0.4)',
+        edgeLabelBg: 'rgba(15, 23, 42, 0.85)',
+        edgeLabelText: '#94a3b8',
+        glowSelected: 'rgba(59, 130, 246, 0.8)',
+        glowError: 'rgba(239, 68, 68, 0.9)',
+        glowSuccess: 'rgba(16, 185, 129, 0.6)',
+        boxSelectFill: 'rgba(59, 130, 246, 0.1)',
+        boxSelectBorder: 'rgba(59, 130, 246, 0.8)'
+      },
+      light: {
+        bg: '#f1f5f9',
+        nodeBg: '#ffffff',
+        nodeDefaultBorder: '#cbd5e1',
+        text: '#0f172a',
+        edgeLine: 'rgba(100, 116, 139, 0.5)',
+        edgeLabelBg: 'rgba(255, 255, 255, 0.9)',
+        edgeLabelText: '#475569',
+        glowSelected: 'rgba(37, 99, 235, 0.5)',
+        glowError: 'rgba(220, 38, 38, 0.6)',
+        glowSuccess: 'rgba(5, 150, 105, 0.4)',
+        boxSelectFill: 'rgba(37, 99, 235, 0.1)',
+        boxSelectBorder: 'rgba(37, 99, 235, 0.8)'
+      }
+    };
+
+    function getColor(key) { return THEME_COLORS[state.theme][key]; }
+
     const canvas = document.getElementById('sim-canvas');
     const ctx = canvas.getContext('2d');
     let bgPattern = null;
@@ -352,17 +496,22 @@
       valSpawn: document.getElementById('val-spawn'),
       sliderSpeed: document.getElementById('slider-speed'),
       valSpeed: document.getElementById('val-speed'),
+      selectTheme: document.getElementById('select-theme'),
+      checkEnableGlow: document.getElementById('check-enable-glow'),
       checkSnap: document.getElementById('check-snap'),
       checkShowBadge: document.getElementById('check-show-badge'),
       panelNoSel: document.getElementById('no-selection'),
       panelNode: document.getElementById('node-properties'),
       panelEdge: document.getElementById('edge-properties'),
+      panelMulti: document.getElementById('multi-selection-properties'),
+      multiSelCount: document.getElementById('multi-sel-count'),
       inputNodeName: document.getElementById('input-node-name'),
       selectNodeShape: document.getElementById('select-node-shape'),
       checkIsGoal: document.getElementById('check-is-goal'),
       inputNodeColor: document.getElementById('input-node-color'),
       checkNodeColor: document.getElementById('check-node-color'),
       btnDeleteNode: document.getElementById('btn-delete-node'),
+      btnDeleteMulti: document.getElementById('btn-delete-multi'),
       inputEdgeLabel: document.getElementById('input-edge-label'),
       inputEdgeColor: document.getElementById('input-edge-color'),
       checkEdgeColor: document.getElementById('check-edge-color'),
@@ -376,51 +525,65 @@
       fileInput: document.getElementById('file-input'),
       btnScreenshot: document.getElementById('btn-screenshot'),
       btnRecord: document.getElementById('btn-record'),
-      inlineEditor: document.getElementById('inline-editor')
+      inlineEditor: document.getElementById('inline-editor'),
+      zoomLevel: document.getElementById('zoom-level'),
+      btnZoomIn: document.getElementById('btn-zoom-in'),
+      btnZoomOut: document.getElementById('btn-zoom-out'),
+      btnZoomReset: document.getElementById('btn-zoom-reset')
     };
 
     function hexToRgba(hex, alpha) {
       let r = 0, g = 0, b = 0;
-      if (hex.length === 4) {
-        r = parseInt(hex[1] + hex[1], 16); g = parseInt(hex[2] + hex[2], 16); b = parseInt(hex[3] + hex[3], 16);
-      } else if (hex.length === 7) {
-        r = parseInt(hex[1] + hex[2], 16); g = parseInt(hex[3] + hex[4], 16); b = parseInt(hex[5] + hex[6], 16);
-      }
+      if (hex.length === 4) { r = parseInt(hex[1]+hex[1], 16); g = parseInt(hex[2]+hex[2], 16); b = parseInt(hex[3]+hex[3], 16); }
+      else if (hex.length === 7) { r = parseInt(hex[1]+hex[2], 16); g = parseInt(hex[3]+hex[4], 16); b = parseInt(hex[5]+hex[6], 16); }
       return `rgba(${r}, ${g}, ${b}, ${alpha})`;
     }
 
     function createBackgroundPattern() {
       const pCanvas = document.createElement('canvas');
-      pCanvas.width = 20; pCanvas.height = 20;
+      pCanvas.width = 40; pCanvas.height = 40;
       const pCtx = pCanvas.getContext('2d');
-      pCtx.fillStyle = '#0f172a'; pCtx.fillRect(0, 0, 20, 20);
-      pCtx.fillStyle = 'rgba(255, 255, 255, 0.05)';
-      pCtx.beginPath(); pCtx.arc(0, 0, 1, 0, Math.PI * 2); pCtx.fill();
-      pCtx.beginPath(); pCtx.arc(10, 10, 1, 0, Math.PI * 2); pCtx.fill();
+      pCtx.fillStyle = getColor('bg'); pCtx.fillRect(0, 0, 40, 40);
+      pCtx.fillStyle = state.theme === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)';
+      pCtx.beginPath(); pCtx.arc(0, 0, 1.5, 0, Math.PI * 2); pCtx.fill();
+      pCtx.beginPath(); pCtx.arc(20, 20, 1.5, 0, Math.PI * 2); pCtx.fill();
       bgPattern = ctx.createPattern(pCanvas, 'repeat');
     }
 
-    function getMousePos(e) {
+    function getScreenPos(e) {
       const rect = canvas.getBoundingClientRect();
       return { x: e.clientX - rect.left, y: e.clientY - rect.top };
+    }
+
+    function getWorldPos(screenX, screenY) {
+      return {
+        x: (screenX - state.panX) / state.zoom,
+        y: (screenY - state.panY) / state.zoom
+      };
+    }
+
+    function getScreenFromWorld(worldX, worldY) {
+      return {
+        x: (worldX * state.zoom) + state.panX,
+        y: (worldY * state.zoom) + state.panY
+      };
     }
 
     function getRectSize(node) {
       ctx.font = '600 13px Inter, sans-serif';
       const textWidth = ctx.measureText(node.name).width;
-      const width = Math.max(100, textWidth + 30);
+      const width = Math.max(120, textWidth + 40);
       return { width, height: 46 };
     }
 
-    function isMouseOnNode(x, y, node) {
+    function isMouseOnNode(worldX, worldY, node) {
       if (node.shape === 'rect') {
         const { width, height } = getRectSize(node);
-        return x >= node.x - width/2 && x <= node.x + width/2 &&
-               y >= node.y - height/2 && y <= node.y + height/2;
+        return worldX >= node.x - width/2 && worldX <= node.x + width/2 &&
+               worldY >= node.y - height/2 && worldY <= node.y + height/2;
       } else {
         const radius = 35;
-        const dx = x - node.x;
-        const dy = y - node.y;
+        const dx = worldX - node.x; const dy = worldY - node.y;
         return (dx * dx + dy * dy) <= (radius * radius);
       }
     }
@@ -437,47 +600,42 @@
       
       ctx.font = '12px Inter, sans-serif';
       const textWidth = ctx.measureText(edge.label).width;
-      
-      return {
-        x: midX - textWidth/2 - 6, y: midY - 12,
-        w: textWidth + 12, h: 24,
-        midX, midY
-      };
+      return { x: midX - textWidth/2 - 6, y: midY - 12, w: textWidth + 12, h: 24, midX, midY };
     }
 
     function startInlineEditing(target, type = 'node') {
-      state.editingTarget = target;
-      state.editingType = type;
+      state.editingTarget = target; state.editingType = type;
       const editor = ui.inlineEditor;
-
-      let w = 100, h = 30, px = 0, py = 0, text = '';
+      let w = 100, h = 30, worldPx = 0, worldPy = 0, text = '';
 
       if (type === 'node') {
         const size = getRectSize(target);
         w = target.shape === 'rect' ? size.width - 20 : 60;
-        px = target.x - w/2;
-        py = target.y - h/2;
+        worldPx = target.x - w/2; worldPy = target.y - h/2;
         text = target.name;
       } else if (type === 'edge') {
         const from = state.nodes.find(n => n.id === target.from);
         const to = state.nodes.find(n => n.id === target.to);
         const pos = target.labelPos !== undefined ? target.labelPos : 0.5;
-        const midX = from.x + (to.x - from.x) * pos;
-        const midY = from.y + (to.y - from.y) * pos;
-        w = 120; 
-        px = midX - w/2;
-        py = midY - h/2;
-        text = target.label || '';
+        worldPx = from.x + (to.x - from.x) * pos - 60;
+        worldPy = from.y + (to.y - from.y) * pos - h/2;
+        w = 120; text = target.label || '';
       }
 
-      editor.style.left = `${px}px`;
-      editor.style.top = `${py}px`;
-      editor.style.width = `${w}px`;
-      editor.style.height = `${h}px`;
+      // Convert world coords to screen coords for the absolute positioned DOM element
+      const screenPos = getScreenFromWorld(worldPx, worldPy);
+      editor.style.left = `${screenPos.x}px`;
+      editor.style.top = `${screenPos.y}px`;
+      editor.style.width = `${w * state.zoom}px`;
+      editor.style.height = `${h * state.zoom}px`;
+      editor.style.fontSize = `${13 * state.zoom}px`;
       editor.value = text;
-      editor.classList.remove('hidden');
-      editor.focus();
-      editor.select(); 
+      
+      // Update editor colors based on theme
+      editor.style.backgroundColor = state.theme === 'dark' ? '#1e293b' : '#ffffff';
+      editor.style.color = state.theme === 'dark' ? 'white' : 'black';
+
+      editor.classList.remove('hidden'); editor.focus(); editor.select(); 
     }
 
     function stopInlineEditing(save = true) {
@@ -493,8 +651,32 @@
         }
       }
       ui.inlineEditor.classList.add('hidden');
-      state.editingTarget = null;
-      state.editingType = null;
+      state.editingTarget = null; state.editingType = null; render();
+    }
+
+    function setZoom(newZoom) {
+      const oldZoom = state.zoom;
+      state.zoom = Math.max(0.2, Math.min(newZoom, 3.0));
+      
+      // Zoom keeping center of screen
+      const screenCenterX = canvas.width / 2;
+      const screenCenterY = canvas.height / 2;
+      const worldCenterX = (screenCenterX - state.panX) / oldZoom;
+      const worldCenterY = (screenCenterY - state.panY) / oldZoom;
+      
+      state.panX = screenCenterX - worldCenterX * state.zoom;
+      state.panY = screenCenterY - worldCenterY * state.zoom;
+      
+      ui.zoomLevel.textContent = `${Math.round(state.zoom * 100)}%`;
+      if(state.editingTarget) stopInlineEditing(true);
+      render();
+    }
+
+    function updateTheme() {
+      if (state.theme === 'light') document.documentElement.classList.add('light-mode');
+      else document.documentElement.classList.remove('light-mode');
+      createBackgroundPattern();
+      if(state.editingTarget) stopInlineEditing(true);
       render();
     }
 
@@ -502,65 +684,55 @@
       ui.btnToggle.addEventListener('click', toggleSimulation);
       
       ui.sliderSpawn.addEventListener('input', (e) => {
-        const val = parseInt(e.target.value);
-        state.spawnRate = 130 - val;
-        let text = '中';
-        if (val < 40) text = '低 (ゆっくり)';
-        if (val > 90) text = '高 (激しい)';
-        ui.valSpawn.textContent = text;
+        const val = parseInt(e.target.value); state.spawnRate = 130 - val;
+        ui.valSpawn.textContent = val < 40 ? '低 (ゆっくり)' : (val > 90 ? '高 (激しい)' : '中');
       });
+      ui.sliderSpeed.addEventListener('input', (e) => { state.simulationSpeed = parseFloat(e.target.value); ui.valSpeed.textContent = `${state.simulationSpeed.toFixed(1)}x`; });
       
-      ui.sliderSpeed.addEventListener('input', (e) => {
-        state.simulationSpeed = parseFloat(e.target.value);
-        ui.valSpeed.textContent = `${state.simulationSpeed.toFixed(1)}x`;
-      });
+      ui.selectTheme.addEventListener('change', (e) => { state.theme = e.target.value; updateTheme(); });
+      ui.checkEnableGlow.addEventListener('change', (e) => { state.enableGlow = e.target.checked; render(); });
+      ui.checkSnap.addEventListener('change', (e) => { state.enableSnap = e.target.checked; });
+      ui.checkShowBadge.addEventListener('change', (e) => { state.showCountBadge = e.target.checked; render(); });
       
-      ui.checkSnap.addEventListener('change', (e) => state.enableSnap = e.target.checked);
-      ui.checkShowBadge.addEventListener('change', (e) => state.showCountBadge = e.target.checked);
-      
-      ui.inputNodeName.addEventListener('input', (e) => { if (state.selectedNode) state.selectedNode.name = e.target.value; });
-      ui.selectNodeShape.addEventListener('change', (e) => { if (state.selectedNode) state.selectedNode.shape = e.target.value; });
-      ui.checkIsGoal.addEventListener('change', (e) => { if (state.selectedNode) state.selectedNode.isGoal = e.target.checked; });
-      ui.inputNodeColor.addEventListener('input', (e) => { if (state.selectedNode) state.selectedNode.customColor = e.target.value; });
-      ui.checkNodeColor.addEventListener('change', (e) => { if (state.selectedNode) state.selectedNode.useCustomColor = e.target.checked; });
+      ui.inputNodeName.addEventListener('input', (e) => { if (state.selectedNode) { state.selectedNode.name = e.target.value; render(); } });
+      ui.selectNodeShape.addEventListener('change', (e) => { if (state.selectedNode) { state.selectedNode.shape = e.target.value; render(); } });
+      ui.checkIsGoal.addEventListener('change', (e) => { if (state.selectedNode) { state.selectedNode.isGoal = e.target.checked; render(); } });
+      ui.inputNodeColor.addEventListener('input', (e) => { if (state.selectedNode) { state.selectedNode.customColor = e.target.value; render(); } });
+      ui.checkNodeColor.addEventListener('change', (e) => { if (state.selectedNode) { state.selectedNode.useCustomColor = e.target.checked; render(); } });
       ui.btnDeleteNode.addEventListener('click', deleteSelectedNode);
+      ui.btnDeleteMulti.addEventListener('click', deleteSelectedGroup);
       
-      ui.inputEdgeLabel.addEventListener('input', (e) => { if (state.selectedEdge) state.selectedEdge.label = e.target.value; });
-      ui.inputEdgeColor.addEventListener('input', (e) => { if (state.selectedEdge) state.selectedEdge.customColor = e.target.value; });
-      ui.checkEdgeColor.addEventListener('change', (e) => { if (state.selectedEdge) state.selectedEdge.useCustomColor = e.target.checked; });
+      ui.inputEdgeLabel.addEventListener('input', (e) => { if (state.selectedEdge) { state.selectedEdge.label = e.target.value; render(); } });
+      ui.inputEdgeColor.addEventListener('input', (e) => { if (state.selectedEdge) { state.selectedEdge.customColor = e.target.value; render(); } });
+      ui.checkEdgeColor.addEventListener('change', (e) => { if (state.selectedEdge) { state.selectedEdge.useCustomColor = e.target.checked; render(); } });
       ui.btnDeleteEdge.addEventListener('click', deleteSelectedEdge);
-      
-      ui.sliderEdgeSpeed.addEventListener('input', (e) => { 
-        if (state.selectedEdge) {
-          state.selectedEdge.speed = parseFloat(e.target.value); 
-          ui.valEdgeSpeed.textContent = `${state.selectedEdge.speed.toFixed(1)}x`;
-        }
-      });
-      ui.sliderEdgeVolume.addEventListener('input', (e) => { 
-        if (state.selectedEdge) {
-          state.selectedEdge.volume = parseInt(e.target.value); 
-          ui.valEdgeVolume.textContent = `${state.selectedEdge.volume}個`;
-        }
-      });
+      ui.sliderEdgeSpeed.addEventListener('input', (e) => { if (state.selectedEdge) { state.selectedEdge.speed = parseFloat(e.target.value); ui.valEdgeSpeed.textContent = `${state.selectedEdge.speed.toFixed(1)}x`; } });
+      ui.sliderEdgeVolume.addEventListener('input', (e) => { if (state.selectedEdge) { state.selectedEdge.volume = parseInt(e.target.value); ui.valEdgeVolume.textContent = `${state.selectedEdge.volume}個`; } });
 
       ui.btnSave.addEventListener('click', saveToFile);
       ui.btnLoad.addEventListener('click', () => ui.fileInput.click());
       ui.fileInput.addEventListener('change', loadFromFile);
-      
       ui.btnScreenshot.addEventListener('click', takeScreenshot);
       ui.btnRecord.addEventListener('click', toggleRecording);
+      
+      ui.btnZoomIn.addEventListener('click', () => setZoom(state.zoom + 0.1));
+      ui.btnZoomOut.addEventListener('click', () => setZoom(state.zoom - 0.1));
+      ui.btnZoomReset.addEventListener('click', () => { state.panX = 0; state.panY = 0; setZoom(1.0); });
+
+      // Disable default context menu for panning
+      canvas.addEventListener('contextmenu', e => e.preventDefault());
 
       canvas.addEventListener('mousedown', handleMouseDown);
       canvas.addEventListener('mousemove', handleMouseMove);
       canvas.addEventListener('mouseup', handleMouseUp);
       canvas.addEventListener('dblclick', handleDoubleClick);
+      canvas.addEventListener('wheel', handleWheel, { passive: false });
       
       window.addEventListener('keydown', (e) => {
-        if (e.key === 'Delete' || e.key === 'Backspace') {
-          if (document.activeElement.tagName !== 'INPUT') {
-            if (state.selectedNode) deleteSelectedNode();
-            if (state.selectedEdge) deleteSelectedEdge();
-          }
+        if ((e.key === 'Delete' || e.key === 'Backspace') && document.activeElement.tagName !== 'INPUT') {
+          if (state.selectedGroup.length > 0) deleteSelectedGroup();
+          else if (state.selectedNode) deleteSelectedNode();
+          else if (state.selectedEdge) deleteSelectedEdge();
         }
       });
 
@@ -571,13 +743,18 @@
       });
     }
 
+    function handleWheel(e) {
+      if(e.ctrlKey || e.metaKey) {
+        e.preventDefault();
+        const delta = e.deltaY > 0 ? -0.1 : 0.1;
+        setZoom(state.zoom + delta);
+      }
+    }
+
     function getDistToSegment(x, y, x1, y1, x2, y2) {
-      const A = x - x1; const B = y - y1;
-      const C = x2 - x1; const D = y2 - y1;
-      const dot = A * C + B * D;
-      const len_sq = C * C + D * D;
-      let param = -1;
-      if (len_sq != 0) param = dot / len_sq;
+      const A = x - x1; const B = y - y1; const C = x2 - x1; const D = y2 - y1;
+      const dot = A * C + B * D; const len_sq = C * C + D * D;
+      let param = -1; if (len_sq != 0) param = dot / len_sq;
       let xx, yy;
       if (param < 0) { xx = x1; yy = y1; }
       else if (param > 1) { xx = x2; yy = y2; }
@@ -590,51 +767,58 @@
       const from = state.nodes.find(n => n.id === edge.from);
       const to = state.nodes.find(n => n.id === edge.to);
       if (!from || !to) return null;
-
       const angle = Math.atan2(to.y - from.y, to.x - from.x);
       
       let fromOffset = 35;
       if (from.shape === 'rect') {
         const tw = getRectSize(from).width / 2; const th = getRectSize(from).height / 2;
         const cosA = Math.abs(Math.cos(angle)); const sinA = Math.abs(Math.sin(angle));
-        if (tw * sinA > th * cosA) fromOffset = th / sinA; else fromOffset = tw / cosA;
-        fromOffset = Math.min(fromOffset + 5, 80);
+        fromOffset = Math.min((tw * sinA > th * cosA ? th / sinA : tw / cosA) + 5, 80);
       }
-      const startX = from.x + Math.cos(angle) * fromOffset;
-      const startY = from.y + Math.sin(angle) * fromOffset;
+      const startX = from.x + Math.cos(angle) * fromOffset; const startY = from.y + Math.sin(angle) * fromOffset;
 
       let toOffset = 40;
       if (to.shape === 'rect') {
         const tw = getRectSize(to).width / 2; const th = getRectSize(to).height / 2;
         const cosA = Math.abs(Math.cos(angle)); const sinA = Math.abs(Math.sin(angle));
-        if (tw * sinA > th * cosA) toOffset = th / sinA; else toOffset = tw / cosA;
-        toOffset = Math.min(toOffset + 10, 80);
+        toOffset = Math.min((tw * sinA > th * cosA ? th / sinA : tw / cosA) + 10, 80);
       }
-      const arrowX = to.x - Math.cos(angle) * toOffset;
-      const arrowY = to.y - Math.sin(angle) * toOffset;
-
+      const arrowX = to.x - Math.cos(angle) * toOffset; const arrowY = to.y - Math.sin(angle) * toOffset;
       return { fromHandle: { x: startX, y: startY }, toHandle: { x: arrowX, y: arrowY } };
     }
 
     function handleMouseDown(e) {
       if (state.editingTarget) stopInlineEditing(true);
 
-      const { x, y } = getMousePos(e);
-      
+      const screenPos = getScreenPos(e);
+      // Panning (Right click or Middle click)
+      if (e.button === 2 || e.button === 1 || (e.button === 0 && e.spaceKey)) {
+        state.isPanning = true;
+        state.panStartX = screenPos.x - state.panX;
+        state.panStartY = screenPos.y - state.panY;
+        canvas.style.cursor = 'grabbing';
+        return;
+      }
+
+      const worldPos = getWorldPos(screenPos.x, screenPos.y);
+      const x = worldPos.x; const y = worldPos.y;
+
+      // Check Edge Handles
       if (state.selectedEdge) {
         const handles = getEdgeHandles(state.selectedEdge);
         if (handles) {
-          if (Math.hypot(x - handles.fromHandle.x, y - handles.fromHandle.y) <= 10) {
+          if (Math.hypot(x - handles.fromHandle.x, y - handles.fromHandle.y) <= 10 / state.zoom) {
             state.isDraggingEdgeHandle = true; state.draggedEdgeHandleEdge = state.selectedEdge;
             state.draggedEdgeHandleType = 'from'; canvas.style.cursor = 'grabbing'; return;
           }
-          if (Math.hypot(x - handles.toHandle.x, y - handles.toHandle.y) <= 10) {
+          if (Math.hypot(x - handles.toHandle.x, y - handles.toHandle.y) <= 10 / state.zoom) {
             state.isDraggingEdgeHandle = true; state.draggedEdgeHandleEdge = state.selectedEdge;
             state.draggedEdgeHandleType = 'to'; canvas.style.cursor = 'grabbing'; return;
           }
         }
       }
 
+      // Check Edge Labels
       let clickedLabelEdge = null;
       for (const edge of state.edges) {
         const rect = getLabelRect(edge);
@@ -649,6 +833,7 @@
         canvas.style.cursor = 'grabbing'; return;
       }
 
+      // Check Nodes
       let clickedNode = null;
       for (let i = state.nodes.length - 1; i >= 0; i--) {
         if (isMouseOnNode(x, y, state.nodes[i])) { clickedNode = state.nodes[i]; break; }
@@ -658,32 +843,65 @@
         if (e.shiftKey) {
           state.isConnecting = true; state.connectFromNode = clickedNode;
         } else {
-          selectNode(clickedNode);
-          state.isDragging = true; state.draggedNode = clickedNode; canvas.style.cursor = 'grabbing';
+          // If clicked node is in selectedGroup, don't clear group, start group drag
+          if(state.selectedGroup.includes(clickedNode)) {
+            state.isDragging = true;
+            state.draggedNode = clickedNode;
+            state.dragOffsetX = x - clickedNode.x;
+            state.dragOffsetY = y - clickedNode.y;
+          } else {
+            // Select single node
+            state.selectedGroup = [];
+            selectNode(clickedNode);
+            state.isDragging = true; state.draggedNode = clickedNode; 
+            state.dragOffsetX = x - clickedNode.x; state.dragOffsetY = y - clickedNode.y;
+          }
+          canvas.style.cursor = 'grabbing';
         }
         return;
       }
 
+      // Check Edges
       let clickedEdge = null;
       for (const edge of state.edges) {
         const from = state.nodes.find(n => n.id === edge.from);
         const to = state.nodes.find(n => n.id === edge.to);
-        if (from && to) {
-          const dist = getDistToSegment(x, y, from.x, from.y, to.x, to.y);
-          if (dist < 10) { clickedEdge = edge; break; }
+        if (from && to && getDistToSegment(x, y, from.x, from.y, to.x, to.y) < 10 / state.zoom) {
+          clickedEdge = edge; break;
         }
       }
 
-      if (clickedEdge) selectEdge(clickedEdge);
-      else clearSelection();
+      if (clickedEdge) {
+        state.selectedGroup = [];
+        selectEdge(clickedEdge);
+      } else {
+        clearSelection();
+        // Start Box Selection
+        state.isBoxSelecting = true;
+        state.boxStartX = x; state.boxStartY = y;
+        state.boxCurrentX = x; state.boxCurrentY = y;
+      }
     }
 
     function handleMouseMove(e) {
-      const { x, y } = getMousePos(e);
+      const screenPos = getScreenPos(e);
+      
+      if (state.isPanning) {
+        state.panX = screenPos.x - state.panStartX;
+        state.panY = screenPos.y - state.panStartY;
+        render(); return;
+      }
+
+      const worldPos = getWorldPos(screenPos.x, screenPos.y);
+      const x = worldPos.x; const y = worldPos.y;
       state.mouseX = x; state.mouseY = y;
 
-      if (state.isDraggingEdgeHandle && state.draggedEdgeHandleEdge) return;
+      if (state.isBoxSelecting) {
+        state.boxCurrentX = x; state.boxCurrentY = y;
+        render(); return;
+      }
 
+      if (state.isDraggingEdgeHandle && state.draggedEdgeHandleEdge) { render(); return; }
       if (state.isDraggingLabel && state.draggedLabelEdge) {
         const from = state.nodes.find(n => n.id === state.draggedLabelEdge.from);
         const to = state.nodes.find(n => n.id === state.draggedLabelEdge.to);
@@ -695,41 +913,41 @@
             state.draggedLabelEdge.labelPos = Math.max(0.1, Math.min(0.9, t));
           }
         }
-        return;
+        render(); return;
       }
 
-      if (!state.isDragging && !state.isDraggingLabel && !state.isDraggingEdgeHandle) {
+      // Hover cursors
+      if (!state.isDragging && !state.isConnecting) {
         let hoverHandle = false;
         if (state.selectedEdge) {
           const handles = getEdgeHandles(state.selectedEdge);
-          if (handles && (Math.hypot(x - handles.fromHandle.x, y - handles.fromHandle.y) <= 10 || 
-                          Math.hypot(x - handles.toHandle.x, y - handles.toHandle.y) <= 10)) { hoverHandle = true; }
+          if (handles && (Math.hypot(x - handles.fromHandle.x, y - handles.fromHandle.y) <= 10/state.zoom || 
+                          Math.hypot(x - handles.toHandle.x, y - handles.toHandle.y) <= 10/state.zoom)) { hoverHandle = true; }
         }
         const hoverNode = state.nodes.some(n => isMouseOnNode(x, y, n));
         const hoverLabel = state.edges.some(e => {
           const r = getLabelRect(e); return r && x >= r.x && x <= r.x + r.w && y >= r.y && y <= r.y + r.h;
         });
         const hoverEdge = state.edges.some(e => {
-          const from = state.nodes.find(n => n.id === e.from);
-          const to = state.nodes.find(n => n.id === e.to);
-          return from && to && getDistToSegment(x, y, from.x, from.y, to.x, to.y) < 10;
+          const from = state.nodes.find(n => n.id === e.from); const to = state.nodes.find(n => n.id === e.to);
+          return from && to && getDistToSegment(x, y, from.x, from.y, to.x, to.y) < 10/state.zoom;
         });
-        
-        canvas.style.cursor = hoverHandle ? 'grab' : ((hoverNode || hoverLabel || hoverEdge) ? 'pointer' : 'crosshair');
+        canvas.style.cursor = hoverHandle ? 'grab' : ((hoverNode || hoverLabel || hoverEdge) ? 'pointer' : 'default');
       }
 
+      // Dragging Nodes (Single or Group)
       if (state.isDragging && state.draggedNode) {
-        let newX = x; let newY = y;
+        let newX = x - state.dragOffsetX; let newY = y - state.dragOffsetY;
         state.alignGuides = [];
         
-        if (state.enableSnap) {
-          const SNAP_DIST = 15;
+        if (state.enableSnap && state.selectedGroup.length <= 1) {
+          const SNAP_DIST = 15 / state.zoom;
           let snapX = null; let minDistX = SNAP_DIST;
           let snapY = null; let minDistY = SNAP_DIST;
           let snapAngle = null; let minDistAngle = SNAP_DIST;
           
           for (const node of state.nodes) {
-            if (node.id === state.draggedNode.id) continue;
+            if (node.id === state.draggedNode.id || state.selectedGroup.includes(node)) continue;
             
             if (Math.abs(newX - node.x) < minDistX) { minDistX = Math.abs(newX - node.x); snapX = node.x; }
             if (Math.abs(newY - node.y) < minDistY) { minDistY = Math.abs(newY - node.y); snapY = node.y; }
@@ -750,24 +968,56 @@
               }
             }
           }
-          if (snapX !== null) { newX = snapX; state.alignGuides.push({ type: 'x', x: snapX, y1: newY - 1000, y2: newY + 1000 }); }
-          if (snapY !== null) { newY = snapY; state.alignGuides.push({ type: 'y', y: snapY, x1: newX - 1000, x2: newX + 1000 }); }
+          if (snapX !== null) { newX = snapX; state.alignGuides.push({ type: 'x', x: snapX, y1: newY - 2000, y2: newY + 2000 }); }
+          if (snapY !== null) { newY = snapY; state.alignGuides.push({ type: 'y', y: snapY, x1: newX - 2000, x2: newX + 2000 }); }
           if (snapX === null && snapY === null && snapAngle !== null) {
             newX = snapAngle.x; newY = snapAngle.y;
             state.alignGuides.push({ type: 'line', x1: snapAngle.guideStartX, y1: snapAngle.guideStartY, x2: snapAngle.guideEndX, y2: snapAngle.guideEndY });
           }
         }
-        state.draggedNode.x = newX; state.draggedNode.y = newY;
+        
+        const deltaX = newX - state.draggedNode.x;
+        const deltaY = newY - state.draggedNode.y;
+        
+        if (state.selectedGroup.length > 0) {
+          state.selectedGroup.forEach(n => { n.x += deltaX; n.y += deltaY; });
+        } else {
+          state.draggedNode.x = newX; state.draggedNode.y = newY;
+        }
       }
+      
+      if (!state.isRunning) render();
     }
 
     function handleMouseUp(e) {
-      if (state.isDraggingEdgeHandle && state.draggedEdgeHandleEdge) {
-        const { x, y } = getMousePos(e);
-        let targetNode = null;
-        for (const node of state.nodes) {
-          if (isMouseOnNode(x, y, node)) { targetNode = node; break; }
+      if (state.isPanning) { state.isPanning = false; canvas.style.cursor = 'default'; return; }
+
+      const screenPos = getScreenPos(e);
+      const worldPos = getWorldPos(screenPos.x, screenPos.y);
+      const x = worldPos.x; const y = worldPos.y;
+
+      if (state.isBoxSelecting) {
+        state.isBoxSelecting = false;
+        const minX = Math.min(state.boxStartX, state.boxCurrentX); const maxX = Math.max(state.boxStartX, state.boxCurrentX);
+        const minY = Math.min(state.boxStartY, state.boxCurrentY); const maxY = Math.max(state.boxStartY, state.boxCurrentY);
+        
+        state.selectedGroup = state.nodes.filter(n => n.x >= minX && n.x <= maxX && n.y >= minY && n.y <= maxY);
+        if (state.selectedGroup.length > 1) {
+          state.selectedNode = null; state.selectedEdge = null;
+          ui.panelNoSel.classList.add('hidden'); ui.panelNode.classList.add('hidden'); ui.panelEdge.classList.add('hidden');
+          ui.panelMulti.classList.remove('hidden');
+          ui.multiSelCount.textContent = state.selectedGroup.length;
+        } else if (state.selectedGroup.length === 1) {
+          selectNode(state.selectedGroup[0]);
+          state.selectedGroup = [];
         }
+        render();
+        return;
+      }
+
+      if (state.isDraggingEdgeHandle && state.draggedEdgeHandleEdge) {
+        let targetNode = null;
+        for (const node of state.nodes) { if (isMouseOnNode(x, y, node)) { targetNode = node; break; } }
         
         if (targetNode) {
           const edge = state.draggedEdgeHandleEdge;
@@ -779,23 +1029,20 @@
                (state.draggedEdgeHandleType === 'to' && e.from === edge.from && e.to === targetNode.id))
             );
             if (!exists) {
-              if (state.draggedEdgeHandleType === 'from') edge.from = targetNode.id;
-              else edge.to = targetNode.id;
+              if (state.draggedEdgeHandleType === 'from') edge.from = targetNode.id; else edge.to = targetNode.id;
               state.signals = state.signals.filter(s => !(s.fromId === edge.from && s.toId === edge.to));
             }
           }
         }
         state.isDraggingEdgeHandle = false; state.draggedEdgeHandleEdge = null;
-        state.draggedEdgeHandleType = null; canvas.style.cursor = 'crosshair'; return;
+        state.draggedEdgeHandleType = null; canvas.style.cursor = 'default'; render(); return;
       }
 
       if (state.isConnecting && state.connectFromNode) {
-        const { x, y } = getMousePos(e);
         let targetNode = null;
         for (const node of state.nodes) {
           if (isMouseOnNode(x, y, node) && node.id !== state.connectFromNode.id) { targetNode = node; break; }
         }
-        
         if (targetNode) {
           const exists = state.edges.some(edge => edge.from === state.connectFromNode.id && edge.to === targetNode.id);
           if (!exists) {
@@ -812,61 +1059,61 @@
       state.isDraggingLabel = false; state.draggedLabelEdge = null;
       state.isConnecting = false; state.connectFromNode = null;
       state.alignGuides = [];
-      canvas.style.cursor = 'crosshair';
+      canvas.style.cursor = 'default';
+      render();
     }
 
     function handleDoubleClick(e) {
       if (state.editingTarget) stopInlineEditing(true);
 
-      const { x, y } = getMousePos(e);
+      const screenPos = getScreenPos(e);
+      const worldPos = getWorldPos(screenPos.x, screenPos.y);
+      const x = worldPos.x; const y = worldPos.y;
       
       const clickedNode = state.nodes.find(node => isMouseOnNode(x, y, node));
       if (clickedNode) {
+        state.selectedGroup = [];
         selectNode(clickedNode);
-        startInlineEditing(clickedNode, 'node');
-        return;
+        startInlineEditing(clickedNode, 'node'); return;
       }
 
       let clickedLabelEdge = null;
       for (const edge of state.edges) {
         const rect = getLabelRect(edge);
-        if (rect && x >= rect.x && x <= rect.x + rect.w && y >= rect.y && y <= rect.y + rect.h) {
-          clickedLabelEdge = edge; break;
-        }
+        if (rect && x >= rect.x && x <= rect.x + rect.w && y >= rect.y && y <= rect.y + rect.h) { clickedLabelEdge = edge; break; }
       }
       if (clickedLabelEdge) {
+        state.selectedGroup = [];
         selectEdge(clickedLabelEdge);
-        startInlineEditing(clickedLabelEdge, 'edge');
-        return;
+        startInlineEditing(clickedLabelEdge, 'edge'); return;
       }
 
       let clickedEdge = null;
       for (const edge of state.edges) {
         const from = state.nodes.find(n => n.id === edge.from);
         const to = state.nodes.find(n => n.id === edge.to);
-        if (from && to) {
-          const dist = getDistToSegment(x, y, from.x, from.y, to.x, to.y);
-          if (dist < 10) { clickedEdge = edge; break; }
-        }
+        if (from && to && getDistToSegment(x, y, from.x, from.y, to.x, to.y) < 10/state.zoom) { clickedEdge = edge; break; }
       }
       if (clickedEdge) {
+        state.selectedGroup = [];
         selectEdge(clickedEdge);
-        startInlineEditing(clickedEdge, 'edge');
-        return;
+        startInlineEditing(clickedEdge, 'edge'); return;
       }
 
+      // Create new node at world position
       const newNode = {
         id: 'node_' + Date.now(), x: x, y: y, name: '', shape: 'rect',
         isGoal: false, errorCount: 0, successCount: 0, useCustomColor: false, customColor: '#ef4444'
       };
       state.nodes.push(newNode);
+      state.selectedGroup = [];
       selectNode(newNode);
       startInlineEditing(newNode, 'node');
     }
 
     function selectNode(node) {
       state.selectedNode = node; state.selectedEdge = null;
-      ui.panelNoSel.classList.add('hidden'); ui.panelEdge.classList.add('hidden'); ui.panelNode.classList.remove('hidden');
+      ui.panelNoSel.classList.add('hidden'); ui.panelEdge.classList.add('hidden'); ui.panelMulti.classList.add('hidden'); ui.panelNode.classList.remove('hidden');
       ui.inputNodeName.value = node.name; ui.selectNodeShape.value = node.shape || 'circle';
       ui.checkIsGoal.checked = node.isGoal || false;
       ui.checkNodeColor.checked = node.useCustomColor || false; ui.inputNodeColor.value = node.customColor || '#ef4444';
@@ -874,7 +1121,7 @@
 
     function selectEdge(edge) {
       state.selectedEdge = edge; state.selectedNode = null;
-      ui.panelNoSel.classList.add('hidden'); ui.panelNode.classList.add('hidden'); ui.panelEdge.classList.remove('hidden');
+      ui.panelNoSel.classList.add('hidden'); ui.panelNode.classList.add('hidden'); ui.panelMulti.classList.add('hidden'); ui.panelEdge.classList.remove('hidden');
       ui.inputEdgeLabel.value = edge.label || '';
       ui.checkEdgeColor.checked = edge.useCustomColor || false; ui.inputEdgeColor.value = edge.customColor || '#ef4444';
       ui.sliderEdgeSpeed.value = edge.speed !== undefined ? edge.speed : 1.0;
@@ -884,8 +1131,8 @@
     }
 
     function clearSelection() {
-      state.selectedNode = null; state.selectedEdge = null;
-      ui.panelNode.classList.add('hidden'); ui.panelEdge.classList.add('hidden'); ui.panelNoSel.classList.remove('hidden');
+      state.selectedNode = null; state.selectedEdge = null; state.selectedGroup = [];
+      ui.panelNode.classList.add('hidden'); ui.panelEdge.classList.add('hidden'); ui.panelMulti.classList.add('hidden'); ui.panelNoSel.classList.remove('hidden');
     }
 
     function deleteSelectedNode() {
@@ -895,36 +1142,47 @@
       state.edges = state.edges.filter(e => e.from !== id && e.to !== id);
       state.signals = state.signals.filter(s => s.fromId !== id && s.toId !== id);
       if (state.editingType === 'node' && state.editingTarget === state.selectedNode) stopInlineEditing(false);
-      clearSelection();
+      clearSelection(); render();
+    }
+
+    function deleteSelectedGroup() {
+      if (state.selectedGroup.length === 0) return;
+      const ids = state.selectedGroup.map(n => n.id);
+      state.nodes = state.nodes.filter(n => !ids.includes(n.id));
+      state.edges = state.edges.filter(e => !ids.includes(e.from) && !ids.includes(e.to));
+      state.signals = state.signals.filter(s => !ids.includes(s.fromId) && !ids.includes(s.toId));
+      clearSelection(); render();
     }
 
     function deleteSelectedEdge() {
       if (!state.selectedEdge) return;
       state.edges = state.edges.filter(e => e !== state.selectedEdge);
       if (state.editingType === 'edge' && state.editingTarget === state.selectedEdge) stopInlineEditing(false);
-      clearSelection();
+      clearSelection(); render();
     }
 
     function drawNode(node) {
       const isEditing = (state.editingType === 'node' && node === state.editingTarget);
       ctx.save();
       
-      const isSelected = state.selectedNode === node;
+      const isSelected = state.selectedNode === node || state.selectedGroup.includes(node);
       const hasOutgoing = state.edges.some(e => e.from === node.id);
       const isError = !hasOutgoing && !node.isGoal;
       const isSuccess = (!hasOutgoing && node.isGoal) || (node.isGoal && node.successCount > 0);
 
-      let nodeStrokeColor = '#475569'; let glowColor = null;
+      let nodeStrokeColor = getColor('nodeDefaultBorder'); let glowColor = null;
 
-      if (isSelected) { nodeStrokeColor = '#3b82f6'; glowColor = 'rgba(59, 130, 246, 0.8)'; }
+      if (isSelected) { nodeStrokeColor = getColor('glowSelected'); glowColor = THEME_COLORS[state.theme].glowSelected; }
       else if (node.useCustomColor && node.customColor) { nodeStrokeColor = node.customColor; glowColor = hexToRgba(node.customColor, 0.8); }
-      else if (isError && node.errorCount > 0) { nodeStrokeColor = '#ef4444'; glowColor = 'rgba(239, 68, 68, 0.9)'; }
-      else if (isSuccess) { nodeStrokeColor = '#10b981'; if (node.successCount > 0) glowColor = 'rgba(16, 185, 129, 0.6)'; }
+      else if (isError && node.errorCount > 0) { nodeStrokeColor = '#ef4444'; glowColor = THEME_COLORS[state.theme].glowError; }
+      else if (isSuccess) { nodeStrokeColor = '#10b981'; if (node.successCount > 0) glowColor = THEME_COLORS[state.theme].glowSuccess; }
 
-      ctx.shadowColor = 'rgba(0,0,0,0.5)'; ctx.shadowBlur = 10; ctx.shadowOffsetY = 4;
-      if (glowColor) { ctx.shadowColor = glowColor; ctx.shadowBlur = 15; }
+      if (state.enableGlow) {
+        ctx.shadowColor = 'rgba(0,0,0,0.5)'; ctx.shadowBlur = 10; ctx.shadowOffsetY = 4;
+        if (glowColor) { ctx.shadowColor = glowColor; ctx.shadowBlur = 15; ctx.shadowOffsetY = 0;}
+      }
 
-      ctx.fillStyle = '#334155'; ctx.strokeStyle = nodeStrokeColor; ctx.lineWidth = (isSelected || glowColor) ? 3 : 2;
+      ctx.fillStyle = getColor('nodeBg'); ctx.strokeStyle = nodeStrokeColor; ctx.lineWidth = (isSelected || glowColor) ? 3 : 2;
 
       if (node.shape === 'rect') {
         const { width, height } = getRectSize(node); const r = 8;
@@ -939,7 +1197,7 @@
 
       ctx.shadowBlur = 0;
       if (!isEditing) {
-        ctx.fillStyle = '#ffffff'; ctx.font = '600 13px Inter, sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillStyle = getColor('text'); ctx.font = '600 13px Inter, sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
         let displayName = node.name;
         if (node.shape !== 'rect' && displayName.length > 8) displayName = displayName.substring(0, 7) + '..';
         ctx.fillText(displayName, node.x, node.y);
@@ -957,7 +1215,7 @@
       const offsetY = node.shape === 'rect' ? -getRectSize(node).height/2 + 5 : -25;
       ctx.beginPath(); ctx.arc(node.x + offsetX, node.y + offsetY, 12, 0, Math.PI*2);
       ctx.fillStyle = color; ctx.fill(); ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 1.5; ctx.stroke();
-      ctx.fillStyle = '#ffffff'; ctx.font = 'bold 11px sans-serif';
+      ctx.fillStyle = '#ffffff'; ctx.font = 'bold 11px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
       ctx.fillText(count > 99 ? '99+' : count, node.x + offsetX, node.y + offsetY);
     }
 
@@ -972,7 +1230,7 @@
       const isHandleDragging = state.isDraggingEdgeHandle && state.draggedEdgeHandleEdge === edge;
       const isEditingLabel = (state.editingType === 'edge' && state.editingTarget === edge);
       
-      let edgeColor = 'rgba(148, 163, 184, 0.4)';
+      let edgeColor = getColor('edgeLine');
       if (isSelected) edgeColor = '#3b82f6';
       else if (edge.useCustomColor && edge.customColor) edgeColor = hexToRgba(edge.customColor, 0.9);
 
@@ -993,8 +1251,7 @@
         if (to.shape === 'rect') {
           const tw = getRectSize(to).width / 2; const th = getRectSize(to).height / 2;
           const cosA = Math.abs(Math.cos(angle)); const sinA = Math.abs(Math.sin(angle));
-          if (tw * sinA > th * cosA) offset = th / sinA; else offset = tw / cosA;
-          offset = Math.min(offset + 10, 80);
+          offset = Math.min((tw * sinA > th * cosA ? th / sinA : tw / cosA) + 10, 80);
         }
       }
 
@@ -1017,23 +1274,23 @@
             }
           }
 
-          ctx.fillStyle = isGlowing ? '#1e293b' : 'rgba(15, 23, 42, 0.85)';
-          if (isGlowing) { ctx.shadowColor = '#60a5fa'; ctx.shadowBlur = 12; ctx.strokeStyle = '#60a5fa'; } 
-          else { ctx.shadowBlur = isDraggedLabel ? 8 : 0; ctx.shadowColor = 'rgba(0,0,0,0.5)'; ctx.strokeStyle = isSelected ? '#3b82f6' : '#475569'; }
+          ctx.fillStyle = isGlowing ? (state.theme === 'dark' ? '#1e293b' : '#eff6ff') : getColor('edgeLabelBg');
+          if (isGlowing && state.enableGlow) { ctx.shadowColor = '#3b82f6'; ctx.shadowBlur = 12; ctx.strokeStyle = '#3b82f6'; } 
+          else { ctx.shadowBlur = (isDraggedLabel && state.enableGlow) ? 8 : 0; ctx.shadowColor = 'rgba(0,0,0,0.5)'; ctx.strokeStyle = isSelected ? '#3b82f6' : getColor('nodeDefaultBorder'); }
 
           ctx.fillRect(rect.x, rect.y, rect.w, rect.h); ctx.lineWidth = (isGlowing || isSelected) ? 2 : 1; ctx.strokeRect(rect.x, rect.y, rect.w, rect.h);
-          ctx.shadowBlur = 0; ctx.fillStyle = isGlowing ? '#93c5fd' : (isSelected ? '#ffffff' : '#94a3b8');
-          ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(edge.label, rect.midX, rect.midY);
+          ctx.shadowBlur = 0; ctx.fillStyle = isGlowing ? '#3b82f6' : (isSelected ? getColor('text') : getColor('edgeLabelText'));
+          ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.font = '12px Inter, sans-serif'; ctx.fillText(edge.label, rect.midX, rect.midY);
         }
       }
 
       if (isSelected && !isHandleDragging) {
         const handles = getEdgeHandles(edge);
         if (handles) {
-          ctx.beginPath(); ctx.arc(handles.fromHandle.x, handles.fromHandle.y, 5, 0, Math.PI * 2);
-          ctx.fillStyle = '#eff6ff'; ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = '#3b82f6'; ctx.stroke();
-          ctx.beginPath(); ctx.arc(handles.toHandle.x, handles.toHandle.y, 5, 0, Math.PI * 2);
-          ctx.fillStyle = '#eff6ff'; ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = '#3b82f6'; ctx.stroke();
+          ctx.beginPath(); ctx.arc(handles.fromHandle.x, handles.fromHandle.y, 5/state.zoom, 0, Math.PI * 2);
+          ctx.fillStyle = '#eff6ff'; ctx.fill(); ctx.lineWidth = 2/state.zoom; ctx.strokeStyle = '#3b82f6'; ctx.stroke();
+          ctx.beginPath(); ctx.arc(handles.toHandle.x, handles.toHandle.y, 5/state.zoom, 0, Math.PI * 2);
+          ctx.fillStyle = '#eff6ff'; ctx.fill(); ctx.lineWidth = 2/state.zoom; ctx.strokeStyle = '#3b82f6'; ctx.stroke();
         }
       }
       ctx.restore();
@@ -1047,7 +1304,7 @@
 
     function drawAlignGuides() {
       if (!state.alignGuides || state.alignGuides.length === 0) return;
-      ctx.save(); ctx.strokeStyle = '#f472b6'; ctx.setLineDash([4, 4]); ctx.lineWidth = 1;
+      ctx.save(); ctx.strokeStyle = '#f472b6'; ctx.setLineDash([4, 4]); ctx.lineWidth = 1 / state.zoom;
       for (const guide of state.alignGuides) {
         ctx.beginPath();
         if (guide.type === 'x') { ctx.moveTo(guide.x, guide.y1); ctx.lineTo(guide.x, guide.y2); }
@@ -1055,6 +1312,22 @@
         else if (guide.type === 'line') { ctx.moveTo(guide.x1, guide.y1); ctx.lineTo(guide.x2, guide.y2); }
         ctx.stroke();
       }
+      ctx.restore();
+    }
+
+    function drawBoxSelection() {
+      if (!state.isBoxSelecting) return;
+      ctx.save();
+      const x = Math.min(state.boxStartX, state.boxCurrentX);
+      const y = Math.min(state.boxStartY, state.boxCurrentY);
+      const w = Math.abs(state.boxCurrentX - state.boxStartX);
+      const h = Math.abs(state.boxCurrentY - state.boxStartY);
+      
+      ctx.fillStyle = getColor('boxSelectFill');
+      ctx.fillRect(x, y, w, h);
+      ctx.strokeStyle = getColor('boxSelectBorder');
+      ctx.lineWidth = 1 / state.zoom;
+      ctx.strokeRect(x, y, w, h);
       ctx.restore();
     }
 
@@ -1122,13 +1395,29 @@
     }
 
     function render() {
-      if (bgPattern) { ctx.fillStyle = bgPattern; ctx.fillRect(0, 0, canvas.width, canvas.height); } 
-      else { ctx.fillStyle = '#0f172a'; ctx.fillRect(0, 0, canvas.width, canvas.height); }
+      // Clear background
+      if (bgPattern) {
+        ctx.save();
+        ctx.fillStyle = bgPattern;
+        // Adjust background pattern to pan/zoom for infinite grid effect
+        ctx.translate(state.panX % (40 * state.zoom), state.panY % (40 * state.zoom));
+        ctx.scale(state.zoom, state.zoom);
+        ctx.fillRect(-canvas.width/state.zoom, -canvas.height/state.zoom, canvas.width*2/state.zoom, canvas.height*2/state.zoom);
+        ctx.restore();
+      } else {
+        ctx.fillStyle = getColor('bg'); ctx.fillRect(0, 0, canvas.width, canvas.height);
+      }
       
-      state.edges.forEach(edge => drawEdge(edge));
-      drawConnectingLine(); drawAlignGuides();
+      // Apply Camera Transform (Pan & Zoom) for World Rendering
+      ctx.save();
+      ctx.translate(state.panX, state.panY);
+      ctx.scale(state.zoom, state.zoom);
 
-      ctx.shadowBlur = 15; ctx.shadowColor = '#60a5fa'; ctx.fillStyle = '#eff6ff';
+      state.edges.forEach(edge => drawEdge(edge));
+      drawConnectingLine(); drawAlignGuides(); drawBoxSelection();
+
+      if (state.enableGlow) { ctx.shadowBlur = 15; ctx.shadowColor = '#3b82f6'; }
+      ctx.fillStyle = (state.theme === 'dark') ? '#eff6ff' : '#3b82f6';
       state.signals.forEach(sig => {
         const from = state.nodes.find(n => n.id === sig.fromId); const to = state.nodes.find(n => n.id === sig.toId);
         if (from && to) {
@@ -1137,14 +1426,27 @@
         }
       });
       ctx.shadowBlur = 0;
+      
       state.nodes.forEach(node => drawNode(node));
+
+      // Restore transform
+      ctx.restore();
+
+      // Ensure Inline Editor follows zoom/pan
+      if(state.editingTarget && state.editingType) {
+         startInlineEditing(state.editingTarget, state.editingType); // re-calc position
+      }
     }
 
     function saveToFile() {
       if (state.editingTarget) stopInlineEditing(true);
       const saveData = {
         nodes: state.nodes, edges: state.edges,
-        settings: { spawnRate: state.spawnRate, simulationSpeed: state.simulationSpeed, enableSnap: state.enableSnap, showCountBadge: state.showCountBadge }
+        settings: { 
+          spawnRate: state.spawnRate, simulationSpeed: state.simulationSpeed, 
+          enableSnap: state.enableSnap, showCountBadge: state.showCountBadge,
+          theme: state.theme, enableGlow: state.enableGlow
+        }
       };
       const jsonStr = JSON.stringify(saveData); const blob = new Blob([jsonStr], { type: 'application/json' });
       const url = URL.createObjectURL(blob); const downloadAnchorNode = document.createElement('a');
@@ -1162,47 +1464,39 @@
         try {
           const contents = JSON.parse(e.target.result);
           if (contents.nodes && contents.edges) {
-            
-            // マイグレーションエンジン: 古いデータに最新プロパティ（初期値）を確実に付与して復元する
+            // Data Migration (Backwards Compatibility)
             state.nodes = contents.nodes.map(n => ({ 
-              id: n.id, x: n.x, y: n.y,
-              name: n.name || '',
-              shape: n.shape || 'circle', 
-              isGoal: n.isGoal || false, 
-              errorCount: 0, successCount: 0,
-              useCustomColor: n.useCustomColor || false, 
-              customColor: n.customColor || '#ef4444'
+              id: n.id, x: n.x, y: n.y, name: n.name || '', shape: n.shape || 'circle', 
+              isGoal: n.isGoal || false, errorCount: 0, successCount: 0,
+              useCustomColor: n.useCustomColor || false, customColor: n.customColor || '#ef4444'
             }));
 
             state.edges = contents.edges.map(e => ({ 
-              from: e.from, to: e.to,
-              label: e.label || '', 
-              labelPos: e.labelPos !== undefined ? e.labelPos : 0.5,
-              useCustomColor: e.useCustomColor || false, 
-              customColor: e.customColor || '#ef4444',
-              speed: e.speed !== undefined ? e.speed : 1.0, 
-              volume: e.volume !== undefined ? e.volume : 1
+              from: e.from, to: e.to, label: e.label || '', labelPos: e.labelPos !== undefined ? e.labelPos : 0.5,
+              useCustomColor: e.useCustomColor || false, customColor: e.customColor || '#ef4444',
+              speed: e.speed !== undefined ? e.speed : 1.0, volume: e.volume !== undefined ? e.volume : 1
             }));
 
-            const defaultSettings = { spawnRate: 60, simulationSpeed: 1.0, enableSnap: true, showCountBadge: true };
-            const loadedSettings = contents.settings || defaultSettings;
+            const ds = { spawnRate: 60, simulationSpeed: 1.0, enableSnap: true, showCountBadge: true, theme: 'dark', enableGlow: true };
+            const ls = contents.settings || ds;
             
-            state.spawnRate = loadedSettings.spawnRate !== undefined ? loadedSettings.spawnRate : defaultSettings.spawnRate;
-            state.simulationSpeed = loadedSettings.simulationSpeed !== undefined ? loadedSettings.simulationSpeed : defaultSettings.simulationSpeed;
-            state.enableSnap = loadedSettings.enableSnap !== undefined ? loadedSettings.enableSnap : defaultSettings.enableSnap;
-            state.showCountBadge = loadedSettings.showCountBadge !== undefined ? loadedSettings.showCountBadge : defaultSettings.showCountBadge;
+            state.spawnRate = ls.spawnRate !== undefined ? ls.spawnRate : ds.spawnRate;
+            state.simulationSpeed = ls.simulationSpeed !== undefined ? ls.simulationSpeed : ds.simulationSpeed;
+            state.enableSnap = ls.enableSnap !== undefined ? ls.enableSnap : ds.enableSnap;
+            state.showCountBadge = ls.showCountBadge !== undefined ? ls.showCountBadge : ds.showCountBadge;
+            state.theme = ls.theme || ds.theme;
+            state.enableGlow = ls.enableGlow !== undefined ? ls.enableGlow : ds.enableGlow;
 
-            // UIの完全同期
-            ui.sliderSpeed.value = state.simulationSpeed; 
-            ui.valSpeed.textContent = `${state.simulationSpeed.toFixed(1)}x`;
-            const spawnVal = 130 - state.spawnRate; 
-            ui.sliderSpawn.value = spawnVal;
-            let text = '中'; if (spawnVal < 40) text = '低 (ゆっくり)'; if (spawnVal > 90) text = '高 (激しい)';
-            ui.valSpawn.textContent = text;
-            ui.checkSnap.checked = state.enableSnap; 
-            ui.checkShowBadge.checked = state.showCountBadge;
+            // Sync UI
+            ui.sliderSpeed.value = state.simulationSpeed; ui.valSpeed.textContent = `${state.simulationSpeed.toFixed(1)}x`;
+            const spawnVal = 130 - state.spawnRate; ui.sliderSpawn.value = spawnVal;
+            ui.valSpawn.textContent = spawnVal < 40 ? '低 (ゆっくり)' : (spawnVal > 90 ? '高 (激しい)' : '中');
+            ui.checkSnap.checked = state.enableSnap; ui.checkShowBadge.checked = state.showCountBadge;
+            ui.selectTheme.value = state.theme; ui.checkEnableGlow.checked = state.enableGlow;
             
-            state.signals = []; clearSelection(); render();
+            updateTheme();
+            state.signals = []; clearSelection();
+            state.panX = 0; state.panY = 0; setZoom(1.0); // Reset view on load
           }
         } catch (err) { alert("ファイルの読み込みに失敗しました。正しいデータ形式か確認してください。"); }
       };
@@ -1238,11 +1532,11 @@
 
     function loadSampleData() {
       state.nodes = [
-        { id: 'n1', x: 150, y: 300, name: '① 入庫', shape: 'circle', isGoal: false, errorCount: 0, successCount: 0 },
-        { id: 'n2', x: 350, y: 300, name: '② 検品', shape: 'circle', isGoal: false, errorCount: 0, successCount: 0 },
-        { id: 'n3', x: 600, y: 150, name: '③ 梱包作業', shape: 'rect', isGoal: false, errorCount: 0, successCount: 0 },
-        { id: 'n4', x: 600, y: 450, name: '④ 異常品対応', shape: 'rect', isGoal: false, errorCount: 0, successCount: 0, useCustomColor: true, customColor: '#ef4444' },
-        { id: 'n5', x: 850, y: 150, name: '⑤ 出荷完了', shape: 'rect', isGoal: true, errorCount: 0, successCount: 0 }
+        { id: 'n1', x: 250, y: 350, name: '① 入庫', shape: 'circle', isGoal: false, errorCount: 0, successCount: 0 },
+        { id: 'n2', x: 450, y: 350, name: '② 検品', shape: 'circle', isGoal: false, errorCount: 0, successCount: 0 },
+        { id: 'n3', x: 700, y: 200, name: '③ 梱包作業', shape: 'rect', isGoal: false, errorCount: 0, successCount: 0 },
+        { id: 'n4', x: 700, y: 500, name: '④ 異常品対応', shape: 'rect', isGoal: false, errorCount: 0, successCount: 0, useCustomColor: true, customColor: '#ef4444' },
+        { id: 'n5', x: 950, y: 200, name: '⑤ 出荷完了', shape: 'rect', isGoal: true, errorCount: 0, successCount: 0 }
       ];
       state.edges = [
         { from: 'n1', to: 'n2', label: '', labelPos: 0.5, speed: 1.0, volume: 1 },
@@ -1259,7 +1553,7 @@
     }
     
     window.addEventListener('resize', resizeCanvas);
-    setupEventListeners(); loadSampleData(); resizeCanvas();
+    setupEventListeners(); loadSampleData(); resizeCanvas(); updateTheme();
     
     function staticRenderLoop() {
       if (!state.isRunning) render();
