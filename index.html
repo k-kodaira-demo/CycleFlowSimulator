@@ -744,11 +744,9 @@
     }
 
     function handleWheel(e) {
-      if(e.ctrlKey || e.metaKey) {
-        e.preventDefault();
-        const delta = e.deltaY > 0 ? -0.1 : 0.1;
-        setZoom(state.zoom + delta);
-      }
+      e.preventDefault();
+      const delta = e.deltaY > 0 ? -0.1 : 0.1;
+      setZoom(state.zoom + delta);
     }
 
     function getDistToSegment(x, y, x1, y1, x2, y2) {
