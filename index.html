@@ -2,7 +2,8 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- ブラウザのネイティブズームを無効化するメタタグ -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Cycle Flow Simulator</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
@@ -45,7 +46,9 @@
       color: var(--text-main);
       font-family: 'Inter', sans-serif;
       overflow: hidden;
+      overscroll-behavior: none; /* スワイプでの戻る/進むナビゲーションを防止 */
       display: flex;
+      width: 100vw;
       height: 100vh;
       transition: background-color 0.3s, color 0.3s;
     }
@@ -53,6 +56,7 @@
     #sidebar {
       width: 320px;
       min-width: 320px;
+      flex-shrink: 0; /* 画面が狭くなってもサイドバーを潰さない（消滅防止） */
       background-color: var(--panel-bg);
       border-right: 1px solid var(--border-color);
       display: flex;
@@ -79,19 +83,6 @@
       color: var(--text-muted);
       margin-bottom: 15px;
       font-weight: 600;
-    }
-
-    #canvas-container {
-      flex-grow: 1;
-      position: relative;
-      background-color: var(--bg-color);
-      overflow: hidden;
-    }
-
-    canvas {
-      display: block;
-      width: 100%;
-      height: 100%;
     }
 
     .btn {
@@ -175,7 +166,27 @@
       border-radius: 0 4px 4px 0;
     }
 
-    /* 改行対応のためテキストエリアに変更 */
+    .radio-group label {
+      display: flex; align-items: center; gap: 5px; cursor: pointer; font-size: 0.85rem; color: var(--text-main);
+    }
+    .radio-group input[type="radio"] { accent-color: var(--accent); width: 14px; height: 14px; margin: 0; }
+
+    .hidden { display: none !important; }
+
+    #canvas-container {
+      flex-grow: 1;
+      position: relative;
+      background-color: var(--bg-color);
+      overflow: hidden;
+      touch-action: none; /* キャンバス上でのブラウザネイティブのズームやパンを完全無効化 */
+    }
+
+    canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+
     #inline-editor {
       position: absolute;
       background-color: var(--panel-bg);
@@ -197,9 +208,6 @@
       line-height: 1.2;
     }
 
-    .hidden { display: none !important; }
-
-    /* ズームコントローラーUI */
     #zoom-controls {
       position: absolute;
       bottom: 20px;
@@ -233,11 +241,6 @@
       min-width: 60px;
       justify-content: center;
     }
-
-    .radio-group label {
-      display: flex; align-items: center; gap: 5px; cursor: pointer; font-size: 0.85rem; color: var(--text-main);
-    }
-    .radio-group input[type="radio"] { accent-color: var(--accent); width: 14px; height: 14px; margin: 0; }
   </style>
 </head>
 <body>
@@ -471,32 +474,16 @@
 
     const THEME_COLORS = {
       dark: {
-        bg: '#0f172a',
-        nodeBg: '#334155',
-        nodeDefaultBorder: '#475569',
-        text: '#ffffff',
-        edgeLine: 'rgba(148, 163, 184, 0.4)',
-        edgeLabelBg: 'rgba(15, 23, 42, 0.85)',
-        edgeLabelText: '#94a3b8',
-        glowSelected: 'rgba(59, 130, 246, 0.8)',
-        glowError: 'rgba(239, 68, 68, 0.9)',
-        glowSuccess: 'rgba(16, 185, 129, 0.6)',
-        boxSelectFill: 'rgba(59, 130, 246, 0.1)',
-        boxSelectBorder: 'rgba(59, 130, 246, 0.8)'
+        bg: '#0f172a', nodeBg: '#334155', nodeDefaultBorder: '#475569', text: '#ffffff',
+        edgeLine: 'rgba(148, 163, 184, 0.4)', edgeLabelBg: 'rgba(15, 23, 42, 0.85)', edgeLabelText: '#94a3b8',
+        glowSelected: 'rgba(59, 130, 246, 0.8)', glowError: 'rgba(239, 68, 68, 0.9)', glowSuccess: 'rgba(16, 185, 129, 0.6)',
+        boxSelectFill: 'rgba(59, 130, 246, 0.1)', boxSelectBorder: 'rgba(59, 130, 246, 0.8)'
       },
       light: {
-        bg: '#f1f5f9',
-        nodeBg: '#ffffff',
-        nodeDefaultBorder: '#cbd5e1',
-        text: '#0f172a',
-        edgeLine: 'rgba(100, 116, 139, 0.5)',
-        edgeLabelBg: 'rgba(255, 255, 255, 0.9)',
-        edgeLabelText: '#475569',
-        glowSelected: 'rgba(37, 99, 235, 0.5)',
-        glowError: 'rgba(220, 38, 38, 0.6)',
-        glowSuccess: 'rgba(5, 150, 105, 0.4)',
-        boxSelectFill: 'rgba(37, 99, 235, 0.1)',
-        boxSelectBorder: 'rgba(37, 99, 235, 0.8)'
+        bg: '#f1f5f9', nodeBg: '#ffffff', nodeDefaultBorder: '#cbd5e1', text: '#0f172a',
+        edgeLine: 'rgba(100, 116, 139, 0.5)', edgeLabelBg: 'rgba(255, 255, 255, 0.9)', edgeLabelText: '#475569',
+        glowSelected: 'rgba(37, 99, 235, 0.5)', glowError: 'rgba(220, 38, 38, 0.6)', glowSuccess: 'rgba(5, 150, 105, 0.4)',
+        boxSelectFill: 'rgba(37, 99, 235, 0.1)', boxSelectBorder: 'rgba(37, 99, 235, 0.8)'
       }
     };
 
@@ -649,16 +636,42 @@
       }
     }
 
-    function getEdgeHandles(edge) {
+    function getEdgeCurve(edge) {
       const from = state.nodes.find(n => n.id === edge.from);
       const to = state.nodes.find(n => n.id === edge.to);
       if (!from || !to) return null;
-      const angle = Math.atan2(to.y - from.y, to.x - from.x);
+
+      const isCurved = state.edges.some(e => e !== edge && e.from === edge.to && e.to === edge.from);
       
-      const fromPos = getNodeIntersection(from, angle);
-      const toPos = getNodeIntersection(to, angle + Math.PI);
+      let startX, startY, endX, endY, cpX, cpY, arrowAngle;
+      const dx = to.x - from.x; const dy = to.y - from.y;
+      const len = Math.hypot(dx, dy) || 1;
       
-      return { fromHandle: { x: fromPos.x, y: fromPos.y }, toHandle: { x: toPos.x, y: toPos.y } };
+      if (isCurved) {
+        const midX = from.x + dx / 2; const midY = from.y + dy / 2;
+        const nx = -dy / len; const ny = dx / len;
+        const offset = 35;
+        cpX = midX + nx * offset; cpY = midY + ny * offset;
+        
+        const angleFrom = Math.atan2(cpY - from.y, cpX - from.x);
+        const posFrom = getNodeIntersection(from, angleFrom);
+        startX = posFrom.x; startY = posFrom.y;
+        
+        const angleToReverse = Math.atan2(cpY - to.y, cpX - to.x);
+        const posTo = getNodeIntersection(to, angleToReverse);
+        endX = posTo.x; endY = posTo.y;
+        
+        arrowAngle = Math.atan2(endY - cpY, endX - cpX);
+      } else {
+        const originalAngle = Math.atan2(dy, dx);
+        const posFrom = getNodeIntersection(from, originalAngle);
+        startX = posFrom.x; startY = posFrom.y;
+        const posTo = getNodeIntersection(to, originalAngle + Math.PI);
+        endX = posTo.x; endY = posTo.y;
+        cpX = (startX + endX) / 2; cpY = (startY + endY) / 2;
+        arrowAngle = originalAngle;
+      }
+      return { isCurved, startX, startY, cpX, cpY, endX, endY, arrowAngle, len };
     }
 
     function getDistToSegment(x, y, x1, y1, x2, y2) {
@@ -671,23 +684,54 @@
       return Math.sqrt(dx * dx + dy * dy);
     }
 
+    function getDistToEdge(x, y, edge) {
+      const curve = getEdgeCurve(edge);
+      if (!curve) return Infinity;
+      if (!curve.isCurved) {
+        return getDistToSegment(x, y, curve.startX, curve.startY, curve.endX, curve.endY);
+      } else {
+        let minDist = Infinity;
+        let lastX = curve.startX, lastY = curve.startY;
+        for (let i = 1; i <= 10; i++) {
+          const t = i / 10; const mt = 1 - t;
+          const px = mt * mt * curve.startX + 2 * mt * t * curve.cpX + t * t * curve.endX;
+          const py = mt * mt * curve.startY + 2 * mt * t * curve.cpY + t * t * curve.endY;
+          const d = getDistToSegment(x, y, lastX, lastY, px, py);
+          if (d < minDist) minDist = d;
+          lastX = px; lastY = py;
+        }
+        return minDist;
+      }
+    }
+
+    function getEdgeHandles(edge) {
+      const curve = getEdgeCurve(edge);
+      if (!curve) return null;
+      return { fromHandle: { x: curve.startX, y: curve.startY }, toHandle: { x: curve.endX, y: curve.endY } };
+    }
+
     function getLabelRect(edge) {
       if (!edge.label || String(edge.label).trim() === "") return null;
-      const from = state.nodes.find(n => n.id === edge.from);
-      const to = state.nodes.find(n => n.id === edge.to);
-      if (!from || !to) return null;
+      const curve = getEdgeCurve(edge);
+      if (!curve) return null;
       
-      const pos = edge.labelPos !== undefined ? edge.labelPos : 0.5;
-      const midX = from.x + (to.x - from.x) * pos;
-      const midY = from.y + (to.y - from.y) * pos;
+      const t = edge.labelPos !== undefined ? edge.labelPos : 0.5;
+      let midX, midY;
+      
+      if (curve.isCurved) {
+        const mt = 1 - t;
+        midX = mt * mt * curve.startX + 2 * mt * t * curve.cpX + t * t * curve.endX;
+        midY = mt * mt * curve.startY + 2 * mt * t * curve.cpY + t * t * curve.endY;
+      } else {
+        midX = curve.startX + (curve.endX - curve.startX) * t;
+        midY = curve.startY + (curve.endY - curve.startY) * t;
+      }
       
       ctx.font = '12px Inter, sans-serif';
       const textInfo = measureMultilineText(ctx, String(edge.label), 12);
-      
       return { x: midX - textInfo.width/2 - 8, y: midY - textInfo.height/2 - 8, w: textInfo.width + 16, h: textInfo.height + 16, midX, midY };
     }
 
-    // 位置の更新だけを行う専用関数（入力状態や選択状態を一切妨害しない）
     function updateInlineEditorPosition() {
       if (!state.editingTarget || !state.editingType) return;
       const target = state.editingTarget;
@@ -703,12 +747,12 @@
         if (rect) {
             w = rect.w; h = rect.h; worldPx = rect.x; worldPy = rect.y;
         } else {
-            const from = state.nodes.find(n => n.id === target.from);
-            const to = state.nodes.find(n => n.id === target.to);
-            if(from && to) {
+            const curve = getEdgeCurve(target);
+            if(curve) {
               const pos = target.labelPos !== undefined ? target.labelPos : 0.5;
-              const midX = from.x + (to.x - from.x) * pos;
-              const midY = from.y + (to.y - from.y) * pos;
+              const mt = 1 - pos;
+              const midX = curve.isCurved ? (mt * mt * curve.startX + 2 * mt * pos * curve.cpX + pos * pos * curve.endX) : (curve.startX + (curve.endX - curve.startX) * pos);
+              const midY = curve.isCurved ? (mt * mt * curve.startY + 2 * mt * pos * curve.cpY + pos * pos * curve.endY) : (curve.startY + (curve.endY - curve.startY) * pos);
               w = 120; h = 40; worldPx = midX - w/2; worldPy = midY - h/2;
             }
         }
@@ -721,7 +765,6 @@
       editor.style.fontSize = `${13 * state.zoom}px`;
     }
 
-    // 初回起動時のみテキストやフォーカスをセットする関数
     function startInlineEditing(target, type = 'node') {
       state.editingTarget = target; state.editingType = type;
       const editor = ui.inlineEditor;
@@ -826,10 +869,24 @@
       canvas.addEventListener('mouseup', handleMouseUp);
       canvas.addEventListener('dblclick', handleDoubleClick);
       
+      // トラックパッド対応の滑らかなズーム処理
       canvas.addEventListener('wheel', (e) => {
           e.preventDefault();
-          const delta = e.deltaY > 0 ? -0.1 : 0.1;
-          setZoom(state.zoom + delta);
+          let delta = 0;
+          if (e.ctrlKey) {
+              // ピンチズーム（トラックパッド）
+              delta = -e.deltaY * 0.01;
+          } else {
+              // マウスホイールまたは2本指スクロール
+              if (Math.abs(e.deltaY) >= 50) {
+                  // 一般的なマウスホイールのカチッという動き
+                  delta = e.deltaY > 0 ? -0.1 : 0.1;
+              } else {
+                  // トラックパッドの滑らかなスクロール
+                  delta = -e.deltaY * 0.005;
+              }
+          }
+          if (delta !== 0) setZoom(state.zoom + delta);
       }, { passive: false });
       
       window.addEventListener('keydown', (e) => {
@@ -903,9 +960,7 @@
 
       let clickedEdge = null;
       for (const edge of state.edges) {
-        const from = state.nodes.find(n => n.id === edge.from);
-        const to = state.nodes.find(n => n.id === edge.to);
-        if (from && to && getDistToSegment(x, y, from.x, from.y, to.x, to.y) < 10 / state.zoom) { clickedEdge = edge; break; }
+        if (getDistToEdge(x, y, edge) < 10 / state.zoom) { clickedEdge = edge; break; }
       }
 
       if (clickedEdge) { state.selectedGroup = []; selectEdge(clickedEdge); } 
@@ -932,12 +987,11 @@
       if (state.isDraggingEdgeHandle && state.draggedEdgeHandleEdge) { render(); return; }
       
       if (state.isDraggingLabel && state.draggedLabelEdge) {
-        const from = state.nodes.find(n => n.id === state.draggedLabelEdge.from);
-        const to = state.nodes.find(n => n.id === state.draggedLabelEdge.to);
-        if (from && to) {
-          const dx = to.x - from.x; const dy = to.y - from.y; const lenSq = dx * dx + dy * dy;
+        const curve = getEdgeCurve(state.draggedLabelEdge);
+        if (curve) {
+          const dx = curve.endX - curve.startX; const dy = curve.endY - curve.startY; const lenSq = dx * dx + dy * dy;
           if (lenSq > 0) {
-            let t = ((x - from.x) * dx + (y - from.y) * dy) / lenSq;
+            let t = ((x - curve.startX) * dx + (y - curve.startY) * dy) / lenSq;
             state.draggedLabelEdge.labelPos = Math.max(0.1, Math.min(0.9, t));
           }
         }
@@ -953,10 +1007,7 @@
         }
         const hoverNode = state.nodes.some(n => isMouseOnNode(x, y, n));
         const hoverLabel = state.edges.some(e => { const r = getLabelRect(e); return r && x >= r.x && x <= r.x + r.w && y >= r.y && y <= r.y + r.h; });
-        const hoverEdge = state.edges.some(e => {
-          const from = state.nodes.find(n => n.id === e.from); const to = state.nodes.find(n => n.id === e.to);
-          return from && to && getDistToSegment(x, y, from.x, from.y, to.x, to.y) < 10/state.zoom;
-        });
+        const hoverEdge = state.edges.some(e => getDistToEdge(x, y, e) < 10/state.zoom);
         
         if (hoverHandle) canvas.style.cursor = 'grab';
         else if (hoverNode || hoverLabel || hoverEdge) canvas.style.cursor = 'pointer';
@@ -1063,8 +1114,7 @@
 
       let clickedEdge = null;
       for (const edge of state.edges) {
-        const from = state.nodes.find(n => n.id === edge.from); const to = state.nodes.find(n => n.id === edge.to);
-        if (from && to && getDistToSegment(x, y, from.x, from.y, to.x, to.y) < 10/state.zoom) { clickedEdge = edge; break; }
+        if (getDistToEdge(x, y, edge) < 10/state.zoom) { clickedEdge = edge; break; }
       }
       if (clickedEdge) { state.selectedGroup = []; selectEdge(clickedEdge); startInlineEditing(clickedEdge, 'edge'); return; }
 
@@ -1177,8 +1227,8 @@
     }
 
     function drawEdge(edge) {
-      const from = state.nodes.find(n => n.id === edge.from); const to = state.nodes.find(n => n.id === edge.to);
-      if (!from || !to) return;
+      const curve = getEdgeCurve(edge);
+      if (!curve) return;
 
       ctx.save();
       const isSelected = state.selectedEdge === edge; const isDraggedLabel = state.draggedLabelEdge === edge;
@@ -1188,20 +1238,30 @@
       let edgeColor = getColor('edgeLine');
       if (isSelected) edgeColor = '#3b82f6'; else if (edge.useCustomColor && edge.customColor) edgeColor = hexToRgba(edge.customColor, 0.9);
 
-      const originalAngle = Math.atan2(to.y - from.y, to.x - from.x);
-      const fromPos = getNodeIntersection(from, originalAngle); let visualStartX = fromPos.x; let visualStartY = fromPos.y;
-      const toPos = getNodeIntersection(to, originalAngle + Math.PI); let visualEndX = toPos.x; let visualEndY = toPos.y;
-      let arrowAngle = originalAngle;
+      let visualStartX = curve.startX, visualStartY = curve.startY;
+      let visualEndX = curve.endX, visualEndY = curve.endY;
+      let arrowAngle = curve.arrowAngle;
 
+      ctx.beginPath();
       if (isHandleDragging) {
-        if (state.draggedEdgeHandleType === 'from') { visualStartX = state.mouseX; visualStartY = state.mouseY; } 
-        else { visualEndX = state.mouseX; visualEndY = state.mouseY; arrowAngle = Math.atan2(visualEndY - from.y, visualEndX - from.x); }
+        if (state.draggedEdgeHandleType === 'from') {
+          ctx.moveTo(state.mouseX, state.mouseY); ctx.lineTo(curve.endX, curve.endY);
+          arrowAngle = Math.atan2(curve.endY - state.mouseY, curve.endX - state.mouseX);
+          visualStartX = state.mouseX; visualStartY = state.mouseY;
+        } else {
+          ctx.moveTo(curve.startX, curve.startY); ctx.lineTo(state.mouseX, state.mouseY);
+          arrowAngle = Math.atan2(state.mouseY - curve.startY, state.mouseX - curve.startX);
+          visualEndX = state.mouseX; visualEndY = state.mouseY;
+        }
+        ctx.strokeStyle = edgeColor; ctx.lineWidth = isSelected ? 3 : 2;
+        ctx.setLineDash([5, 5]); ctx.stroke(); ctx.setLineDash([]);
+      } else {
+        ctx.moveTo(curve.startX, curve.startY);
+        if (curve.isCurved) { ctx.quadraticCurveTo(curve.cpX, curve.cpY, curve.endX, curve.endY); } 
+        else { ctx.lineTo(curve.endX, curve.endY); }
+        ctx.strokeStyle = edgeColor; ctx.lineWidth = isSelected ? 3 : 2;
+        ctx.stroke();
       }
-
-      ctx.beginPath(); ctx.moveTo(visualStartX, visualStartY); ctx.lineTo(visualEndX, visualEndY);
-      ctx.strokeStyle = edgeColor; ctx.lineWidth = isSelected ? 3 : 2;
-      if (isHandleDragging) ctx.setLineDash([5, 5]); ctx.stroke();
-      if (isHandleDragging) ctx.setLineDash([]);
 
       ctx.beginPath(); ctx.moveTo(visualEndX, visualEndY);
       ctx.lineTo(visualEndX - 10 * Math.cos(arrowAngle - Math.PI/6), visualEndY - 10 * Math.sin(arrowAngle - Math.PI/6));
@@ -1212,10 +1272,10 @@
         const rect = getLabelRect(edge);
         if (rect) {
           let isGlowing = false; const pos = edge.labelPos !== undefined ? edge.labelPos : 0.5;
-          const edgeLen = Math.max(Math.hypot(to.x - from.x, to.y - from.y), 1);
+          const hitRange = 30 / curve.len;
           for (const sig of state.signals) {
             if (sig.fromId === edge.from && sig.toId === edge.to) {
-              const hitRange = 30 / edgeLen; if (Math.abs(sig.progress - pos) < hitRange) { isGlowing = true; break; }
+              if (Math.abs(sig.progress - pos) < hitRange) { isGlowing = true; break; }
             }
           }
           ctx.fillStyle = isGlowing ? (state.theme === 'dark' ? '#1e293b' : '#eff6ff') : getColor('edgeLabelBg');
@@ -1334,19 +1394,24 @@
 
       if (state.enableGlow) { ctx.shadowBlur = 15; ctx.shadowColor = '#3b82f6'; }
       ctx.fillStyle = (state.theme === 'dark') ? '#eff6ff' : '#3b82f6';
+      
       state.signals.forEach(sig => {
-        const from = state.nodes.find(n => n.id === sig.fromId); const to = state.nodes.find(n => n.id === sig.toId);
-        if (from && to) {
-          const currentX = from.x + (to.x - from.x) * sig.progress; const currentY = from.y + (to.y - from.y) * sig.progress;
-          ctx.beginPath(); ctx.arc(currentX, currentY, 5, 0, Math.PI * 2); ctx.fill();
-        }
+        const edge = state.edges.find(e => e.from === sig.fromId && e.to === sig.toId);
+        if (!edge) return;
+        const curve = getEdgeCurve(edge);
+        if (!curve) return;
+        
+        const t = sig.progress; const mt = 1 - t;
+        const currentX = curve.isCurved ? (mt * mt * curve.startX + 2 * mt * t * curve.cpX + t * t * curve.endX) : (curve.startX + (curve.endX - curve.startX) * t);
+        const currentY = curve.isCurved ? (mt * mt * curve.startY + 2 * mt * t * curve.cpY + t * t * curve.endY) : (curve.startY + (curve.endY - curve.startY) * t);
+        
+        ctx.beginPath(); ctx.arc(currentX, currentY, 5, 0, Math.PI * 2); ctx.fill();
       });
       ctx.shadowBlur = 0;
       
       state.nodes.forEach(node => drawNode(node));
       ctx.restore();
 
-      // UIバグ解消：初期化ではなく、位置の再計算のみを行う
       if(state.editingTarget && state.editingType) {
          updateInlineEditorPosition();
       }
@@ -1377,31 +1442,20 @@
         try {
           const contents = JSON.parse(e.target.result);
           if (contents.nodes && contents.edges) {
-            
-            // 安全な自動型変換（マイグレーションエンジン）
             state.nodes = contents.nodes.map(n => ({ 
               id: String(n.id || 'node_' + Date.now() + Math.random()), 
-              x: Number(n.x) || 0, 
-              y: Number(n.y) || 0, 
+              x: Number(n.x) || 0, y: Number(n.y) || 0, 
               name: String(n.name !== undefined ? n.name : (n.text !== undefined ? n.text : '')), 
-              shape: String(n.shape || 'circle'), 
-              scale: Number(n.scale !== undefined ? n.scale : 1.0),
-              isGoal: Boolean(n.isGoal), 
-              errorCount: 0, 
-              successCount: 0,
-              useCustomColor: Boolean(n.useCustomColor), 
-              customColor: String(n.customColor || '#ef4444')
+              shape: String(n.shape || 'circle'), scale: Number(n.scale !== undefined ? n.scale : 1.0),
+              isGoal: Boolean(n.isGoal), errorCount: 0, successCount: 0,
+              useCustomColor: Boolean(n.useCustomColor), customColor: String(n.customColor || '#ef4444')
             }));
 
             state.edges = contents.edges.map(e => ({ 
-              from: String(e.from), 
-              to: String(e.to), 
-              label: String(e.label !== undefined ? e.label : ''), 
-              labelPos: Number(e.labelPos !== undefined ? e.labelPos : 0.5),
-              useCustomColor: Boolean(e.useCustomColor), 
-              customColor: String(e.customColor || '#ef4444'),
-              speed: Number(e.speed !== undefined ? e.speed : 1.0), 
-              volume: Number(e.volume !== undefined ? e.volume : 1)
+              from: String(e.from), to: String(e.to), 
+              label: String(e.label !== undefined ? e.label : ''), labelPos: Number(e.labelPos !== undefined ? e.labelPos : 0.5),
+              useCustomColor: Boolean(e.useCustomColor), customColor: String(e.customColor || '#ef4444'),
+              speed: Number(e.speed !== undefined ? e.speed : 1.0), volume: Number(e.volume !== undefined ? e.volume : 1)
             }));
 
             const ds = { spawnRate: 60, simulationSpeed: 1.0, enableSnap: true, showCountBadge: true, theme: 'dark', enableGlow: true, bgDragMode: 'pan' };
@@ -1423,12 +1477,9 @@
             const radioBg = document.querySelector(`input[name="bg-drag-mode"][value="${state.bgDragMode}"]`);
             if (radioBg) radioBg.checked = true;
             
-            // 操作状態の完全リセット
             state.isDragging = false; state.draggedNode = null; state.isDraggingLabel = false; state.draggedLabelEdge = null; state.isConnecting = false; state.connectFromNode = null; state.isBoxSelecting = false; state.selectedGroup = [];
             
-            updateTheme();
-            state.signals = []; clearSelection();
-            state.panX = 0; state.panY = 0; setZoom(1.0);
+            updateTheme(); state.signals = []; clearSelection(); state.panX = 0; state.panY = 0; setZoom(1.0);
           }
         } catch (err) { alert("ファイルの読み込みに失敗しました。正しいデータ形式か確認してください。"); }
       };
@@ -1460,13 +1511,6 @@
       };
       state.mediaRecorder.start(); state.isRecording = true;
       ui.btnRecord.textContent = '⏹ 録画停止'; ui.btnRecord.classList.replace('btn-secondary', 'btn-danger');
-    }
-
-    function stopRecording() {
-      if(state.mediaRecorder && state.mediaRecorder.state !== 'inactive') {
-        state.mediaRecorder.stop(); state.isRecording = false;
-        ui.btnRecord.textContent = '🎥 録画開始'; ui.btnRecord.classList.replace('btn-danger', 'btn-secondary');
-      }
     }
 
     function loadSampleData() {
