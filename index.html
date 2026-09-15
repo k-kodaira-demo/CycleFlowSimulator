@@ -2,7 +2,6 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <!-- ブラウザのネイティブズームを無効化するメタタグ -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Cycle Flow Simulator</title>
   <script src="https://cdn.tailwindcss.com"></script>
@@ -46,7 +45,7 @@
       color: var(--text-main);
       font-family: 'Inter', sans-serif;
       overflow: hidden;
-      overscroll-behavior: none; /* スワイプでの戻る/進むナビゲーションを防止 */
+      overscroll-behavior: none; 
       display: flex;
       width: 100vw;
       height: 100vh;
@@ -56,7 +55,7 @@
     #sidebar {
       width: 320px;
       min-width: 320px;
-      flex-shrink: 0; /* 画面が狭くなってもサイドバーを潰さない（消滅防止） */
+      flex-shrink: 0; 
       background-color: var(--panel-bg);
       border-right: 1px solid var(--border-color);
       display: flex;
@@ -71,176 +70,49 @@
     #sidebar::-webkit-scrollbar-track { background: var(--panel-bg); }
     #sidebar::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 3px; }
 
-    .panel-section {
-      padding: 16px 20px;
-      border-bottom: 1px solid var(--border-color);
-    }
+    .panel-section { padding: 16px 20px; border-bottom: 1px solid var(--border-color); }
+    .panel-title { font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); margin-bottom: 15px; font-weight: 600; }
 
-    .panel-title {
-      font-size: 0.85rem;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      color: var(--text-muted);
-      margin-bottom: 15px;
-      font-weight: 600;
-    }
-
-    .btn {
-      width: 100%;
-      padding: 10px;
-      border-radius: 6px;
-      border: none;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-    }
-
+    .btn { width: 100%; padding: 10px; border-radius: 6px; border: none; font-weight: 600; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; }
     .btn-primary { background-color: var(--accent); color: white; }
     .btn-primary:hover { background-color: var(--accent-hover); }
-
-    .btn-danger {
-      background-color: rgba(239, 68, 68, 0.1);
-      color: var(--danger);
-      border: 1px solid var(--danger);
-    }
+    .btn-danger { background-color: rgba(239, 68, 68, 0.1); color: var(--danger); border: 1px solid var(--danger); }
     .btn-danger:hover { background-color: var(--danger); color: white; }
-
-    .btn-secondary {
-      background-color: transparent;
-      color: var(--text-main);
-      border: 1px solid var(--border-color);
-    }
+    .btn-secondary { background-color: transparent; color: var(--text-main); border: 1px solid var(--border-color); }
     .btn-secondary:hover { background-color: var(--border-color); }
 
     .form-group { margin-bottom: 15px; }
-    .form-group label {
-      display: block;
-      font-size: 0.85rem;
-      margin-bottom: 5px;
-      color: var(--text-muted);
-    }
-    .form-group input[type="text"],
-    .form-group select {
-      width: 100%;
-      padding: 8px 12px;
-      background-color: var(--input-bg);
-      border: 1px solid var(--border-color);
-      border-radius: 4px;
-      color: var(--text-main);
-      font-size: 0.9rem;
-      outline: none;
-      transition: background-color 0.3s, color 0.3s, border-color 0.3s;
-    }
-    .form-group input[type="text"]:focus,
-    .form-group select:focus { border-color: var(--accent); }
+    .form-group label { display: block; font-size: 0.85rem; margin-bottom: 5px; color: var(--text-muted); }
+    .form-group input[type="text"], .form-group select { width: 100%; padding: 8px 12px; background-color: var(--input-bg); border: 1px solid var(--border-color); border-radius: 4px; color: var(--text-main); font-size: 0.9rem; outline: none; transition: background-color 0.3s, color 0.3s, border-color 0.3s; }
+    .form-group input[type="text"]:focus, .form-group select:focus { border-color: var(--accent); }
     .form-group input[type="range"] { width: 100%; accent-color: var(--accent); }
 
-    .color-picker-group {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      background: rgba(128,128,128,0.1);
-      padding: 10px;
-      border-radius: 4px;
-      border: 1px solid var(--border-color);
-    }
-    .color-picker-group input[type="color"] {
-      width: 32px; height: 32px; padding: 0; border: none; border-radius: 4px; background: none; cursor: pointer;
-    }
+    .color-picker-group { display: flex; align-items: center; gap: 10px; background: rgba(128,128,128,0.1); padding: 10px; border-radius: 4px; border: 1px solid var(--border-color); }
+    .color-picker-group input[type="color"] { width: 32px; height: 32px; padding: 0; border: none; border-radius: 4px; background: none; cursor: pointer; }
 
     .checkbox-label { display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.9rem; }
     .checkbox-label input[type="checkbox"] { accent-color: var(--accent); width: 16px; height: 16px; }
 
-    .info-box {
-      background-color: var(--info-bg);
-      border-left: 3px solid var(--accent);
-      padding: 10px;
-      font-size: 0.8rem;
-      color: var(--info-text);
-      margin-bottom: 15px;
-      line-height: 1.5;
-      border-radius: 0 4px 4px 0;
-    }
+    .info-box { background-color: var(--info-bg); border-left: 3px solid var(--accent); padding: 10px; font-size: 0.8rem; color: var(--info-text); margin-bottom: 15px; line-height: 1.5; border-radius: 0 4px 4px 0; }
 
-    .radio-group label {
-      display: flex; align-items: center; gap: 5px; cursor: pointer; font-size: 0.85rem; color: var(--text-main);
-    }
+    .radio-group label { display: flex; align-items: center; gap: 5px; cursor: pointer; font-size: 0.85rem; color: var(--text-main); }
     .radio-group input[type="radio"] { accent-color: var(--accent); width: 14px; height: 14px; margin: 0; }
 
     .hidden { display: none !important; }
 
-    #canvas-container {
-      flex-grow: 1;
-      position: relative;
-      background-color: var(--bg-color);
-      overflow: hidden;
-      touch-action: none; /* キャンバス上でのブラウザネイティブのズームやパンを完全無効化 */
-    }
-
-    canvas {
-      display: block;
-      width: 100%;
-      height: 100%;
-    }
+    #canvas-container { flex-grow: 1; position: relative; background-color: var(--bg-color); overflow: hidden; touch-action: none; }
+    canvas { display: block; width: 100%; height: 100%; }
 
     #inline-editor {
-      position: absolute;
-      background-color: var(--panel-bg);
-      color: var(--text-main);
-      border: 2px solid var(--accent);
-      border-radius: 4px;
-      padding: 5px;
-      font-family: 'Inter', sans-serif;
-      font-size: 13px;
-      font-weight: 600;
-      text-align: center;
-      outline: none;
-      z-index: 100;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-      resize: none;
-      overflow: hidden;
-      white-space: pre-wrap;
-      word-wrap: break-word;
-      line-height: 1.2;
+      position: absolute; background-color: var(--panel-bg); color: var(--text-main); border: 2px solid var(--accent);
+      border-radius: 4px; padding: 5px; font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600; text-align: center;
+      outline: none; z-index: 100; box-shadow: 0 4px 15px rgba(0,0,0,0.2); resize: none; overflow: hidden; white-space: pre-wrap; word-wrap: break-word; line-height: 1.2;
     }
 
-    #zoom-controls {
-      position: absolute;
-      bottom: 20px;
-      right: 20px;
-      background: var(--panel-bg);
-      border: 1px solid var(--border-color);
-      border-radius: 8px;
-      display: flex;
-      overflow: hidden;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-      z-index: 50;
-    }
-    #zoom-controls button {
-      background: none;
-      border: none;
-      padding: 8px 12px;
-      color: var(--text-main);
-      cursor: pointer;
-      font-weight: bold;
-      transition: background-color 0.2s;
-    }
+    #zoom-controls { position: absolute; bottom: 20px; right: 20px; background: var(--panel-bg); border: 1px solid var(--border-color); border-radius: 8px; display: flex; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.2); z-index: 50; }
+    #zoom-controls button { background: none; border: none; padding: 8px 12px; color: var(--text-main); cursor: pointer; font-weight: bold; transition: background-color 0.2s; }
     #zoom-controls button:hover { background-color: var(--border-color); }
-    #zoom-controls span {
-      padding: 8px 12px;
-      font-size: 0.85rem;
-      color: var(--text-main);
-      display: flex;
-      align-items: center;
-      border-left: 1px solid var(--border-color);
-      border-right: 1px solid var(--border-color);
-      min-width: 60px;
-      justify-content: center;
-    }
+    #zoom-controls span { padding: 8px 12px; font-size: 0.85rem; color: var(--text-main); display: flex; align-items: center; border-left: 1px solid var(--border-color); border-right: 1px solid var(--border-color); min-width: 60px; justify-content: center; }
   </style>
 </head>
 <body>
@@ -272,13 +144,11 @@
         </div>
       </div>
 
-      <button id="btn-toggle-sim" class="btn btn-primary mb-3 mt-2">
-        ▶ シミュレーション開始
-      </button>
+      <button id="btn-toggle-sim" class="btn btn-primary mb-3 mt-2">▶ シミュレーション開始</button>
 
       <div class="form-group">
-        <label>発生頻度: <span id="val-spawn">中</span></label>
-        <input type="range" id="slider-spawn" min="10" max="120" value="60">
+        <label>発生頻度: <span id="val-spawn" style="font-weight:bold; color:var(--accent);">中</span></label>
+        <input type="range" id="slider-spawn" min="0" max="100" value="50">
       </div>
       <div class="form-group">
         <label>基本速度: <span id="val-speed">1.0x</span></label>
@@ -416,7 +286,8 @@
       signals: [],
       isRunning: false,
       simulationSpeed: 1.0,
-      spawnRate: 60,
+      spawnMode: 'continuous', // 'single' または 'continuous'
+      spawnRate: 60, // 連続モード時のフレーム間隔
       frameCount: 0,
       
       selectedNode: null,
@@ -441,35 +312,15 @@
       bgDragMode: 'pan', 
       
       isBoxSelecting: false,
-      boxStartX: 0,
-      boxStartY: 0,
-      boxCurrentX: 0,
-      boxCurrentY: 0,
+      boxStartX: 0, boxStartY: 0, boxCurrentX: 0, boxCurrentY: 0,
 
-      panX: 0,
-      panY: 0,
-      zoom: 1.0,
-      isPanning: false,
-      panStartX: 0,
-      panStartY: 0,
-
-      mouseX: 0,
-      mouseY: 0,
+      panX: 0, panY: 0, zoom: 1.0, isPanning: false, panStartX: 0, panStartY: 0,
+      mouseX: 0, mouseY: 0,
       
-      theme: 'dark',
-      enableGlow: true,
-      enableSnap: true,
-      showCountBadge: true,
-      
-      alignGuides: [],
-      lastTime: 0,
-
-      editingTarget: null, 
-      editingType: null,
-
-      isRecording: false,
-      mediaRecorder: null,
-      recordedChunks: []
+      theme: 'dark', enableGlow: true, enableSnap: true, showCountBadge: true,
+      alignGuides: [], lastTime: 0,
+      editingTarget: null, editingType: null,
+      isRecording: false, mediaRecorder: null, recordedChunks: []
     };
 
     const THEME_COLORS = {
@@ -543,9 +394,7 @@
     }
 
     function createBackgroundPattern() {
-      const pCanvas = document.createElement('canvas');
-      pCanvas.width = 40; pCanvas.height = 40;
-      const pCtx = pCanvas.getContext('2d');
+      const pCanvas = document.createElement('canvas'); pCanvas.width = 40; pCanvas.height = 40; const pCtx = pCanvas.getContext('2d');
       pCtx.fillStyle = getColor('bg'); pCtx.fillRect(0, 0, 40, 40);
       pCtx.fillStyle = state.theme === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)';
       pCtx.beginPath(); pCtx.arc(0, 0, 1.5, 0, Math.PI * 2); pCtx.fill();
@@ -553,291 +402,190 @@
       bgPattern = ctx.createPattern(pCanvas, 'repeat');
     }
 
-    function getScreenPos(e) {
-      const rect = canvas.getBoundingClientRect();
-      return { x: e.clientX - rect.left, y: e.clientY - rect.top };
-    }
-
-    function getWorldPos(screenX, screenY) {
-      return { x: (screenX - state.panX) / state.zoom, y: (screenY - state.panY) / state.zoom };
-    }
-
-    function getScreenFromWorld(worldX, worldY) {
-      return { x: (worldX * state.zoom) + state.panX, y: (worldY * state.zoom) + state.panY };
-    }
+    function getScreenPos(e) { const rect = canvas.getBoundingClientRect(); return { x: e.clientX - rect.left, y: e.clientY - rect.top }; }
+    function getWorldPos(screenX, screenY) { return { x: (screenX - state.panX) / state.zoom, y: (screenY - state.panY) / state.zoom }; }
+    function getScreenFromWorld(worldX, worldY) { return { x: (worldX * state.zoom) + state.panX, y: (worldY * state.zoom) + state.panY }; }
 
     function measureMultilineText(ctx, text, fontSize) {
-      const safeText = String(text || '');
-      const lines = safeText.split('\n');
-      let maxWidth = 0;
-      for (let line of lines) {
-        const w = ctx.measureText(line).width;
-        if (w > maxWidth) maxWidth = w;
-      }
+      const safeText = String(text || ''); const lines = safeText.split('\n'); let maxWidth = 0;
+      for (let line of lines) { const w = ctx.measureText(line).width; if (w > maxWidth) maxWidth = w; }
       return { width: maxWidth, height: lines.length * fontSize };
     }
 
     function drawMultilineText(ctx, text, x, y, fontSize, lineHeightMult = 1.2) {
-      const safeText = String(text || '');
-      const lines = safeText.split('\n');
-      const lineHeight = fontSize * lineHeightMult;
-      const totalHeight = lines.length * lineHeight;
-      let currentY = y - totalHeight / 2 + lineHeight / 2;
+      const safeText = String(text || ''); const lines = safeText.split('\n'); const lineHeight = fontSize * lineHeightMult;
+      const totalHeight = lines.length * lineHeight; let currentY = y - totalHeight / 2 + lineHeight / 2;
       for (let line of lines) { ctx.fillText(line, x, currentY); currentY += lineHeight; }
     }
 
     function getNodeSize(node) {
       const scale = node.scale !== undefined ? Number(node.scale) : 1.0;
-      ctx.font = '600 13px Inter, sans-serif';
-      const textInfo = measureMultilineText(ctx, String(node.name || ''), 13);
+      ctx.font = '600 13px Inter, sans-serif'; const textInfo = measureMultilineText(ctx, String(node.name || ''), 13);
       let width, height;
-      
-      if (node.shape === 'rect') {
-        width = Math.max(120, textInfo.width + 40) * scale;
-        height = Math.max(46, textInfo.height + 20) * scale;
-      } else if (node.shape === 'diamond') {
-        width = Math.max(140, textInfo.width + 60) * scale;
-        height = Math.max(80, textInfo.height + 40) * scale;
-      } else { // circle
-        const r = Math.max(35, (Math.max(textInfo.width, textInfo.height) + 20) / 2) * scale;
-        width = r * 2; height = r * 2;
-      }
+      if (node.shape === 'rect') { width = Math.max(120, textInfo.width + 40) * scale; height = Math.max(46, textInfo.height + 20) * scale; } 
+      else if (node.shape === 'diamond') { width = Math.max(140, textInfo.width + 60) * scale; height = Math.max(80, textInfo.height + 40) * scale; } 
+      else { const r = Math.max(35, (Math.max(textInfo.width, textInfo.height) + 20) / 2) * scale; width = r * 2; height = r * 2; }
       return { width, height, scale };
     }
 
     function isMouseOnNode(worldX, worldY, node) {
-      const size = getNodeSize(node);
-      const dx = Math.abs(worldX - node.x);
-      const dy = Math.abs(worldY - node.y);
-      
-      if (node.shape === 'rect') {
-        return dx <= size.width/2 && dy <= size.height/2;
-      } else if (node.shape === 'diamond') {
-        return (dx / (size.width/2) + dy / (size.height/2)) <= 1;
-      } else { // circle
-        return (dx*dx + dy*dy) <= (size.width/2)*(size.width/2);
-      }
+      const size = getNodeSize(node); const dx = Math.abs(worldX - node.x); const dy = Math.abs(worldY - node.y);
+      if (node.shape === 'rect') return dx <= size.width/2 && dy <= size.height/2;
+      else if (node.shape === 'diamond') return (dx / (size.width/2) + dy / (size.height/2)) <= 1;
+      else return (dx*dx + dy*dy) <= (size.width/2)*(size.width/2);
     }
 
     function getNodeIntersection(node, angle) {
-      const size = getNodeSize(node);
-      const w = size.width / 2; const h = size.height / 2;
-      
+      const size = getNodeSize(node); const w = size.width / 2; const h = size.height / 2;
       if (node.shape === 'rect') {
           const cosA = Math.abs(Math.cos(angle)); const sinA = Math.abs(Math.sin(angle));
-          const dist = Math.min(w * sinA > h * cosA ? h / sinA : w / cosA);
-          return { x: node.x + dist * Math.cos(angle), y: node.y + dist * Math.sin(angle) };
+          const dist = Math.min(w * sinA > h * cosA ? h / sinA : w / cosA); return { x: node.x + dist * Math.cos(angle), y: node.y + dist * Math.sin(angle) };
       } else if (node.shape === 'diamond') {
           const cosA = Math.abs(Math.cos(angle)); const sinA = Math.abs(Math.sin(angle));
-          const dist = (w * h) / (h * cosA + w * sinA);
-          return { x: node.x + dist * Math.cos(angle), y: node.y + dist * Math.sin(angle) };
-      } else {
-          return { x: node.x + w * Math.cos(angle), y: node.y + h * Math.sin(angle) };
-      }
+          const dist = (w * h) / (h * cosA + w * sinA); return { x: node.x + dist * Math.cos(angle), y: node.y + dist * Math.sin(angle) };
+      } else { return { x: node.x + w * Math.cos(angle), y: node.y + h * Math.sin(angle) }; }
     }
 
     function getEdgeCurve(edge) {
-      const from = state.nodes.find(n => n.id === edge.from);
-      const to = state.nodes.find(n => n.id === edge.to);
+      const from = state.nodes.find(n => n.id === edge.from); const to = state.nodes.find(n => n.id === edge.to);
       if (!from || !to) return null;
 
       const isCurved = state.edges.some(e => e !== edge && e.from === edge.to && e.to === edge.from);
-      
-      let startX, startY, endX, endY, cpX, cpY, arrowAngle;
-      const dx = to.x - from.x; const dy = to.y - from.y;
-      const len = Math.hypot(dx, dy) || 1;
+      let startX, startY, endX, endY, cpX, cpY, arrowAngle; const dx = to.x - from.x; const dy = to.y - from.y; const len = Math.hypot(dx, dy) || 1;
       
       if (isCurved) {
-        const midX = from.x + dx / 2; const midY = from.y + dy / 2;
-        const nx = -dy / len; const ny = dx / len;
-        const offset = 35;
+        const midX = from.x + dx / 2; const midY = from.y + dy / 2; const nx = -dy / len; const ny = dx / len; const offset = 35;
         cpX = midX + nx * offset; cpY = midY + ny * offset;
-        
-        const angleFrom = Math.atan2(cpY - from.y, cpX - from.x);
-        const posFrom = getNodeIntersection(from, angleFrom);
-        startX = posFrom.x; startY = posFrom.y;
-        
-        const angleToReverse = Math.atan2(cpY - to.y, cpX - to.x);
-        const posTo = getNodeIntersection(to, angleToReverse);
-        endX = posTo.x; endY = posTo.y;
-        
+        const angleFrom = Math.atan2(cpY - from.y, cpX - from.x); const posFrom = getNodeIntersection(from, angleFrom); startX = posFrom.x; startY = posFrom.y;
+        const angleToReverse = Math.atan2(cpY - to.y, cpX - to.x); const posTo = getNodeIntersection(to, angleToReverse); endX = posTo.x; endY = posTo.y;
         arrowAngle = Math.atan2(endY - cpY, endX - cpX);
       } else {
         const originalAngle = Math.atan2(dy, dx);
-        const posFrom = getNodeIntersection(from, originalAngle);
-        startX = posFrom.x; startY = posFrom.y;
-        const posTo = getNodeIntersection(to, originalAngle + Math.PI);
-        endX = posTo.x; endY = posTo.y;
-        cpX = (startX + endX) / 2; cpY = (startY + endY) / 2;
-        arrowAngle = originalAngle;
+        const posFrom = getNodeIntersection(from, originalAngle); startX = posFrom.x; startY = posFrom.y;
+        const posTo = getNodeIntersection(to, originalAngle + Math.PI); endX = posTo.x; endY = posTo.y;
+        cpX = (startX + endX) / 2; cpY = (startY + endY) / 2; arrowAngle = originalAngle;
       }
       return { isCurved, startX, startY, cpX, cpY, endX, endY, arrowAngle, len };
     }
 
     function getDistToSegment(x, y, x1, y1, x2, y2) {
-      const A = x - x1; const B = y - y1; const C = x2 - x1; const D = y2 - y1;
-      const dot = A * C + B * D; const len_sq = C * C + D * D;
-      let param = -1; if (len_sq != 0) param = dot / len_sq;
-      let xx, yy;
+      const A = x - x1; const B = y - y1; const C = x2 - x1; const D = y2 - y1; const dot = A * C + B * D; const len_sq = C * C + D * D;
+      let param = -1; if (len_sq != 0) param = dot / len_sq; let xx, yy;
       if (param < 0) { xx = x1; yy = y1; } else if (param > 1) { xx = x2; yy = y2; } else { xx = x1 + param * C; yy = y1 + param * D; }
-      const dx = x - xx; const dy = y - yy;
-      return Math.sqrt(dx * dx + dy * dy);
+      const dx = x - xx; const dy = y - yy; return Math.sqrt(dx * dx + dy * dy);
     }
 
     function getDistToEdge(x, y, edge) {
-      const curve = getEdgeCurve(edge);
-      if (!curve) return Infinity;
-      if (!curve.isCurved) {
-        return getDistToSegment(x, y, curve.startX, curve.startY, curve.endX, curve.endY);
-      } else {
-        let minDist = Infinity;
-        let lastX = curve.startX, lastY = curve.startY;
+      const curve = getEdgeCurve(edge); if (!curve) return Infinity;
+      if (!curve.isCurved) return getDistToSegment(x, y, curve.startX, curve.startY, curve.endX, curve.endY);
+      else {
+        let minDist = Infinity; let lastX = curve.startX, lastY = curve.startY;
         for (let i = 1; i <= 10; i++) {
           const t = i / 10; const mt = 1 - t;
-          const px = mt * mt * curve.startX + 2 * mt * t * curve.cpX + t * t * curve.endX;
-          const py = mt * mt * curve.startY + 2 * mt * t * curve.cpY + t * t * curve.endY;
-          const d = getDistToSegment(x, y, lastX, lastY, px, py);
-          if (d < minDist) minDist = d;
-          lastX = px; lastY = py;
+          const px = mt * mt * curve.startX + 2 * mt * t * curve.cpX + t * t * curve.endX; const py = mt * mt * curve.startY + 2 * mt * t * curve.cpY + t * t * curve.endY;
+          const d = getDistToSegment(x, y, lastX, lastY, px, py); if (d < minDist) minDist = d; lastX = px; lastY = py;
         }
         return minDist;
       }
     }
 
-    function getEdgeHandles(edge) {
-      const curve = getEdgeCurve(edge);
-      if (!curve) return null;
-      return { fromHandle: { x: curve.startX, y: curve.startY }, toHandle: { x: curve.endX, y: curve.endY } };
-    }
+    function getEdgeHandles(edge) { const curve = getEdgeCurve(edge); if (!curve) return null; return { fromHandle: { x: curve.startX, y: curve.startY }, toHandle: { x: curve.endX, y: curve.endY } }; }
 
     function getLabelRect(edge) {
       if (!edge.label || String(edge.label).trim() === "") return null;
-      const curve = getEdgeCurve(edge);
-      if (!curve) return null;
-      
-      const t = edge.labelPos !== undefined ? edge.labelPos : 0.5;
-      let midX, midY;
-      
+      const curve = getEdgeCurve(edge); if (!curve) return null;
+      const t = edge.labelPos !== undefined ? edge.labelPos : 0.5; let midX, midY;
       if (curve.isCurved) {
-        const mt = 1 - t;
-        midX = mt * mt * curve.startX + 2 * mt * t * curve.cpX + t * t * curve.endX;
-        midY = mt * mt * curve.startY + 2 * mt * t * curve.cpY + t * t * curve.endY;
-      } else {
-        midX = curve.startX + (curve.endX - curve.startX) * t;
-        midY = curve.startY + (curve.endY - curve.startY) * t;
-      }
-      
-      ctx.font = '12px Inter, sans-serif';
-      const textInfo = measureMultilineText(ctx, String(edge.label), 12);
+        const mt = 1 - t; midX = mt * mt * curve.startX + 2 * mt * t * curve.cpX + t * t * curve.endX; midY = mt * mt * curve.startY + 2 * mt * t * curve.cpY + t * t * curve.endY;
+      } else { midX = curve.startX + (curve.endX - curve.startX) * t; midY = curve.startY + (curve.endY - curve.startY) * t; }
+      ctx.font = '12px Inter, sans-serif'; const textInfo = measureMultilineText(ctx, String(edge.label), 12);
       return { x: midX - textInfo.width/2 - 8, y: midY - textInfo.height/2 - 8, w: textInfo.width + 16, h: textInfo.height + 16, midX, midY };
     }
 
     function updateInlineEditorPosition() {
       if (!state.editingTarget || !state.editingType) return;
-      const target = state.editingTarget;
-      const editor = ui.inlineEditor;
+      const target = state.editingTarget; const editor = ui.inlineEditor;
       let w = 100, h = 30, worldPx = 0, worldPy = 0;
 
       if (state.editingType === 'node') {
-        const size = getNodeSize(target);
-        w = size.width - 10; h = size.height - 10;
-        worldPx = target.x - w/2; worldPy = target.y - h/2;
+        const size = getNodeSize(target); w = size.width - 10; h = size.height - 10; worldPx = target.x - w/2; worldPy = target.y - h/2;
       } else if (state.editingType === 'edge') {
         const rect = getLabelRect(target);
-        if (rect) {
-            w = rect.w; h = rect.h; worldPx = rect.x; worldPy = rect.y;
-        } else {
+        if (rect) { w = rect.w; h = rect.h; worldPx = rect.x; worldPy = rect.y; } 
+        else {
             const curve = getEdgeCurve(target);
             if(curve) {
-              const pos = target.labelPos !== undefined ? target.labelPos : 0.5;
-              const mt = 1 - pos;
+              const pos = target.labelPos !== undefined ? target.labelPos : 0.5; const mt = 1 - pos;
               const midX = curve.isCurved ? (mt * mt * curve.startX + 2 * mt * pos * curve.cpX + pos * pos * curve.endX) : (curve.startX + (curve.endX - curve.startX) * pos);
               const midY = curve.isCurved ? (mt * mt * curve.startY + 2 * mt * pos * curve.cpY + pos * pos * curve.endY) : (curve.startY + (curve.endY - curve.startY) * pos);
               w = 120; h = 40; worldPx = midX - w/2; worldPy = midY - h/2;
             }
         }
       }
-
       const screenPos = getScreenFromWorld(worldPx, worldPy);
-      editor.style.left = `${screenPos.x}px`;
-      editor.style.top = `${screenPos.y}px`;
-      editor.style.width = `${w * state.zoom}px`;
-      editor.style.fontSize = `${13 * state.zoom}px`;
+      editor.style.left = `${screenPos.x}px`; editor.style.top = `${screenPos.y}px`;
+      editor.style.width = `${w * state.zoom}px`; editor.style.fontSize = `${13 * state.zoom}px`;
     }
 
     function startInlineEditing(target, type = 'node') {
-      state.editingTarget = target; state.editingType = type;
-      const editor = ui.inlineEditor;
-      
+      state.editingTarget = target; state.editingType = type; const editor = ui.inlineEditor;
       let text = type === 'node' ? String(target.name || '') : String(target.label || '');
       editor.value = text;
-      
-      editor.style.backgroundColor = state.theme === 'dark' ? '#1e293b' : '#ffffff';
-      editor.style.color = state.theme === 'dark' ? 'white' : 'black';
-
+      editor.style.backgroundColor = state.theme === 'dark' ? '#1e293b' : '#ffffff'; editor.style.color = state.theme === 'dark' ? 'white' : 'black';
       updateInlineEditorPosition();
-
-      editor.classList.remove('hidden'); 
-      editor.focus(); 
-      editor.select(); 
-      
-      const resizeEditor = () => {
-          editor.style.height = 'auto';
-          editor.style.height = (editor.scrollHeight) + 'px';
-      };
-      editor.oninput = resizeEditor;
-      setTimeout(resizeEditor, 10);
+      editor.classList.remove('hidden'); editor.focus(); editor.select(); 
+      const resizeEditor = () => { editor.style.height = 'auto'; editor.style.height = (editor.scrollHeight) + 'px'; };
+      editor.oninput = resizeEditor; setTimeout(resizeEditor, 10);
     }
 
     function stopInlineEditing(save = true) {
       if (!state.editingTarget) return;
       if (save) {
         const newText = ui.inlineEditor.value.trim();
-        if (state.editingType === 'node') { state.editingTarget.name = newText; } 
-        else if (state.editingType === 'edge') { state.editingTarget.label = newText; }
+        if (state.editingType === 'node') state.editingTarget.name = newText; else if (state.editingType === 'edge') state.editingTarget.label = newText;
       }
-      ui.inlineEditor.classList.add('hidden');
-      state.editingTarget = null; state.editingType = null; render();
+      ui.inlineEditor.classList.add('hidden'); state.editingTarget = null; state.editingType = null; render();
     }
 
     function setZoom(newZoom) {
-      const oldZoom = state.zoom;
-      state.zoom = Math.max(0.2, Math.min(newZoom, 3.0));
-      
+      const oldZoom = state.zoom; state.zoom = Math.max(0.2, Math.min(newZoom, 3.0));
       const screenCenterX = canvas.width / 2; const screenCenterY = canvas.height / 2;
       const worldCenterX = (screenCenterX - state.panX) / oldZoom; const worldCenterY = (screenCenterY - state.panY) / oldZoom;
-      
       state.panX = screenCenterX - worldCenterX * state.zoom; state.panY = screenCenterY - worldCenterY * state.zoom;
       ui.zoomLevel.textContent = `${Math.round(state.zoom * 100)}%`;
-      if(state.editingTarget) stopInlineEditing(true);
-      render();
+      if(state.editingTarget) stopInlineEditing(true); render();
     }
 
     function updateTheme() {
-      if (state.theme === 'light') document.documentElement.classList.add('light-mode');
-      else document.documentElement.classList.remove('light-mode');
-      createBackgroundPattern();
-      if(state.editingTarget) stopInlineEditing(true);
-      render();
+      if (state.theme === 'light') document.documentElement.classList.add('light-mode'); else document.documentElement.classList.remove('light-mode');
+      createBackgroundPattern(); if(state.editingTarget) stopInlineEditing(true); render();
+    }
+    
+    function updateSpawnSettings(val) {
+        if (val === 0) {
+            state.spawnMode = 'single';
+            ui.valSpawn.textContent = '単発 (完了待機)';
+        } else {
+            state.spawnMode = 'continuous';
+            const maxInt = 600; const minInt = 10;
+            state.spawnRate = Math.floor(minInt + (maxInt - minInt) * Math.pow((100 - val) / 99, 2));
+            if (val < 30) ui.valSpawn.textContent = '低 (数秒に1回)';
+            else if (val > 80) ui.valSpawn.textContent = '高 (激しい)';
+            else ui.valSpawn.textContent = '中';
+        }
     }
 
     function setupEventListeners() {
       ui.btnToggle.addEventListener('click', toggleSimulation);
       
-      ui.sliderSpawn.addEventListener('input', (e) => {
-        const val = parseInt(e.target.value); state.spawnRate = 130 - val;
-        ui.valSpawn.textContent = val < 40 ? '低 (ゆっくり)' : (val > 90 ? '高 (激しい)' : '中');
-      });
+      ui.sliderSpawn.addEventListener('input', (e) => { updateSpawnSettings(parseInt(e.target.value)); });
       ui.sliderSpeed.addEventListener('input', (e) => { state.simulationSpeed = parseFloat(e.target.value); ui.valSpeed.textContent = `${state.simulationSpeed.toFixed(1)}x`; });
-      
       ui.selectTheme.addEventListener('change', (e) => { state.theme = e.target.value; updateTheme(); });
       ui.checkEnableGlow.addEventListener('change', (e) => { state.enableGlow = e.target.checked; render(); });
       ui.checkSnap.addEventListener('change', (e) => { state.enableSnap = e.target.checked; });
       ui.checkShowBadge.addEventListener('change', (e) => { state.showCountBadge = e.target.checked; render(); });
       
-      document.querySelectorAll('input[name="bg-drag-mode"]').forEach(radio => {
-          radio.addEventListener('change', (e) => { state.bgDragMode = e.target.value; });
-      });
+      document.querySelectorAll('input[name="bg-drag-mode"]').forEach(radio => { radio.addEventListener('change', (e) => { state.bgDragMode = e.target.value; }); });
 
       ui.selectNodeShape.addEventListener('change', (e) => { if (state.selectedNode) { state.selectedNode.shape = e.target.value; render(); } });
       ui.sliderNodeScale.addEventListener('input', (e) => { if (state.selectedNode) { state.selectedNode.scale = parseFloat(e.target.value); ui.valNodeScale.textContent = `${state.selectedNode.scale.toFixed(1)}x`; render(); } });
@@ -869,31 +617,17 @@
       canvas.addEventListener('mouseup', handleMouseUp);
       canvas.addEventListener('dblclick', handleDoubleClick);
       
-      // トラックパッド対応の滑らかなズーム処理
       canvas.addEventListener('wheel', (e) => {
           e.preventDefault();
           let delta = 0;
-          if (e.ctrlKey) {
-              // ピンチズーム（トラックパッド）
-              delta = -e.deltaY * 0.01;
-          } else {
-              // マウスホイールまたは2本指スクロール
-              if (Math.abs(e.deltaY) >= 50) {
-                  // 一般的なマウスホイールのカチッという動き
-                  delta = e.deltaY > 0 ? -0.1 : 0.1;
-              } else {
-                  // トラックパッドの滑らかなスクロール
-                  delta = -e.deltaY * 0.005;
-              }
-          }
+          if (e.ctrlKey) delta = -e.deltaY * 0.01; 
+          else delta = Math.abs(e.deltaY) >= 50 ? (e.deltaY > 0 ? -0.1 : 0.1) : -e.deltaY * 0.005;
           if (delta !== 0) setZoom(state.zoom + delta);
       }, { passive: false });
       
       window.addEventListener('keydown', (e) => {
         if ((e.key === 'Delete' || e.key === 'Backspace') && document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') {
-          if (state.selectedGroup.length > 0) deleteSelectedGroup();
-          else if (state.selectedNode) deleteSelectedNode();
-          else if (state.selectedEdge) deleteSelectedEdge();
+          if (state.selectedGroup.length > 0) deleteSelectedGroup(); else if (state.selectedNode) deleteSelectedNode(); else if (state.selectedEdge) deleteSelectedEdge();
         }
       });
 
@@ -901,48 +635,28 @@
       ui.inlineEditor.addEventListener('dblclick', e => e.stopPropagation());
       ui.inlineEditor.addEventListener('blur', () => stopInlineEditing(true));
       ui.inlineEditor.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); ui.inlineEditor.blur(); } 
-        else if (e.key === 'Escape') { e.preventDefault(); stopInlineEditing(false); }
+        if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); ui.inlineEditor.blur(); } else if (e.key === 'Escape') { e.preventDefault(); stopInlineEditing(false); }
       });
     }
 
     function handleMouseDown(e) {
       if (state.editingTarget) stopInlineEditing(true);
       const screenPos = getScreenPos(e);
+      if (e.button === 2 || e.button === 1 || (e.button === 0 && e.spaceKey)) { state.isPanning = true; state.panStartX = screenPos.x - state.panX; state.panStartY = screenPos.y - state.panY; canvas.style.cursor = 'grabbing'; return; }
 
-      if (e.button === 2 || e.button === 1 || (e.button === 0 && e.spaceKey)) {
-        state.isPanning = true; state.panStartX = screenPos.x - state.panX; state.panStartY = screenPos.y - state.panY;
-        canvas.style.cursor = 'grabbing'; return;
-      }
-
-      const worldPos = getWorldPos(screenPos.x, screenPos.y);
-      const x = worldPos.x; const y = worldPos.y;
+      const worldPos = getWorldPos(screenPos.x, screenPos.y); const x = worldPos.x; const y = worldPos.y;
 
       if (state.selectedEdge) {
         const handles = getEdgeHandles(state.selectedEdge);
         if (handles) {
-          if (Math.hypot(x - handles.fromHandle.x, y - handles.fromHandle.y) <= 10 / state.zoom) {
-            state.isDraggingEdgeHandle = true; state.draggedEdgeHandleEdge = state.selectedEdge;
-            state.draggedEdgeHandleType = 'from'; canvas.style.cursor = 'grabbing'; return;
-          }
-          if (Math.hypot(x - handles.toHandle.x, y - handles.toHandle.y) <= 10 / state.zoom) {
-            state.isDraggingEdgeHandle = true; state.draggedEdgeHandleEdge = state.selectedEdge;
-            state.draggedEdgeHandleType = 'to'; canvas.style.cursor = 'grabbing'; return;
-          }
+          if (Math.hypot(x - handles.fromHandle.x, y - handles.fromHandle.y) <= 10 / state.zoom) { state.isDraggingEdgeHandle = true; state.draggedEdgeHandleEdge = state.selectedEdge; state.draggedEdgeHandleType = 'from'; canvas.style.cursor = 'grabbing'; return; }
+          if (Math.hypot(x - handles.toHandle.x, y - handles.toHandle.y) <= 10 / state.zoom) { state.isDraggingEdgeHandle = true; state.draggedEdgeHandleEdge = state.selectedEdge; state.draggedEdgeHandleType = 'to'; canvas.style.cursor = 'grabbing'; return; }
         }
       }
 
       let clickedLabelEdge = null;
-      for (const edge of state.edges) {
-        const rect = getLabelRect(edge);
-        if (rect && x >= rect.x && x <= rect.x + rect.w && y >= rect.y && y <= rect.y + rect.h) { clickedLabelEdge = edge; break; }
-      }
-
-      if (clickedLabelEdge) {
-        selectEdge(clickedLabelEdge);
-        state.isDraggingLabel = true; state.draggedLabelEdge = clickedLabelEdge;
-        canvas.style.cursor = 'grabbing'; return;
-      }
+      for (const edge of state.edges) { const rect = getLabelRect(edge); if (rect && x >= rect.x && x <= rect.x + rect.w && y >= rect.y && y <= rect.y + rect.h) { clickedLabelEdge = edge; break; } }
+      if (clickedLabelEdge) { selectEdge(clickedLabelEdge); state.isDraggingLabel = true; state.draggedLabelEdge = clickedLabelEdge; canvas.style.cursor = 'grabbing'; return; }
 
       let clickedNode = null;
       for (let i = state.nodes.length - 1; i >= 0; i--) { if (isMouseOnNode(x, y, state.nodes[i])) { clickedNode = state.nodes[i]; break; } }
@@ -951,27 +665,18 @@
         if (e.shiftKey) { state.isConnecting = true; state.connectFromNode = clickedNode; } 
         else {
           if(!state.selectedGroup.includes(clickedNode)) { state.selectedGroup = []; selectNode(clickedNode); }
-          state.isDragging = true; state.draggedNode = clickedNode; 
-          state.dragOffsetX = x - clickedNode.x; state.dragOffsetY = y - clickedNode.y;
-          canvas.style.cursor = 'grabbing';
+          state.isDragging = true; state.draggedNode = clickedNode; state.dragOffsetX = x - clickedNode.x; state.dragOffsetY = y - clickedNode.y; canvas.style.cursor = 'grabbing';
         }
         return;
       }
 
       let clickedEdge = null;
-      for (const edge of state.edges) {
-        if (getDistToEdge(x, y, edge) < 10 / state.zoom) { clickedEdge = edge; break; }
-      }
-
+      for (const edge of state.edges) { if (getDistToEdge(x, y, edge) < 10 / state.zoom) { clickedEdge = edge; break; } }
       if (clickedEdge) { state.selectedGroup = []; selectEdge(clickedEdge); } 
       else {
         clearSelection();
-        if (state.bgDragMode === 'pan') {
-          state.isPanning = true; state.panStartX = screenPos.x - state.panX; state.panStartY = screenPos.y - state.panY;
-          canvas.style.cursor = 'grabbing';
-        } else {
-          state.isBoxSelecting = true; state.boxStartX = x; state.boxStartY = y; state.boxCurrentX = x; state.boxCurrentY = y;
-        }
+        if (state.bgDragMode === 'pan') { state.isPanning = true; state.panStartX = screenPos.x - state.panX; state.panStartY = screenPos.y - state.panY; canvas.style.cursor = 'grabbing'; } 
+        else { state.isBoxSelecting = true; state.boxStartX = x; state.boxStartY = y; state.boxCurrentX = x; state.boxCurrentY = y; }
       }
     }
 
@@ -979,9 +684,7 @@
       const screenPos = getScreenPos(e);
       if (state.isPanning) { state.panX = screenPos.x - state.panStartX; state.panY = screenPos.y - state.panStartY; render(); return; }
 
-      const worldPos = getWorldPos(screenPos.x, screenPos.y);
-      const x = worldPos.x; const y = worldPos.y;
-      state.mouseX = x; state.mouseY = y;
+      const worldPos = getWorldPos(screenPos.x, screenPos.y); const x = worldPos.x; const y = worldPos.y; state.mouseX = x; state.mouseY = y;
 
       if (state.isBoxSelecting) { state.boxCurrentX = x; state.boxCurrentY = y; render(); return; }
       if (state.isDraggingEdgeHandle && state.draggedEdgeHandleEdge) { render(); return; }
@@ -990,10 +693,7 @@
         const curve = getEdgeCurve(state.draggedLabelEdge);
         if (curve) {
           const dx = curve.endX - curve.startX; const dy = curve.endY - curve.startY; const lenSq = dx * dx + dy * dy;
-          if (lenSq > 0) {
-            let t = ((x - curve.startX) * dx + (y - curve.startY) * dy) / lenSq;
-            state.draggedLabelEdge.labelPos = Math.max(0.1, Math.min(0.9, t));
-          }
+          if (lenSq > 0) { let t = ((x - curve.startX) * dx + (y - curve.startY) * dy) / lenSq; state.draggedLabelEdge.labelPos = Math.max(0.1, Math.min(0.9, t)); }
         }
         render(); return;
       }
@@ -1002,8 +702,7 @@
         let hoverHandle = false;
         if (state.selectedEdge) {
           const handles = getEdgeHandles(state.selectedEdge);
-          if (handles && (Math.hypot(x - handles.fromHandle.x, y - handles.fromHandle.y) <= 10/state.zoom || 
-                          Math.hypot(x - handles.toHandle.x, y - handles.toHandle.y) <= 10/state.zoom)) { hoverHandle = true; }
+          if (handles && (Math.hypot(x - handles.fromHandle.x, y - handles.fromHandle.y) <= 10/state.zoom || Math.hypot(x - handles.toHandle.x, y - handles.toHandle.y) <= 10/state.zoom)) hoverHandle = true;
         }
         const hoverNode = state.nodes.some(n => isMouseOnNode(x, y, n));
         const hoverLabel = state.edges.some(e => { const r = getLabelRect(e); return r && x >= r.x && x <= r.x + r.w && y >= r.y && y <= r.y + r.h; });
@@ -1015,8 +714,7 @@
       }
 
       if (state.isDragging && state.draggedNode) {
-        let newX = x - state.dragOffsetX; let newY = y - state.dragOffsetY;
-        state.alignGuides = [];
+        let newX = x - state.dragOffsetX; let newY = y - state.dragOffsetY; state.alignGuides = [];
         
         if (state.enableSnap && state.selectedGroup.length <= 1) {
           const SNAP_DIST = 15 / state.zoom; let snapX = null; let minDistX = SNAP_DIST; let snapY = null; let minDistY = SNAP_DIST; let snapAngle = null; let minDistAngle = SNAP_DIST;
@@ -1028,10 +726,7 @@
             for(const ang of diagAngles) {
               const rad = ang * Math.PI / 180; const dx = newX - node.x; const dy = newY - node.y;
               const dist = Math.abs(dx * (-Math.sin(rad)) + dy * Math.cos(rad));
-              if (dist < minDistAngle) {
-                minDistAngle = dist; const t = dx * Math.cos(rad) + dy * Math.sin(rad);
-                snapAngle = { x: node.x + t * Math.cos(rad), y: node.y + t * Math.sin(rad), guideStartX: node.x - 2000 * Math.cos(rad), guideStartY: node.y - 2000 * Math.sin(rad), guideEndX: node.x + 2000 * Math.cos(rad), guideEndY: node.y + 2000 * Math.sin(rad) };
-              }
+              if (dist < minDistAngle) { minDistAngle = dist; const t = dx * Math.cos(rad) + dy * Math.sin(rad); snapAngle = { x: node.x + t * Math.cos(rad), y: node.y + t * Math.sin(rad), guideStartX: node.x - 2000 * Math.cos(rad), guideStartY: node.y - 2000 * Math.sin(rad), guideEndX: node.x + 2000 * Math.cos(rad), guideEndY: node.y + 2000 * Math.sin(rad) }; }
             }
           }
           if (snapX !== null) { newX = snapX; state.alignGuides.push({ type: 'x', x: snapX, y1: newY - 2000, y2: newY + 2000 }); }
@@ -1043,13 +738,11 @@
         if (state.selectedGroup.length > 0) { state.selectedGroup.forEach(n => { n.x += deltaX; n.y += deltaY; }); } 
         else { state.draggedNode.x = newX; state.draggedNode.y = newY; }
       }
-      
       if (!state.isRunning) render();
     }
 
     function handleMouseUp(e) {
       if (state.isPanning) { state.isPanning = false; canvas.style.cursor = state.bgDragMode === 'pan' ? 'grab' : 'default'; return; }
-
       const screenPos = getScreenPos(e); const worldPos = getWorldPos(screenPos.x, screenPos.y); const x = worldPos.x; const y = worldPos.y;
 
       if (state.isBoxSelecting) {
@@ -1066,30 +759,22 @@
       }
 
       if (state.isDraggingEdgeHandle && state.draggedEdgeHandleEdge) {
-        let targetNode = null;
-        for (const node of state.nodes) { if (isMouseOnNode(x, y, node)) { targetNode = node; break; } }
+        let targetNode = null; for (const node of state.nodes) { if (isMouseOnNode(x, y, node)) { targetNode = node; break; } }
         if (targetNode) {
           const edge = state.draggedEdgeHandleEdge; const otherNodeId = state.draggedEdgeHandleType === 'from' ? edge.to : edge.from;
           if (targetNode.id !== otherNodeId) {
             const exists = state.edges.some(e => e !== edge && ((state.draggedEdgeHandleType === 'from' && e.from === targetNode.id && e.to === edge.to) || (state.draggedEdgeHandleType === 'to' && e.from === edge.from && e.to === targetNode.id)));
-            if (!exists) {
-              if (state.draggedEdgeHandleType === 'from') edge.from = targetNode.id; else edge.to = targetNode.id;
-              state.signals = state.signals.filter(s => !(s.fromId === edge.from && s.toId === edge.to));
-            }
+            if (!exists) { if (state.draggedEdgeHandleType === 'from') edge.from = targetNode.id; else edge.to = targetNode.id; state.signals = state.signals.filter(s => !(s.fromId === edge.from && s.toId === edge.to)); }
           }
         }
         state.isDraggingEdgeHandle = false; state.draggedEdgeHandleEdge = null; state.draggedEdgeHandleType = null; canvas.style.cursor = 'default'; render(); return;
       }
 
       if (state.isConnecting && state.connectFromNode) {
-        let targetNode = null;
-        for (const node of state.nodes) { if (isMouseOnNode(x, y, node) && node.id !== state.connectFromNode.id) { targetNode = node; break; } }
+        let targetNode = null; for (const node of state.nodes) { if (isMouseOnNode(x, y, node) && node.id !== state.connectFromNode.id) { targetNode = node; break; } }
         if (targetNode) {
           const exists = state.edges.some(edge => edge.from === state.connectFromNode.id && edge.to === targetNode.id);
-          if (!exists) {
-            state.edges.push({ from: state.connectFromNode.id, to: targetNode.id, label: '', labelPos: 0.5, useCustomColor: false, customColor: '#ef4444', speed: 1.0, volume: 1 });
-            selectEdge(state.edges[state.edges.length - 1]);
-          }
+          if (!exists) { state.edges.push({ from: state.connectFromNode.id, to: targetNode.id, label: '', labelPos: 0.5, useCustomColor: false, customColor: '#ef4444', speed: 1.0, volume: 1 }); selectEdge(state.edges[state.edges.length - 1]); }
         }
       }
       
@@ -1099,23 +784,17 @@
 
     function handleDoubleClick(e) {
       if (state.editingTarget) stopInlineEditing(true);
-
       const screenPos = getScreenPos(e); const worldPos = getWorldPos(screenPos.x, screenPos.y); const x = worldPos.x; const y = worldPos.y;
       
       const clickedNode = state.nodes.find(node => isMouseOnNode(x, y, node));
       if (clickedNode) { state.selectedGroup = []; selectNode(clickedNode); startInlineEditing(clickedNode, 'node'); return; }
 
       let clickedLabelEdge = null;
-      for (const edge of state.edges) {
-        const rect = getLabelRect(edge);
-        if (rect && x >= rect.x && x <= rect.x + rect.w && y >= rect.y && y <= rect.y + rect.h) { clickedLabelEdge = edge; break; }
-      }
+      for (const edge of state.edges) { const rect = getLabelRect(edge); if (rect && x >= rect.x && x <= rect.x + rect.w && y >= rect.y && y <= rect.y + rect.h) { clickedLabelEdge = edge; break; } }
       if (clickedLabelEdge) { state.selectedGroup = []; selectEdge(clickedLabelEdge); startInlineEditing(clickedLabelEdge, 'edge'); return; }
 
       let clickedEdge = null;
-      for (const edge of state.edges) {
-        if (getDistToEdge(x, y, edge) < 10/state.zoom) { clickedEdge = edge; break; }
-      }
+      for (const edge of state.edges) { if (getDistToEdge(x, y, edge) < 10/state.zoom) { clickedEdge = edge; break; } }
       if (clickedEdge) { state.selectedGroup = []; selectEdge(clickedEdge); startInlineEditing(clickedEdge, 'edge'); return; }
 
       const newNode = { id: 'node_' + Date.now(), x: x, y: y, name: '', shape: 'rect', scale: 1.0, isGoal: false, errorCount: 0, successCount: 0, useCustomColor: false, customColor: '#ef4444' };
@@ -1125,8 +804,7 @@
     function selectNode(node) {
       state.selectedNode = node; state.selectedEdge = null;
       ui.panelNoSel.classList.add('hidden'); ui.panelEdge.classList.add('hidden'); ui.panelMulti.classList.add('hidden'); ui.panelNode.classList.remove('hidden');
-      ui.selectNodeShape.value = node.shape || 'circle';
-      ui.sliderNodeScale.value = node.scale !== undefined ? node.scale : 1.0; ui.valNodeScale.textContent = `${(node.scale !== undefined ? node.scale : 1.0).toFixed(1)}x`;
+      ui.selectNodeShape.value = node.shape || 'circle'; ui.sliderNodeScale.value = node.scale !== undefined ? node.scale : 1.0; ui.valNodeScale.textContent = `${(node.scale !== undefined ? node.scale : 1.0).toFixed(1)}x`;
       ui.checkIsGoal.checked = node.isGoal || false; ui.checkNodeColor.checked = node.useCustomColor || false; ui.inputNodeColor.value = node.customColor || '#ef4444';
     }
 
@@ -1144,54 +822,37 @@
     }
 
     function deleteSelectedNode() {
-      if (!state.selectedNode) return;
-      const id = state.selectedNode.id;
-      state.nodes = state.nodes.filter(n => n.id !== id);
-      state.edges = state.edges.filter(e => e.from !== id && e.to !== id);
-      state.signals = state.signals.filter(s => s.fromId !== id && s.toId !== id);
-      if (state.editingType === 'node' && state.editingTarget === state.selectedNode) stopInlineEditing(false);
-      clearSelection(); render();
+      if (!state.selectedNode) return; const id = state.selectedNode.id;
+      state.nodes = state.nodes.filter(n => n.id !== id); state.edges = state.edges.filter(e => e.from !== id && e.to !== id); state.signals = state.signals.filter(s => s.fromId !== id && s.toId !== id);
+      if (state.editingType === 'node' && state.editingTarget === state.selectedNode) stopInlineEditing(false); clearSelection(); render();
     }
 
     function deleteSelectedGroup() {
-      if (state.selectedGroup.length === 0) return;
-      const ids = state.selectedGroup.map(n => n.id);
-      state.nodes = state.nodes.filter(n => !ids.includes(n.id));
-      state.edges = state.edges.filter(e => !ids.includes(e.from) && !ids.includes(e.to));
-      state.signals = state.signals.filter(s => !ids.includes(s.fromId) && !ids.includes(s.toId));
+      if (state.selectedGroup.length === 0) return; const ids = state.selectedGroup.map(n => n.id);
+      state.nodes = state.nodes.filter(n => !ids.includes(n.id)); state.edges = state.edges.filter(e => !ids.includes(e.from) && !ids.includes(e.to)); state.signals = state.signals.filter(s => !ids.includes(s.fromId) && !ids.includes(s.toId));
       clearSelection(); render();
     }
 
     function deleteSelectedEdge() {
-      if (!state.selectedEdge) return;
-      state.edges = state.edges.filter(e => e !== state.selectedEdge);
-      if (state.editingType === 'edge' && state.editingTarget === state.selectedEdge) stopInlineEditing(false);
-      clearSelection(); render();
+      if (!state.selectedEdge) return; state.edges = state.edges.filter(e => e !== state.selectedEdge);
+      if (state.editingType === 'edge' && state.editingTarget === state.selectedEdge) stopInlineEditing(false); clearSelection(); render();
     }
 
     function drawNode(node) {
-      const isEditing = (state.editingType === 'node' && node === state.editingTarget);
-      ctx.save();
-      
+      const isEditing = (state.editingType === 'node' && node === state.editingTarget); ctx.save();
       const isSelected = state.selectedNode === node || state.selectedGroup.includes(node);
       const hasOutgoing = state.edges.some(e => e.from === node.id);
-      const isError = !hasOutgoing && !node.isGoal;
-      const isSuccess = (!hasOutgoing && node.isGoal) || (node.isGoal && node.successCount > 0);
+      const isError = !hasOutgoing && !node.isGoal; const isSuccess = (!hasOutgoing && node.isGoal) || (node.isGoal && node.successCount > 0);
 
       let nodeStrokeColor = getColor('nodeDefaultBorder'); let glowColor = null;
-
       if (isSelected) { nodeStrokeColor = getColor('glowSelected'); glowColor = THEME_COLORS[state.theme].glowSelected; }
       else if (node.useCustomColor && node.customColor) { nodeStrokeColor = node.customColor; glowColor = hexToRgba(node.customColor, 0.8); }
       else if (isError && node.errorCount > 0) { nodeStrokeColor = '#ef4444'; glowColor = THEME_COLORS[state.theme].glowError; }
       else if (isSuccess) { nodeStrokeColor = '#10b981'; if (node.successCount > 0) glowColor = THEME_COLORS[state.theme].glowSuccess; }
 
-      if (state.enableGlow) {
-        ctx.shadowColor = 'rgba(0,0,0,0.5)'; ctx.shadowBlur = 10; ctx.shadowOffsetY = 4;
-        if (glowColor) { ctx.shadowColor = glowColor; ctx.shadowBlur = 15; ctx.shadowOffsetY = 0;}
-      }
+      if (state.enableGlow) { ctx.shadowColor = 'rgba(0,0,0,0.5)'; ctx.shadowBlur = 10; ctx.shadowOffsetY = 4; if (glowColor) { ctx.shadowColor = glowColor; ctx.shadowBlur = 15; ctx.shadowOffsetY = 0;} }
 
       ctx.fillStyle = getColor('nodeBg'); ctx.strokeStyle = nodeStrokeColor; ctx.lineWidth = (isSelected || glowColor) ? 3 : 2;
-
       const size = getNodeSize(node);
 
       if (node.shape === 'rect') {
@@ -1199,138 +860,89 @@
         ctx.beginPath(); ctx.moveTo(x + r, y); ctx.lineTo(x + w - r, y); ctx.arcTo(x + w, y, x + w, y + h, r);
         ctx.lineTo(x + w, y + h - r); ctx.arcTo(x + w, y + h, x, y + h, r); ctx.lineTo(x + r, y + h); ctx.arcTo(x, y + h, x, y, r); ctx.lineTo(x, y + r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath(); ctx.fill(); ctx.stroke();
       } else if (node.shape === 'diamond') {
-        const w = size.width; const h = size.height;
-        ctx.beginPath(); ctx.moveTo(node.x, node.y - h/2); ctx.lineTo(node.x + w/2, node.y); ctx.lineTo(node.x, node.y + h/2); ctx.lineTo(node.x - w/2, node.y); ctx.closePath(); ctx.fill(); ctx.stroke();
-      } else {
-        ctx.beginPath(); ctx.arc(node.x, node.y, size.width/2, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
-      }
+        const w = size.width; const h = size.height; ctx.beginPath(); ctx.moveTo(node.x, node.y - h/2); ctx.lineTo(node.x + w/2, node.y); ctx.lineTo(node.x, node.y + h/2); ctx.lineTo(node.x - w/2, node.y); ctx.closePath(); ctx.fill(); ctx.stroke();
+      } else { ctx.beginPath(); ctx.arc(node.x, node.y, size.width/2, 0, Math.PI * 2); ctx.fill(); ctx.stroke(); }
 
       ctx.shadowBlur = 0;
-      if (!isEditing) {
-        ctx.fillStyle = getColor('text'); ctx.font = '600 13px Inter, sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-        drawMultilineText(ctx, node.name, node.x, node.y, 13);
-      }
-
-      if (state.showCountBadge && !isEditing) {
-        if (isError && node.errorCount > 0) drawBadge(node, node.errorCount, '#ef4444');
-        else if (isSuccess && node.successCount > 0) drawBadge(node, node.successCount, '#10b981');
-      }
+      if (!isEditing) { ctx.fillStyle = getColor('text'); ctx.font = '600 13px Inter, sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; drawMultilineText(ctx, node.name, node.x, node.y, 13); }
+      if (state.showCountBadge && !isEditing) { if (isError && node.errorCount > 0) drawBadge(node, node.errorCount, '#ef4444'); else if (isSuccess && node.successCount > 0) drawBadge(node, node.successCount, '#10b981'); }
       ctx.restore();
     }
 
     function drawBadge(node, count, color) {
       const size = getNodeSize(node); const offsetX = size.width/2 - (10 * size.scale); const offsetY = -(size.height/2) + (5 * size.scale);
-      ctx.beginPath(); ctx.arc(node.x + offsetX, node.y + offsetY, 12, 0, Math.PI*2);
-      ctx.fillStyle = color; ctx.fill(); ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 1.5; ctx.stroke();
-      ctx.fillStyle = '#ffffff'; ctx.font = 'bold 11px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-      ctx.fillText(count > 99 ? '99+' : count, node.x + offsetX, node.y + offsetY);
+      ctx.beginPath(); ctx.arc(node.x + offsetX, node.y + offsetY, 12, 0, Math.PI*2); ctx.fillStyle = color; ctx.fill(); ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 1.5; ctx.stroke();
+      ctx.fillStyle = '#ffffff'; ctx.font = 'bold 11px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(count > 99 ? '99+' : count, node.x + offsetX, node.y + offsetY);
     }
 
     function drawEdge(edge) {
-      const curve = getEdgeCurve(edge);
-      if (!curve) return;
-
-      ctx.save();
-      const isSelected = state.selectedEdge === edge; const isDraggedLabel = state.draggedLabelEdge === edge;
-      const isHandleDragging = state.isDraggingEdgeHandle && state.draggedEdgeHandleEdge === edge;
-      const isEditingLabel = (state.editingType === 'edge' && state.editingTarget === edge);
+      const curve = getEdgeCurve(edge); if (!curve) return; ctx.save();
+      const isSelected = state.selectedEdge === edge; const isDraggedLabel = state.draggedLabelEdge === edge; const isHandleDragging = state.isDraggingEdgeHandle && state.draggedEdgeHandleEdge === edge; const isEditingLabel = (state.editingType === 'edge' && state.editingTarget === edge);
       
       let edgeColor = getColor('edgeLine');
       if (isSelected) edgeColor = '#3b82f6'; else if (edge.useCustomColor && edge.customColor) edgeColor = hexToRgba(edge.customColor, 0.9);
 
-      let visualStartX = curve.startX, visualStartY = curve.startY;
-      let visualEndX = curve.endX, visualEndY = curve.endY;
-      let arrowAngle = curve.arrowAngle;
+      let visualStartX = curve.startX, visualStartY = curve.startY; let visualEndX = curve.endX, visualEndY = curve.endY; let arrowAngle = curve.arrowAngle;
 
       ctx.beginPath();
       if (isHandleDragging) {
-        if (state.draggedEdgeHandleType === 'from') {
-          ctx.moveTo(state.mouseX, state.mouseY); ctx.lineTo(curve.endX, curve.endY);
-          arrowAngle = Math.atan2(curve.endY - state.mouseY, curve.endX - state.mouseX);
-          visualStartX = state.mouseX; visualStartY = state.mouseY;
-        } else {
-          ctx.moveTo(curve.startX, curve.startY); ctx.lineTo(state.mouseX, state.mouseY);
-          arrowAngle = Math.atan2(state.mouseY - curve.startY, state.mouseX - curve.startX);
-          visualEndX = state.mouseX; visualEndY = state.mouseY;
-        }
-        ctx.strokeStyle = edgeColor; ctx.lineWidth = isSelected ? 3 : 2;
-        ctx.setLineDash([5, 5]); ctx.stroke(); ctx.setLineDash([]);
+        if (state.draggedEdgeHandleType === 'from') { ctx.moveTo(state.mouseX, state.mouseY); ctx.lineTo(curve.endX, curve.endY); arrowAngle = Math.atan2(curve.endY - state.mouseY, curve.endX - state.mouseX); visualStartX = state.mouseX; visualStartY = state.mouseY; } 
+        else { ctx.moveTo(curve.startX, curve.startY); ctx.lineTo(state.mouseX, state.mouseY); arrowAngle = Math.atan2(state.mouseY - curve.startY, state.mouseX - curve.startX); visualEndX = state.mouseX; visualEndY = state.mouseY; }
+        ctx.strokeStyle = edgeColor; ctx.lineWidth = isSelected ? 3 : 2; ctx.setLineDash([5, 5]); ctx.stroke(); ctx.setLineDash([]);
       } else {
         ctx.moveTo(curve.startX, curve.startY);
-        if (curve.isCurved) { ctx.quadraticCurveTo(curve.cpX, curve.cpY, curve.endX, curve.endY); } 
-        else { ctx.lineTo(curve.endX, curve.endY); }
-        ctx.strokeStyle = edgeColor; ctx.lineWidth = isSelected ? 3 : 2;
-        ctx.stroke();
+        if (curve.isCurved) { ctx.quadraticCurveTo(curve.cpX, curve.cpY, curve.endX, curve.endY); } else { ctx.lineTo(curve.endX, curve.endY); }
+        ctx.strokeStyle = edgeColor; ctx.lineWidth = isSelected ? 3 : 2; ctx.stroke();
       }
 
       ctx.beginPath(); ctx.moveTo(visualEndX, visualEndY);
-      ctx.lineTo(visualEndX - 10 * Math.cos(arrowAngle - Math.PI/6), visualEndY - 10 * Math.sin(arrowAngle - Math.PI/6));
-      ctx.lineTo(visualEndX - 10 * Math.cos(arrowAngle + Math.PI/6), visualEndY - 10 * Math.sin(arrowAngle + Math.PI/6));
+      ctx.lineTo(visualEndX - 10 * Math.cos(arrowAngle - Math.PI/6), visualEndY - 10 * Math.sin(arrowAngle - Math.PI/6)); ctx.lineTo(visualEndX - 10 * Math.cos(arrowAngle + Math.PI/6), visualEndY - 10 * Math.sin(arrowAngle + Math.PI/6));
       ctx.closePath(); ctx.fillStyle = edgeColor; ctx.fill();
 
       if (!isHandleDragging && !isEditingLabel) {
         const rect = getLabelRect(edge);
         if (rect) {
-          let isGlowing = false; const pos = edge.labelPos !== undefined ? edge.labelPos : 0.5;
-          const hitRange = 30 / curve.len;
-          for (const sig of state.signals) {
-            if (sig.fromId === edge.from && sig.toId === edge.to) {
-              if (Math.abs(sig.progress - pos) < hitRange) { isGlowing = true; break; }
-            }
-          }
+          let isGlowing = false; const pos = edge.labelPos !== undefined ? edge.labelPos : 0.5; const hitRange = 30 / curve.len;
+          for (const sig of state.signals) { if (sig.fromId === edge.from && sig.toId === edge.to) { if (Math.abs(sig.progress - pos) < hitRange) { isGlowing = true; break; } } }
           ctx.fillStyle = isGlowing ? (state.theme === 'dark' ? '#1e293b' : '#eff6ff') : getColor('edgeLabelBg');
           if (isGlowing && state.enableGlow) { ctx.shadowColor = '#3b82f6'; ctx.shadowBlur = 12; ctx.strokeStyle = '#3b82f6'; } 
           else { ctx.shadowBlur = (isDraggedLabel && state.enableGlow) ? 8 : 0; ctx.shadowColor = 'rgba(0,0,0,0.5)'; ctx.strokeStyle = isSelected ? '#3b82f6' : getColor('nodeDefaultBorder'); }
 
           ctx.fillRect(rect.x, rect.y, rect.w, rect.h); ctx.lineWidth = (isGlowing || isSelected) ? 2 : 1; ctx.strokeRect(rect.x, rect.y, rect.w, rect.h);
           ctx.shadowBlur = 0; ctx.fillStyle = isGlowing ? '#3b82f6' : (isSelected ? getColor('text') : getColor('edgeLabelText'));
-          ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.font = '12px Inter, sans-serif'; 
-          drawMultilineText(ctx, edge.label, rect.midX, rect.midY, 12);
+          ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.font = '12px Inter, sans-serif'; drawMultilineText(ctx, edge.label, rect.midX, rect.midY, 12);
         }
       }
 
       if (isSelected && !isHandleDragging) {
-        ctx.beginPath(); ctx.arc(visualStartX, visualStartY, 5/state.zoom, 0, Math.PI * 2);
-        ctx.fillStyle = '#eff6ff'; ctx.fill(); ctx.lineWidth = 2/state.zoom; ctx.strokeStyle = '#3b82f6'; ctx.stroke();
-        ctx.beginPath(); ctx.arc(visualEndX, visualEndY, 5/state.zoom, 0, Math.PI * 2);
-        ctx.fillStyle = '#eff6ff'; ctx.fill(); ctx.lineWidth = 2/state.zoom; ctx.strokeStyle = '#3b82f6'; ctx.stroke();
+        ctx.beginPath(); ctx.arc(visualStartX, visualStartY, 5/state.zoom, 0, Math.PI * 2); ctx.fillStyle = '#eff6ff'; ctx.fill(); ctx.lineWidth = 2/state.zoom; ctx.strokeStyle = '#3b82f6'; ctx.stroke();
+        ctx.beginPath(); ctx.arc(visualEndX, visualEndY, 5/state.zoom, 0, Math.PI * 2); ctx.fillStyle = '#eff6ff'; ctx.fill(); ctx.lineWidth = 2/state.zoom; ctx.strokeStyle = '#3b82f6'; ctx.stroke();
       }
       ctx.restore();
     }
 
     function drawConnectingLine() {
-      if (!state.isConnecting || !state.connectFromNode) return;
-      ctx.save(); ctx.beginPath(); ctx.moveTo(state.connectFromNode.x, state.connectFromNode.y); ctx.lineTo(state.mouseX, state.mouseY);
-      ctx.strokeStyle = 'rgba(59, 130, 246, 0.8)'; ctx.lineWidth = 2; ctx.setLineDash([5, 5]); ctx.stroke(); ctx.restore();
+      if (!state.isConnecting || !state.connectFromNode) return; ctx.save(); ctx.beginPath(); ctx.moveTo(state.connectFromNode.x, state.connectFromNode.y); ctx.lineTo(state.mouseX, state.mouseY); ctx.strokeStyle = 'rgba(59, 130, 246, 0.8)'; ctx.lineWidth = 2; ctx.setLineDash([5, 5]); ctx.stroke(); ctx.restore();
     }
 
     function drawAlignGuides() {
-      if (!state.alignGuides || state.alignGuides.length === 0) return;
-      ctx.save(); ctx.strokeStyle = '#f472b6'; ctx.setLineDash([4, 4]); ctx.lineWidth = 1 / state.zoom;
+      if (!state.alignGuides || state.alignGuides.length === 0) return; ctx.save(); ctx.strokeStyle = '#f472b6'; ctx.setLineDash([4, 4]); ctx.lineWidth = 1 / state.zoom;
       for (const guide of state.alignGuides) {
         ctx.beginPath();
-        if (guide.type === 'x') { ctx.moveTo(guide.x, guide.y1); ctx.lineTo(guide.x, guide.y2); }
-        else if (guide.type === 'y') { ctx.moveTo(guide.x1, guide.y); ctx.lineTo(guide.x2, guide.y); }
-        else if (guide.type === 'line') { ctx.moveTo(guide.x1, guide.y1); ctx.lineTo(guide.x2, guide.y2); }
+        if (guide.type === 'x') { ctx.moveTo(guide.x, guide.y1); ctx.lineTo(guide.x, guide.y2); } else if (guide.type === 'y') { ctx.moveTo(guide.x1, guide.y); ctx.lineTo(guide.x2, guide.y); } else if (guide.type === 'line') { ctx.moveTo(guide.x1, guide.y1); ctx.lineTo(guide.x2, guide.y2); }
         ctx.stroke();
       }
       ctx.restore();
     }
 
     function drawBoxSelection() {
-      if (!state.isBoxSelecting) return;
-      ctx.save();
-      const x = Math.min(state.boxStartX, state.boxCurrentX); const y = Math.min(state.boxStartY, state.boxCurrentY);
-      const w = Math.abs(state.boxCurrentX - state.boxStartX); const h = Math.abs(state.boxCurrentY - state.boxStartY);
-      ctx.fillStyle = getColor('boxSelectFill'); ctx.fillRect(x, y, w, h);
-      ctx.strokeStyle = getColor('boxSelectBorder'); ctx.lineWidth = 1 / state.zoom; ctx.strokeRect(x, y, w, h);
-      ctx.restore();
+      if (!state.isBoxSelecting) return; ctx.save();
+      const x = Math.min(state.boxStartX, state.boxCurrentX); const y = Math.min(state.boxStartY, state.boxCurrentY); const w = Math.abs(state.boxCurrentX - state.boxStartX); const h = Math.abs(state.boxCurrentY - state.boxStartY);
+      ctx.fillStyle = getColor('boxSelectFill'); ctx.fillRect(x, y, w, h); ctx.strokeStyle = getColor('boxSelectBorder'); ctx.lineWidth = 1 / state.zoom; ctx.strokeRect(x, y, w, h); ctx.restore();
     }
 
     function spawnSignal(startNode) {
-      if (state.signals.length > 500) return;
-      const outgoingEdges = state.edges.filter(e => e.from === startNode.id);
-      if (outgoingEdges.length === 0) return;
+      if (state.signals.length > 500) return; const outgoingEdges = state.edges.filter(e => e.from === startNode.id); if (outgoingEdges.length === 0) return;
       outgoingEdges.forEach(edge => {
         const vol = edge.volume !== undefined ? edge.volume : 1; const spd = edge.speed !== undefined ? edge.speed : 1.0;
         for (let k = 0; k < vol; k++) { state.signals.push({ fromId: edge.from, toId: edge.to, progress: 0, speed: (0.005 + Math.random() * 0.002) * spd }); }
@@ -1344,22 +956,28 @@
         ui.btnToggle.textContent = '■ シミュレーション停止'; ui.btnToggle.classList.replace('btn-primary', 'btn-danger');
         state.signals = []; state.nodes.forEach(n => { n.errorCount = 0; n.successCount = 0; });
         state.frameCount = 0; state.lastTime = performance.now(); requestAnimationFrame(simulationLoop);
-      } else {
-        ui.btnToggle.textContent = '▶ シミュレーション開始'; ui.btnToggle.classList.replace('btn-danger', 'btn-primary');
-      }
+      } else { ui.btnToggle.textContent = '▶ シミュレーション開始'; ui.btnToggle.classList.replace('btn-danger', 'btn-primary'); }
     }
 
     function simulationLoop(timestamp) {
       if (!state.isRunning) return;
-      let deltaTime = timestamp - state.lastTime; if (deltaTime > 100) deltaTime = 16;
-      state.lastTime = timestamp;
-      const timeScale = (deltaTime / 16.6) * state.simulationSpeed; state.frameCount += timeScale;
+      let deltaTime = timestamp - state.lastTime; if (deltaTime > 100) deltaTime = 16; state.lastTime = timestamp;
+      const timeScale = (deltaTime / 16.6) * state.simulationSpeed;
       
-      if (state.frameCount >= state.spawnRate) {
-        state.frameCount = 0;
-        const startNodes = state.nodes.filter(n => !state.edges.some(e => e.to === n.id));
-        if (startNodes.length === 0 && state.nodes.length > 0) spawnSignal(state.nodes[0]); 
-        else startNodes.forEach(node => spawnSignal(node));
+      if (state.spawnMode === 'single') {
+          if (state.signals.length === 0) {
+              state.frameCount += timeScale;
+              if (state.frameCount >= 30) { 
+                  state.frameCount = 0; const startNodes = state.nodes.filter(n => !state.edges.some(e => e.to === n.id));
+                  if (startNodes.length === 0 && state.nodes.length > 0) spawnSignal(state.nodes[0]); else startNodes.forEach(node => spawnSignal(node));
+              }
+          } else { state.frameCount = 0; }
+      } else {
+          state.frameCount += timeScale;
+          if (state.frameCount >= state.spawnRate) {
+            state.frameCount = 0; const startNodes = state.nodes.filter(n => !state.edges.some(e => e.to === n.id));
+            if (startNodes.length === 0 && state.nodes.length > 0) spawnSignal(state.nodes[0]); else startNodes.forEach(node => spawnSignal(node));
+          }
       }
 
       for (let i = state.signals.length - 1; i >= 0; i--) {
@@ -1389,32 +1007,21 @@
       
       ctx.save(); ctx.translate(state.panX, state.panY); ctx.scale(state.zoom, state.zoom);
 
-      state.edges.forEach(edge => drawEdge(edge));
-      drawConnectingLine(); drawAlignGuides(); drawBoxSelection();
+      state.edges.forEach(edge => drawEdge(edge)); drawConnectingLine(); drawAlignGuides(); drawBoxSelection();
 
       if (state.enableGlow) { ctx.shadowBlur = 15; ctx.shadowColor = '#3b82f6'; }
       ctx.fillStyle = (state.theme === 'dark') ? '#eff6ff' : '#3b82f6';
       
       state.signals.forEach(sig => {
-        const edge = state.edges.find(e => e.from === sig.fromId && e.to === sig.toId);
-        if (!edge) return;
-        const curve = getEdgeCurve(edge);
-        if (!curve) return;
-        
+        const edge = state.edges.find(e => e.from === sig.fromId && e.to === sig.toId); if (!edge) return;
+        const curve = getEdgeCurve(edge); if (!curve) return;
         const t = sig.progress; const mt = 1 - t;
         const currentX = curve.isCurved ? (mt * mt * curve.startX + 2 * mt * t * curve.cpX + t * t * curve.endX) : (curve.startX + (curve.endX - curve.startX) * t);
         const currentY = curve.isCurved ? (mt * mt * curve.startY + 2 * mt * t * curve.cpY + t * t * curve.endY) : (curve.startY + (curve.endY - curve.startY) * t);
-        
         ctx.beginPath(); ctx.arc(currentX, currentY, 5, 0, Math.PI * 2); ctx.fill();
       });
-      ctx.shadowBlur = 0;
-      
-      state.nodes.forEach(node => drawNode(node));
-      ctx.restore();
-
-      if(state.editingTarget && state.editingType) {
-         updateInlineEditorPosition();
-      }
+      ctx.shadowBlur = 0; state.nodes.forEach(node => drawNode(node)); ctx.restore();
+      if(state.editingTarget && state.editingType) updateInlineEditorPosition();
     }
 
     function saveToFile() {
@@ -1422,9 +1029,8 @@
       const saveData = {
         nodes: state.nodes, edges: state.edges,
         settings: { 
-          spawnRate: state.spawnRate, simulationSpeed: state.simulationSpeed, 
-          enableSnap: state.enableSnap, showCountBadge: state.showCountBadge,
-          theme: state.theme, enableGlow: state.enableGlow, bgDragMode: state.bgDragMode
+          spawnVal: parseInt(ui.sliderSpawn.value), spawnRate: state.spawnRate, simulationSpeed: state.simulationSpeed, 
+          enableSnap: state.enableSnap, showCountBadge: state.showCountBadge, theme: state.theme, enableGlow: state.enableGlow, bgDragMode: state.bgDragMode
         }
       };
       const jsonStr = JSON.stringify(saveData); const blob = new Blob([jsonStr], { type: 'application/json' });
@@ -1435,50 +1041,43 @@
 
     function loadFromFile(event) {
       if (state.editingTarget) stopInlineEditing(false);
-      const file = event.target.files[0]; if (!file) return;
-      const reader = new FileReader();
+      const file = event.target.files[0]; if (!file) return; const reader = new FileReader();
       
       reader.onload = function(e) {
         try {
           const contents = JSON.parse(e.target.result);
           if (contents.nodes && contents.edges) {
             state.nodes = contents.nodes.map(n => ({ 
-              id: String(n.id || 'node_' + Date.now() + Math.random()), 
-              x: Number(n.x) || 0, y: Number(n.y) || 0, 
-              name: String(n.name !== undefined ? n.name : (n.text !== undefined ? n.text : '')), 
-              shape: String(n.shape || 'circle'), scale: Number(n.scale !== undefined ? n.scale : 1.0),
-              isGoal: Boolean(n.isGoal), errorCount: 0, successCount: 0,
-              useCustomColor: Boolean(n.useCustomColor), customColor: String(n.customColor || '#ef4444')
+              id: String(n.id || 'node_' + Date.now() + Math.random()), x: Number(n.x) || 0, y: Number(n.y) || 0, 
+              name: String(n.name !== undefined ? n.name : (n.text !== undefined ? n.text : '')), shape: String(n.shape || 'circle'), scale: Number(n.scale !== undefined ? n.scale : 1.0),
+              isGoal: Boolean(n.isGoal), errorCount: 0, successCount: 0, useCustomColor: Boolean(n.useCustomColor), customColor: String(n.customColor || '#ef4444')
             }));
 
             state.edges = contents.edges.map(e => ({ 
-              from: String(e.from), to: String(e.to), 
-              label: String(e.label !== undefined ? e.label : ''), labelPos: Number(e.labelPos !== undefined ? e.labelPos : 0.5),
-              useCustomColor: Boolean(e.useCustomColor), customColor: String(e.customColor || '#ef4444'),
-              speed: Number(e.speed !== undefined ? e.speed : 1.0), volume: Number(e.volume !== undefined ? e.volume : 1)
+              from: String(e.from), to: String(e.to), label: String(e.label !== undefined ? e.label : ''), labelPos: Number(e.labelPos !== undefined ? e.labelPos : 0.5),
+              useCustomColor: Boolean(e.useCustomColor), customColor: String(e.customColor || '#ef4444'), speed: Number(e.speed !== undefined ? e.speed : 1.0), volume: Number(e.volume !== undefined ? e.volume : 1)
             }));
 
-            const ds = { spawnRate: 60, simulationSpeed: 1.0, enableSnap: true, showCountBadge: true, theme: 'dark', enableGlow: true, bgDragMode: 'pan' };
+            const ds = { spawnVal: 50, simulationSpeed: 1.0, enableSnap: true, showCountBadge: true, theme: 'dark', enableGlow: true, bgDragMode: 'pan' };
             const ls = contents.settings || ds;
             
-            state.spawnRate = ls.spawnRate !== undefined ? Number(ls.spawnRate) : ds.spawnRate;
+            let loadedSpawnVal = 50;
+            if (ls.spawnVal !== undefined) { loadedSpawnVal = Number(ls.spawnVal); } 
+            else if (ls.spawnRate !== undefined) { const sr = Number(ls.spawnRate); if (sr > 100) loadedSpawnVal = 20; else if (sr < 40) loadedSpawnVal = 80; else loadedSpawnVal = 50; }
+            ui.sliderSpawn.value = loadedSpawnVal; updateSpawnSettings(loadedSpawnVal);
+            
             state.simulationSpeed = ls.simulationSpeed !== undefined ? Number(ls.simulationSpeed) : ds.simulationSpeed;
             state.enableSnap = ls.enableSnap !== undefined ? Boolean(ls.enableSnap) : ds.enableSnap;
             state.showCountBadge = ls.showCountBadge !== undefined ? Boolean(ls.showCountBadge) : ds.showCountBadge;
-            state.theme = String(ls.theme || ds.theme);
-            state.enableGlow = ls.enableGlow !== undefined ? Boolean(ls.enableGlow) : ds.enableGlow;
+            state.theme = String(ls.theme || ds.theme); state.enableGlow = ls.enableGlow !== undefined ? Boolean(ls.enableGlow) : ds.enableGlow;
             state.bgDragMode = String(ls.bgDragMode || ds.bgDragMode);
 
             ui.sliderSpeed.value = state.simulationSpeed; ui.valSpeed.textContent = `${state.simulationSpeed.toFixed(1)}x`;
-            const spawnVal = 130 - state.spawnRate; ui.sliderSpawn.value = spawnVal;
-            ui.valSpawn.textContent = spawnVal < 40 ? '低 (ゆっくり)' : (spawnVal > 90 ? '高 (激しい)' : '中');
             ui.checkSnap.checked = state.enableSnap; ui.checkShowBadge.checked = state.showCountBadge;
             ui.selectTheme.value = state.theme; ui.checkEnableGlow.checked = state.enableGlow;
-            const radioBg = document.querySelector(`input[name="bg-drag-mode"][value="${state.bgDragMode}"]`);
-            if (radioBg) radioBg.checked = true;
+            const radioBg = document.querySelector(`input[name="bg-drag-mode"][value="${state.bgDragMode}"]`); if (radioBg) radioBg.checked = true;
             
             state.isDragging = false; state.draggedNode = null; state.isDraggingLabel = false; state.draggedLabelEdge = null; state.isConnecting = false; state.connectFromNode = null; state.isBoxSelecting = false; state.selectedGroup = [];
-            
             updateTheme(); state.signals = []; clearSelection(); state.panX = 0; state.panY = 0; setZoom(1.0);
           }
         } catch (err) { alert("ファイルの読み込みに失敗しました。正しいデータ形式か確認してください。"); }
@@ -1487,31 +1086,27 @@
     }
 
     function takeScreenshot() {
-      if (state.editingTarget) stopInlineEditing(true);
-      render(); const dataURL = canvas.toDataURL('image/png'); const a = document.createElement('a');
-      a.href = dataURL; a.download = 'cycle_flow_screenshot.png'; document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      if (state.editingTarget) stopInlineEditing(true); render();
+      const dataURL = canvas.toDataURL('image/png'); const a = document.createElement('a'); a.href = dataURL; a.download = 'cycle_flow_screenshot.png'; document.body.appendChild(a); a.click(); document.body.removeChild(a);
     }
 
-    function toggleRecording() {
-      if (!state.isRecording) startRecording(); else stopRecording();
-    }
+    function toggleRecording() { if (!state.isRecording) startRecording(); else stopRecording(); }
 
     function startRecording() {
       if (state.editingTarget) stopInlineEditing(true);
-      const stream = canvas.captureStream(30); let mimeType = 'video/webm';
-      if (!MediaRecorder.isTypeSupported(mimeType)) mimeType = 'video/mp4'; 
+      const stream = canvas.captureStream(30); let mimeType = 'video/webm'; if (!MediaRecorder.isTypeSupported(mimeType)) mimeType = 'video/mp4'; 
       try { state.mediaRecorder = new MediaRecorder(stream, { mimeType: MediaRecorder.isTypeSupported(mimeType) ? mimeType : '' }); } 
       catch (e) { alert("お使いのブラウザは録画機能に対応していません。"); return; }
-      state.recordedChunks = [];
-      state.mediaRecorder.ondataavailable = function(e) { if (e.data.size > 0) state.recordedChunks.push(e.data); };
+      state.recordedChunks = []; state.mediaRecorder.ondataavailable = function(e) { if (e.data.size > 0) state.recordedChunks.push(e.data); };
       state.mediaRecorder.onstop = function() {
         const blob = new Blob(state.recordedChunks, { type: mimeType }); const url = URL.createObjectURL(blob);
         const a = document.createElement('a'); a.href = url; a.download = `cycle_flow_movie.${mimeType === 'video/mp4' ? 'mp4' : 'webm'}`;
         document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
       };
-      state.mediaRecorder.start(); state.isRecording = true;
-      ui.btnRecord.textContent = '⏹ 録画停止'; ui.btnRecord.classList.replace('btn-secondary', 'btn-danger');
+      state.mediaRecorder.start(); state.isRecording = true; ui.btnRecord.textContent = '⏹ 録画停止'; ui.btnRecord.classList.replace('btn-secondary', 'btn-danger');
     }
+    
+    function stopRecording() { if (state.mediaRecorder && state.mediaRecorder.state !== 'inactive') state.mediaRecorder.stop(); state.isRecording = false; ui.btnRecord.textContent = '🎥 録画開始'; ui.btnRecord.classList.replace('btn-danger', 'btn-secondary'); }
 
     function loadSampleData() {
       state.nodes = [
@@ -1530,18 +1125,10 @@
       ];
     }
 
-    function resizeCanvas() {
-      canvas.width = canvas.parentElement.clientWidth; canvas.height = canvas.parentElement.clientHeight;
-      createBackgroundPattern(); render();
-    }
-    
+    function resizeCanvas() { canvas.width = canvas.parentElement.clientWidth; canvas.height = canvas.parentElement.clientHeight; createBackgroundPattern(); render(); }
     window.addEventListener('resize', resizeCanvas);
-    setupEventListeners(); loadSampleData(); resizeCanvas(); updateTheme();
-    
-    function staticRenderLoop() {
-      if (!state.isRunning) render();
-      requestAnimationFrame(staticRenderLoop);
-    }
+    setupEventListeners(); loadSampleData(); updateSpawnSettings(parseInt(ui.sliderSpawn.value)); resizeCanvas(); updateTheme();
+    function staticRenderLoop() { if (!state.isRunning) render(); requestAnimationFrame(staticRenderLoop); }
     staticRenderLoop();
   </script>
 </body>
