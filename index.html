@@ -998,19 +998,22 @@
       let deltaTime = timestamp - state.lastTime; if (deltaTime > 100) deltaTime = 16; state.lastTime = timestamp;
       const timeScale = (deltaTime / 16.6) * state.simulationSpeed;
       
-      // 発生源のリストを作成し、指定された順番(spawnOrder)で並び替える
+      // 発生源のリストを作成
       let spawners = state.nodes.filter(n => n.isSpawner);
       if (spawners.length === 0) spawners = state.nodes.filter(n => !state.edges.some(e => e.to === n.id)); // 互換性のため自動補完
-      spawners.sort((a, b) => (a.spawnOrder || 1) - (b.spawnOrder || 1));
+      
+      // ユニークな発生順番を抽出し、昇順に並べる
+      const uniqueOrders = [...new Set(spawners.map(n => n.spawnOrder || 1))].sort((a, b) => a - b);
 
       if (state.spawnMode === 'single') {
           if (state.signals.length === 0) {
               state.frameCount += timeScale;
               if (state.frameCount >= 30) { 
                   state.frameCount = 0; 
-                  if (spawners.length > 0 && state.nodes.length > 0) {
-                      const targetSpawner = spawners[state.currentSpawnerIndex % spawners.length];
-                      spawnSignal(targetSpawner);
+                  if (uniqueOrders.length > 0) {
+                      const targetOrder = uniqueOrders[state.currentSpawnerIndex % uniqueOrders.length];
+                      const targetSpawners = spawners.filter(n => (n.spawnOrder || 1) === targetOrder);
+                      targetSpawners.forEach(spawner => spawnSignal(spawner));
                       state.currentSpawnerIndex++;
                   }
               }
@@ -1019,9 +1022,10 @@
           state.frameCount += timeScale;
           if (state.frameCount >= state.spawnRate) {
             state.frameCount = 0; 
-            if (spawners.length > 0 && state.nodes.length > 0) {
-                const targetSpawner = spawners[state.currentSpawnerIndex % spawners.length];
-                spawnSignal(targetSpawner);
+            if (uniqueOrders.length > 0) {
+                const targetOrder = uniqueOrders[state.currentSpawnerIndex % uniqueOrders.length];
+                const targetSpawners = spawners.filter(n => (n.spawnOrder || 1) === targetOrder);
+                targetSpawners.forEach(spawner => spawnSignal(spawner));
                 state.currentSpawnerIndex++;
             }
           }
