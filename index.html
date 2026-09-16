@@ -83,8 +83,8 @@
 
     .form-group { margin-bottom: 15px; }
     .form-group label { display: block; font-size: 0.85rem; margin-bottom: 5px; color: var(--text-muted); }
-    .form-group input[type="text"], .form-group select { width: 100%; padding: 8px 12px; background-color: var(--input-bg); border: 1px solid var(--border-color); border-radius: 4px; color: var(--text-main); font-size: 0.9rem; outline: none; transition: background-color 0.3s, color 0.3s, border-color 0.3s; }
-    .form-group input[type="text"]:focus, .form-group select:focus { border-color: var(--accent); }
+    .form-group input[type="text"], .form-group input[type="number"], .form-group select { width: 100%; padding: 8px 12px; background-color: var(--input-bg); border: 1px solid var(--border-color); border-radius: 4px; color: var(--text-main); font-size: 0.9rem; outline: none; transition: background-color 0.3s, color 0.3s, border-color 0.3s; }
+    .form-group input[type="text"]:focus, .form-group input[type="number"]:focus, .form-group select:focus { border-color: var(--accent); }
     .form-group input[type="range"] { width: 100%; accent-color: var(--accent); }
 
     .color-picker-group { display: flex; align-items: center; gap: 10px; background: rgba(128,128,128,0.1); padding: 10px; border-radius: 4px; border: 1px solid var(--border-color); }
@@ -101,7 +101,7 @@
     .hidden { display: none !important; }
 
     #canvas-container { flex-grow: 1; position: relative; background-color: var(--bg-color); overflow: hidden; touch-action: none; }
-    canvas { display: block; width: 100%; height: 100%; }
+    canvas { display: block; width: 100%; height: 100%; touch-action: none; }
 
     #inline-editor {
       position: absolute; background-color: var(--panel-bg); color: var(--text-main); border: 2px solid var(--accent);
@@ -126,7 +126,7 @@
       <div class="info-box">
         <b>基本操作:</b><br>
         ・空白[Wクリック]：拠点追加<br>
-        ・文字[Wクリック]：直接編集 (Shift+Enterで改行)<br>
+        ・文字/線[Wクリック]：直接編集 (Shift+Enterで改行)<br>
         ・[Shift+ドラッグ]：線を引く<br>
         ・線の端(●)ドラッグ：付け替え<br>
         ・[ホイール回転]：拡大縮小
@@ -209,6 +209,19 @@
           </label>
         </div>
       </div>
+      
+      <!-- Spawner Setting -->
+      <div class="form-group" style="margin-top: 15px; padding: 10px; background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3); border-radius: 4px;">
+        <label class="checkbox-label" style="color: var(--accent);">
+          <input type="checkbox" id="check-is-spawner">
+          <span class="font-bold">この拠点を「発生源(スタート)」にする</span>
+        </label>
+        <div id="spawn-order-container" class="hidden" style="margin-top: 10px; padding-left: 24px; border-top: 1px dashed rgba(59, 130, 246, 0.3); padding-top: 10px;">
+          <label style="display:inline-block; margin-right: 10px; color: var(--accent);">発生順番:</label>
+          <input type="number" id="input-spawn-order" min="1" max="99" value="1" style="width: 60px; padding: 4px; display:inline-block;">
+        </div>
+      </div>
+
       <div class="form-group" style="margin-top: 15px; padding: 10px; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 4px;">
         <label class="checkbox-label" style="color: var(--success);">
           <input type="checkbox" id="check-is-goal">
@@ -286,9 +299,10 @@
       signals: [],
       isRunning: false,
       simulationSpeed: 1.0,
-      spawnMode: 'continuous', // 'single' または 'continuous'
-      spawnRate: 60, // 連続モード時のフレーム間隔
+      spawnMode: 'continuous',
+      spawnRate: 60,
       frameCount: 0,
+      currentSpawnerIndex: 0, // 発生順番の管理用
       
       selectedNode: null,
       selectedEdge: null,
@@ -363,6 +377,9 @@
       sliderNodeScale: document.getElementById('slider-node-scale'),
       valNodeScale: document.getElementById('val-node-scale'),
       checkIsGoal: document.getElementById('check-is-goal'),
+      checkIsSpawner: document.getElementById('check-is-spawner'),
+      spawnOrderContainer: document.getElementById('spawn-order-container'),
+      inputSpawnOrder: document.getElementById('input-spawn-order'),
       inputNodeColor: document.getElementById('input-node-color'),
       checkNodeColor: document.getElementById('check-node-color'),
       btnDeleteNode: document.getElementById('btn-delete-node'),
@@ -595,6 +612,18 @@
       ui.btnDeleteNode.addEventListener('click', deleteSelectedNode);
       ui.btnDeleteMulti.addEventListener('click', deleteSelectedGroup);
       
+      // Spawner settings
+      ui.checkIsSpawner.addEventListener('change', (e) => {
+        if (state.selectedNode) {
+          state.selectedNode.isSpawner = e.target.checked;
+          if (e.target.checked) ui.spawnOrderContainer.classList.remove('hidden');
+          else ui.spawnOrderContainer.classList.add('hidden');
+        }
+      });
+      ui.inputSpawnOrder.addEventListener('input', (e) => {
+        if (state.selectedNode) { state.selectedNode.spawnOrder = parseInt(e.target.value) || 1; }
+      });
+
       ui.inputEdgeColor.addEventListener('input', (e) => { if (state.selectedEdge) { state.selectedEdge.customColor = e.target.value; render(); } });
       ui.checkEdgeColor.addEventListener('change', (e) => { if (state.selectedEdge) { state.selectedEdge.useCustomColor = e.target.checked; render(); } });
       ui.btnDeleteEdge.addEventListener('click', deleteSelectedEdge);
@@ -620,8 +649,7 @@
       canvas.addEventListener('wheel', (e) => {
           e.preventDefault();
           let delta = 0;
-          if (e.ctrlKey) delta = -e.deltaY * 0.01; 
-          else delta = Math.abs(e.deltaY) >= 50 ? (e.deltaY > 0 ? -0.1 : 0.1) : -e.deltaY * 0.005;
+          delta = Math.abs(e.deltaY) >= 50 ? (e.deltaY > 0 ? -0.1 : 0.1) : -e.deltaY * 0.005;
           if (delta !== 0) setZoom(state.zoom + delta);
       }, { passive: false });
       
@@ -797,7 +825,7 @@
       for (const edge of state.edges) { if (getDistToEdge(x, y, edge) < 10/state.zoom) { clickedEdge = edge; break; } }
       if (clickedEdge) { state.selectedGroup = []; selectEdge(clickedEdge); startInlineEditing(clickedEdge, 'edge'); return; }
 
-      const newNode = { id: 'node_' + Date.now(), x: x, y: y, name: '', shape: 'rect', scale: 1.0, isGoal: false, errorCount: 0, successCount: 0, useCustomColor: false, customColor: '#ef4444' };
+      const newNode = { id: 'node_' + Date.now(), x: x, y: y, name: '', shape: 'rect', scale: 1.0, isGoal: false, isSpawner: false, spawnOrder: 1, errorCount: 0, successCount: 0, useCustomColor: false, customColor: '#ef4444' };
       state.nodes.push(newNode); state.selectedGroup = []; selectNode(newNode); startInlineEditing(newNode, 'node');
     }
 
@@ -806,6 +834,9 @@
       ui.panelNoSel.classList.add('hidden'); ui.panelEdge.classList.add('hidden'); ui.panelMulti.classList.add('hidden'); ui.panelNode.classList.remove('hidden');
       ui.selectNodeShape.value = node.shape || 'circle'; ui.sliderNodeScale.value = node.scale !== undefined ? node.scale : 1.0; ui.valNodeScale.textContent = `${(node.scale !== undefined ? node.scale : 1.0).toFixed(1)}x`;
       ui.checkIsGoal.checked = node.isGoal || false; ui.checkNodeColor.checked = node.useCustomColor || false; ui.inputNodeColor.value = node.customColor || '#ef4444';
+      ui.checkIsSpawner.checked = node.isSpawner || false;
+      if (node.isSpawner) ui.spawnOrderContainer.classList.remove('hidden'); else ui.spawnOrderContainer.classList.add('hidden');
+      ui.inputSpawnOrder.value = node.spawnOrder !== undefined ? node.spawnOrder : 1;
     }
 
     function selectEdge(edge) {
@@ -945,7 +976,10 @@
       if (state.signals.length > 500) return; const outgoingEdges = state.edges.filter(e => e.from === startNode.id); if (outgoingEdges.length === 0) return;
       outgoingEdges.forEach(edge => {
         const vol = edge.volume !== undefined ? edge.volume : 1; const spd = edge.speed !== undefined ? edge.speed : 1.0;
-        for (let k = 0; k < vol; k++) { state.signals.push({ fromId: edge.from, toId: edge.to, progress: 0, speed: (0.005 + Math.random() * 0.002) * spd }); }
+        for (let k = 0; k < vol; k++) { 
+            // 履歴（history）に自分自身（発生元のノードID）を刻み込んで発射する
+            state.signals.push({ fromId: edge.from, toId: edge.to, progress: 0, speed: (0.005 + Math.random() * 0.002) * spd, history: [startNode.id] }); 
+        }
       });
     }
 
@@ -955,7 +989,7 @@
         if (state.editingTarget) stopInlineEditing(true);
         ui.btnToggle.textContent = '■ シミュレーション停止'; ui.btnToggle.classList.replace('btn-primary', 'btn-danger');
         state.signals = []; state.nodes.forEach(n => { n.errorCount = 0; n.successCount = 0; });
-        state.frameCount = 0; state.lastTime = performance.now(); requestAnimationFrame(simulationLoop);
+        state.frameCount = 0; state.currentSpawnerIndex = 0; state.lastTime = performance.now(); requestAnimationFrame(simulationLoop);
       } else { ui.btnToggle.textContent = '▶ シミュレーション開始'; ui.btnToggle.classList.replace('btn-danger', 'btn-primary'); }
     }
 
@@ -964,19 +998,32 @@
       let deltaTime = timestamp - state.lastTime; if (deltaTime > 100) deltaTime = 16; state.lastTime = timestamp;
       const timeScale = (deltaTime / 16.6) * state.simulationSpeed;
       
+      // 発生源のリストを作成し、指定された順番(spawnOrder)で並び替える
+      let spawners = state.nodes.filter(n => n.isSpawner);
+      if (spawners.length === 0) spawners = state.nodes.filter(n => !state.edges.some(e => e.to === n.id)); // 互換性のため自動補完
+      spawners.sort((a, b) => (a.spawnOrder || 1) - (b.spawnOrder || 1));
+
       if (state.spawnMode === 'single') {
           if (state.signals.length === 0) {
               state.frameCount += timeScale;
               if (state.frameCount >= 30) { 
-                  state.frameCount = 0; const startNodes = state.nodes.filter(n => !state.edges.some(e => e.to === n.id));
-                  if (startNodes.length === 0 && state.nodes.length > 0) spawnSignal(state.nodes[0]); else startNodes.forEach(node => spawnSignal(node));
+                  state.frameCount = 0; 
+                  if (spawners.length > 0 && state.nodes.length > 0) {
+                      const targetSpawner = spawners[state.currentSpawnerIndex % spawners.length];
+                      spawnSignal(targetSpawner);
+                      state.currentSpawnerIndex++;
+                  }
               }
           } else { state.frameCount = 0; }
       } else {
           state.frameCount += timeScale;
           if (state.frameCount >= state.spawnRate) {
-            state.frameCount = 0; const startNodes = state.nodes.filter(n => !state.edges.some(e => e.to === n.id));
-            if (startNodes.length === 0 && state.nodes.length > 0) spawnSignal(state.nodes[0]); else startNodes.forEach(node => spawnSignal(node));
+            state.frameCount = 0; 
+            if (spawners.length > 0 && state.nodes.length > 0) {
+                const targetSpawner = spawners[state.currentSpawnerIndex % spawners.length];
+                spawnSignal(targetSpawner);
+                state.currentSpawnerIndex++;
+            }
           }
       }
 
@@ -985,11 +1032,21 @@
         if (sig.progress >= 1.0) {
           const toNode = state.nodes.find(n => n.id === sig.toId);
           if (toNode) {
+            // 無限ループ(往復)防止処理: 到達した拠点が履歴に含まれていれば、サイクル完了として消滅させる
+            if (sig.history && sig.history.includes(toNode.id)) {
+                state.signals.splice(i, 1);
+                continue;
+            }
+
             const nextEdges = state.edges.filter(e => e.from === toNode.id);
             if (nextEdges.length > 0) {
               nextEdges.forEach(edge => {
                 const vol = edge.volume !== undefined ? edge.volume : 1; const spd = edge.speed !== undefined ? edge.speed : 1.0;
-                for (let k = 0; k < vol; k++) { state.signals.push({ fromId: edge.from, toId: edge.to, progress: 0, speed: (0.005 + Math.random() * 0.002) * spd }); }
+                for (let k = 0; k < vol; k++) { 
+                    // 次の拠点へ向かう際、履歴に今の拠点を追加して引き継ぐ
+                    const newHistory = sig.history ? [...sig.history, toNode.id] : [toNode.id];
+                    state.signals.push({ fromId: edge.from, toId: edge.to, progress: 0, speed: (0.005 + Math.random() * 0.002) * spd, history: newHistory }); 
+                }
               });
             } else { if (toNode.isGoal) toNode.successCount++; else toNode.errorCount++; }
           }
@@ -1050,8 +1107,15 @@
             state.nodes = contents.nodes.map(n => ({ 
               id: String(n.id || 'node_' + Date.now() + Math.random()), x: Number(n.x) || 0, y: Number(n.y) || 0, 
               name: String(n.name !== undefined ? n.name : (n.text !== undefined ? n.text : '')), shape: String(n.shape || 'circle'), scale: Number(n.scale !== undefined ? n.scale : 1.0),
-              isGoal: Boolean(n.isGoal), errorCount: 0, successCount: 0, useCustomColor: Boolean(n.useCustomColor), customColor: String(n.customColor || '#ef4444')
+              isGoal: Boolean(n.isGoal), isSpawner: Boolean(n.isSpawner), spawnOrder: Number(n.spawnOrder !== undefined ? n.spawnOrder : 1),
+              errorCount: 0, successCount: 0, useCustomColor: Boolean(n.useCustomColor), customColor: String(n.customColor || '#ef4444')
             }));
+
+            // マイグレーション: もし isSpawner が一つも設定されていない古いデータの場合、自動的に始点を設定する
+            const hasSpawner = state.nodes.some(n => n.isSpawner);
+            if (!hasSpawner) {
+                state.nodes.forEach(n => { if (!contents.edges.some(e => e.to === n.id)) { n.isSpawner = true; n.spawnOrder = 1; } });
+            }
 
             state.edges = contents.edges.map(e => ({ 
               from: String(e.from), to: String(e.to), label: String(e.label !== undefined ? e.label : ''), labelPos: Number(e.labelPos !== undefined ? e.labelPos : 0.5),
@@ -1110,11 +1174,11 @@
 
     function loadSampleData() {
       state.nodes = [
-        { id: 'n1', x: 250, y: 350, name: '① 入庫', shape: 'circle', scale: 1.0, isGoal: false, errorCount: 0, successCount: 0 },
-        { id: 'n2', x: 450, y: 350, name: '② 検品', shape: 'diamond', scale: 1.0, isGoal: false, errorCount: 0, successCount: 0 },
-        { id: 'n3', x: 700, y: 200, name: '③ 梱包作業\n(手作業)', shape: 'rect', scale: 1.2, isGoal: false, errorCount: 0, successCount: 0 },
-        { id: 'n4', x: 700, y: 500, name: '④ 異常品対応', shape: 'rect', scale: 1.0, isGoal: false, errorCount: 0, successCount: 0, useCustomColor: true, customColor: '#ef4444' },
-        { id: 'n5', x: 950, y: 200, name: '⑤ 出荷完了', shape: 'rect', scale: 1.0, isGoal: true, errorCount: 0, successCount: 0 }
+        { id: 'n1', x: 250, y: 350, name: '① 入庫', shape: 'circle', scale: 1.0, isGoal: false, isSpawner: true, spawnOrder: 1, errorCount: 0, successCount: 0 },
+        { id: 'n2', x: 450, y: 350, name: '② 検品', shape: 'diamond', scale: 1.0, isGoal: false, isSpawner: false, spawnOrder: 1, errorCount: 0, successCount: 0 },
+        { id: 'n3', x: 700, y: 200, name: '③ 梱包作業\n(手作業)', shape: 'rect', scale: 1.2, isGoal: false, isSpawner: false, spawnOrder: 1, errorCount: 0, successCount: 0 },
+        { id: 'n4', x: 700, y: 500, name: '④ 異常品対応', shape: 'rect', scale: 1.0, isGoal: false, isSpawner: false, spawnOrder: 1, errorCount: 0, successCount: 0, useCustomColor: true, customColor: '#ef4444' },
+        { id: 'n5', x: 950, y: 200, name: '⑤ 出荷完了', shape: 'rect', scale: 1.0, isGoal: true, isSpawner: false, spawnOrder: 1, errorCount: 0, successCount: 0 }
       ];
       state.edges = [
         { from: 'n1', to: 'n2', label: '', labelPos: 0.5, speed: 1.0, volume: 1 },
