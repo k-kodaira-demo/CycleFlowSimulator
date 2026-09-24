@@ -1145,21 +1145,47 @@
       const dataURL = canvas.toDataURL('image/png'); const a = document.createElement('a'); a.href = dataURL; a.download = 'cycle_flow_screenshot.png'; document.body.appendChild(a); a.click(); document.body.removeChild(a);
     }
 
-    function toggleRecording() { if (!state.isRecording) startRecording(); else stopRecording(); }
-
     function startRecording() {
       if (state.editingTarget) stopInlineEditing(true);
-      const stream = canvas.captureStream(30); let mimeType = 'video/webm'; if (!MediaRecorder.isTypeSupported(mimeType)) mimeType = 'video/mp4'; 
-      try { state.mediaRecorder = new MediaRecorder(stream, { mimeType: MediaRecorder.isTypeSupported(mimeType) ? mimeType : '' }); } 
-      catch (e) { alert("お使いのブラウザは録画機能に対応していません。"); return; }
-      state.recordedChunks = []; state.mediaRecorder.ondataavailable = function(e) { if (e.data.size > 0) state.recordedChunks.push(e.data); };
+      
+      // 60fpsで滑らかにキャプチャ
+      const stream = canvas.captureStream(60); 
+      
+      // 高画質コーデックを優先
+      let mimeType = 'video/webm;codecs=vp9'; 
+      if (!MediaRecorder.isTypeSupported(mimeType)) mimeType = 'video/webm;codecs=vp8';
+      if (!MediaRecorder.isTypeSupported(mimeType)) mimeType = 'video/webm'; 
+      if (!MediaRecorder.isTypeSupported(mimeType)) mimeType = 'video/mp4'; 
+      
+      // エンコードオプション（ビットレートを8Mbpsに指定して画質劣化・ぼやけを防ぐ）
+      const options = { videoBitsPerSecond: 8000000 };
+      if (MediaRecorder.isTypeSupported(mimeType)) options.mimeType = mimeType;
+
+      try { state.mediaRecorder = new MediaRecorder(stream, options); } 
+      catch (e) { 
+          // フォールバック: ビットレート指定なしで試す
+          try { state.mediaRecorder = new MediaRecorder(stream); }
+          catch(e2) { alert("お使いのブラウザは録画機能に対応していません。"); return; }
+      }
+      
+      state.recordedChunks = []; 
+      state.mediaRecorder.ondataavailable = function(e) { if (e.data.size > 0) state.recordedChunks.push(e.data); };
       state.mediaRecorder.onstop = function() {
-        const blob = new Blob(state.recordedChunks, { type: mimeType }); const url = URL.createObjectURL(blob);
-        const a = document.createElement('a'); a.href = url; a.download = `cycle_flow_movie.${mimeType === 'video/mp4' ? 'mp4' : 'webm'}`;
+        let finalMimeType = state.mediaRecorder.mimeType || 'video/webm';
+        let ext = 'webm';
+        if(finalMimeType.includes('mp4')) ext = 'mp4';
+        
+        const blob = new Blob(state.recordedChunks, { type: finalMimeType }); 
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a'); a.href = url; a.download = `cycle_flow_movie.${ext}`;
         document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
       };
-      state.mediaRecorder.start(); state.isRecording = true; ui.btnRecord.textContent = '⏹ 録画停止'; ui.btnRecord.classList.replace('btn-secondary', 'btn-danger');
+      
+      state.mediaRecorder.start(); state.isRecording = true; 
+      ui.btnRecord.textContent = '⏹ 録画停止'; ui.btnRecord.classList.replace('btn-secondary', 'btn-danger');
     }
+    
+    function toggleRecording() { if (!state.isRecording) startRecording(); else stopRecording(); }
     
     function stopRecording() { if (state.mediaRecorder && state.mediaRecorder.state !== 'inactive') state.mediaRecorder.stop(); state.isRecording = false; ui.btnRecord.textContent = '🎥 録画開始'; ui.btnRecord.classList.replace('btn-danger', 'btn-secondary'); }
 
