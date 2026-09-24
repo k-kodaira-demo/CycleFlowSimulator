@@ -6,7 +6,7 @@
   <title>Cycle Flow Simulator</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
     
     :root {
       --bg-color: #0f172a;
@@ -178,6 +178,10 @@
           <input type="checkbox" id="check-show-badge" checked>
           <span>滞留カウント(バッジ)を表示</span>
         </label>
+        <label class="checkbox-label" style="margin-top: 12px; color: var(--accent); font-weight: bold; padding-top: 8px; border-top: 1px dashed var(--border-color);">
+          <input type="checkbox" id="check-presentation">
+          <span>プレゼンモード (太字・高視認性)</span>
+        </label>
       </div>
     </div>
 
@@ -210,7 +214,6 @@
         </div>
       </div>
       
-      <!-- Spawner Setting -->
       <div class="form-group" style="margin-top: 15px; padding: 10px; background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3); border-radius: 4px;">
         <label class="checkbox-label" style="color: var(--accent);">
           <input type="checkbox" id="check-is-spawner">
@@ -294,46 +297,20 @@
 
   <script>
     const state = {
-      nodes: [],
-      edges: [],
-      signals: [],
-      isRunning: false,
-      simulationSpeed: 1.0,
-      spawnMode: 'continuous',
-      spawnRate: 60,
-      frameCount: 0,
-      currentSpawnerIndex: 0, // 発生順番の管理用
+      nodes: [], edges: [], signals: [],
+      isRunning: false, simulationSpeed: 1.0, spawnMode: 'continuous', spawnRate: 60, frameCount: 0, currentSpawnerIndex: 0,
       
-      selectedNode: null,
-      selectedEdge: null,
-      selectedGroup: [], 
+      selectedNode: null, selectedEdge: null, selectedGroup: [], 
+      isDragging: false, draggedNode: null, dragOffsetX: 0, dragOffsetY: 0,
+      isDraggingLabel: false, draggedLabelEdge: null,
+      isDraggingEdgeHandle: false, draggedEdgeHandleEdge: null, draggedEdgeHandleType: null,
+      isConnecting: false, connectFromNode: null,
       
-      isDragging: false,
-      draggedNode: null,
-      dragOffsetX: 0,
-      dragOffsetY: 0,
+      bgDragMode: 'pan', isBoxSelecting: false, boxStartX: 0, boxStartY: 0, boxCurrentX: 0, boxCurrentY: 0,
+      panX: 0, panY: 0, zoom: 1.0, isPanning: false, panStartX: 0, panStartY: 0, mouseX: 0, mouseY: 0,
       
-      isDraggingLabel: false,
-      draggedLabelEdge: null,
-
-      isDraggingEdgeHandle: false,
-      draggedEdgeHandleEdge: null,
-      draggedEdgeHandleType: null,
-      
-      isConnecting: false,
-      connectFromNode: null,
-      
-      bgDragMode: 'pan', 
-      
-      isBoxSelecting: false,
-      boxStartX: 0, boxStartY: 0, boxCurrentX: 0, boxCurrentY: 0,
-
-      panX: 0, panY: 0, zoom: 1.0, isPanning: false, panStartX: 0, panStartY: 0,
-      mouseX: 0, mouseY: 0,
-      
-      theme: 'dark', enableGlow: true, enableSnap: true, showCountBadge: true,
-      alignGuides: [], lastTime: 0,
-      editingTarget: null, editingType: null,
+      theme: 'dark', enableGlow: true, enableSnap: true, showCountBadge: true, presentationMode: false,
+      alignGuides: [], lastTime: 0, editingTarget: null, editingType: null,
       isRecording: false, mediaRecorder: null, recordedChunks: []
     };
 
@@ -360,47 +337,32 @@
 
     const ui = {
       btnToggle: document.getElementById('btn-toggle-sim'),
-      sliderSpawn: document.getElementById('slider-spawn'),
-      valSpawn: document.getElementById('val-spawn'),
-      sliderSpeed: document.getElementById('slider-speed'),
-      valSpeed: document.getElementById('val-speed'),
+      sliderSpawn: document.getElementById('slider-spawn'), valSpawn: document.getElementById('val-spawn'),
+      sliderSpeed: document.getElementById('slider-speed'), valSpeed: document.getElementById('val-speed'),
       selectTheme: document.getElementById('select-theme'),
       checkEnableGlow: document.getElementById('check-enable-glow'),
       checkSnap: document.getElementById('check-snap'),
       checkShowBadge: document.getElementById('check-show-badge'),
+      checkPresentation: document.getElementById('check-presentation'),
       panelNoSel: document.getElementById('no-selection'),
       panelNode: document.getElementById('node-properties'),
       panelEdge: document.getElementById('edge-properties'),
       panelMulti: document.getElementById('multi-selection-properties'),
       multiSelCount: document.getElementById('multi-sel-count'),
       selectNodeShape: document.getElementById('select-node-shape'),
-      sliderNodeScale: document.getElementById('slider-node-scale'),
-      valNodeScale: document.getElementById('val-node-scale'),
+      sliderNodeScale: document.getElementById('slider-node-scale'), valNodeScale: document.getElementById('val-node-scale'),
       checkIsGoal: document.getElementById('check-is-goal'),
-      checkIsSpawner: document.getElementById('check-is-spawner'),
-      spawnOrderContainer: document.getElementById('spawn-order-container'),
-      inputSpawnOrder: document.getElementById('input-spawn-order'),
-      inputNodeColor: document.getElementById('input-node-color'),
-      checkNodeColor: document.getElementById('check-node-color'),
-      btnDeleteNode: document.getElementById('btn-delete-node'),
-      btnDeleteMulti: document.getElementById('btn-delete-multi'),
-      inputEdgeColor: document.getElementById('input-edge-color'),
-      checkEdgeColor: document.getElementById('check-edge-color'),
+      checkIsSpawner: document.getElementById('check-is-spawner'), spawnOrderContainer: document.getElementById('spawn-order-container'), inputSpawnOrder: document.getElementById('input-spawn-order'),
+      inputNodeColor: document.getElementById('input-node-color'), checkNodeColor: document.getElementById('check-node-color'),
+      btnDeleteNode: document.getElementById('btn-delete-node'), btnDeleteMulti: document.getElementById('btn-delete-multi'),
+      inputEdgeColor: document.getElementById('input-edge-color'), checkEdgeColor: document.getElementById('check-edge-color'),
       btnDeleteEdge: document.getElementById('btn-delete-edge'),
-      sliderEdgeSpeed: document.getElementById('slider-edge-speed'),
-      valEdgeSpeed: document.getElementById('val-edge-speed'),
-      sliderEdgeVolume: document.getElementById('slider-edge-volume'),
-      valEdgeVolume: document.getElementById('val-edge-volume'),
-      btnSave: document.getElementById('btn-save'),
-      btnLoad: document.getElementById('btn-load'),
-      fileInput: document.getElementById('file-input'),
-      btnScreenshot: document.getElementById('btn-screenshot'),
-      btnRecord: document.getElementById('btn-record'),
+      sliderEdgeSpeed: document.getElementById('slider-edge-speed'), valEdgeSpeed: document.getElementById('val-edge-speed'),
+      sliderEdgeVolume: document.getElementById('slider-edge-volume'), valEdgeVolume: document.getElementById('val-edge-volume'),
+      btnSave: document.getElementById('btn-save'), btnLoad: document.getElementById('btn-load'), fileInput: document.getElementById('file-input'),
+      btnScreenshot: document.getElementById('btn-screenshot'), btnRecord: document.getElementById('btn-record'),
       inlineEditor: document.getElementById('inline-editor'),
-      zoomLevel: document.getElementById('zoom-level'),
-      btnZoomIn: document.getElementById('btn-zoom-in'),
-      btnZoomOut: document.getElementById('btn-zoom-out'),
-      btnZoomReset: document.getElementById('btn-zoom-reset')
+      zoomLevel: document.getElementById('zoom-level'), btnZoomIn: document.getElementById('btn-zoom-in'), btnZoomOut: document.getElementById('btn-zoom-out'), btnZoomReset: document.getElementById('btn-zoom-reset')
     };
 
     function hexToRgba(hex, alpha) {
@@ -437,12 +399,21 @@
 
     function getNodeSize(node) {
       const scale = node.scale !== undefined ? Number(node.scale) : 1.0;
-      ctx.font = '600 13px Inter, sans-serif'; const textInfo = measureMultilineText(ctx, String(node.name || ''), 13);
+      const isPresen = state.presentationMode;
+      const fontSize = isPresen ? 16 : 13;
+      const fontWeight = isPresen ? '800' : '600';
+      
+      ctx.font = `${fontWeight} ${fontSize}px Inter, sans-serif`; 
+      const textInfo = measureMultilineText(ctx, String(node.name || ''), fontSize);
+      
       let width, height;
-      if (node.shape === 'rect') { width = Math.max(120, textInfo.width + 40) * scale; height = Math.max(46, textInfo.height + 20) * scale; } 
-      else if (node.shape === 'diamond') { width = Math.max(140, textInfo.width + 60) * scale; height = Math.max(80, textInfo.height + 40) * scale; } 
-      else { const r = Math.max(35, (Math.max(textInfo.width, textInfo.height) + 20) / 2) * scale; width = r * 2; height = r * 2; }
-      return { width, height, scale };
+      const padW = isPresen ? 50 : 40;
+      const padH = isPresen ? 30 : 20;
+      
+      if (node.shape === 'rect') { width = Math.max(isPresen?140:120, textInfo.width + padW) * scale; height = Math.max(isPresen?60:46, textInfo.height + padH) * scale; } 
+      else if (node.shape === 'diamond') { width = Math.max(isPresen?160:140, textInfo.width + padW+20) * scale; height = Math.max(isPresen?100:80, textInfo.height + padH+20) * scale; } 
+      else { const r = Math.max(isPresen?45:35, (Math.max(textInfo.width, textInfo.height) + padH) / 2) * scale; width = r * 2; height = r * 2; }
+      return { width, height, scale, fontSize, fontWeight };
     }
 
     function isMouseOnNode(worldX, worldY, node) {
@@ -515,18 +486,29 @@
       if (curve.isCurved) {
         const mt = 1 - t; midX = mt * mt * curve.startX + 2 * mt * t * curve.cpX + t * t * curve.endX; midY = mt * mt * curve.startY + 2 * mt * t * curve.cpY + t * t * curve.endY;
       } else { midX = curve.startX + (curve.endX - curve.startX) * t; midY = curve.startY + (curve.endY - curve.startY) * t; }
-      ctx.font = '12px Inter, sans-serif'; const textInfo = measureMultilineText(ctx, String(edge.label), 12);
-      return { x: midX - textInfo.width/2 - 8, y: midY - textInfo.height/2 - 8, w: textInfo.width + 16, h: textInfo.height + 16, midX, midY };
+      
+      const isPresen = state.presentationMode;
+      const fontSize = isPresen ? 14 : 12;
+      ctx.font = `${isPresen?'700':'400'} ${fontSize}px Inter, sans-serif`; 
+      const textInfo = measureMultilineText(ctx, String(edge.label), fontSize);
+      const pad = isPresen ? 12 : 8;
+      
+      return { x: midX - textInfo.width/2 - pad, y: midY - textInfo.height/2 - pad, w: textInfo.width + pad*2, h: textInfo.height + pad*2, midX, midY, fontSize };
     }
 
     function updateInlineEditorPosition() {
       if (!state.editingTarget || !state.editingType) return;
       const target = state.editingTarget; const editor = ui.inlineEditor;
+      const isPresen = state.presentationMode;
+      
       let w = 100, h = 30, worldPx = 0, worldPy = 0;
+      let fontSize = isPresen ? 16 : 13;
 
       if (state.editingType === 'node') {
         const size = getNodeSize(target); w = size.width - 10; h = size.height - 10; worldPx = target.x - w/2; worldPy = target.y - h/2;
+        fontSize = size.fontSize;
       } else if (state.editingType === 'edge') {
+        fontSize = isPresen ? 14 : 12;
         const rect = getLabelRect(target);
         if (rect) { w = rect.w; h = rect.h; worldPx = rect.x; worldPy = rect.y; } 
         else {
@@ -541,7 +523,7 @@
       }
       const screenPos = getScreenFromWorld(worldPx, worldPy);
       editor.style.left = `${screenPos.x}px`; editor.style.top = `${screenPos.y}px`;
-      editor.style.width = `${w * state.zoom}px`; editor.style.fontSize = `${13 * state.zoom}px`;
+      editor.style.width = `${w * state.zoom}px`; editor.style.fontSize = `${fontSize * state.zoom}px`;
     }
 
     function startInlineEditing(target, type = 'node') {
@@ -601,6 +583,7 @@
       ui.checkEnableGlow.addEventListener('change', (e) => { state.enableGlow = e.target.checked; render(); });
       ui.checkSnap.addEventListener('change', (e) => { state.enableSnap = e.target.checked; });
       ui.checkShowBadge.addEventListener('change', (e) => { state.showCountBadge = e.target.checked; render(); });
+      ui.checkPresentation.addEventListener('change', (e) => { state.presentationMode = e.target.checked; if(state.editingTarget) stopInlineEditing(true); render(); });
       
       document.querySelectorAll('input[name="bg-drag-mode"]').forEach(radio => { radio.addEventListener('change', (e) => { state.bgDragMode = e.target.value; }); });
 
@@ -612,17 +595,13 @@
       ui.btnDeleteNode.addEventListener('click', deleteSelectedNode);
       ui.btnDeleteMulti.addEventListener('click', deleteSelectedGroup);
       
-      // Spawner settings
       ui.checkIsSpawner.addEventListener('change', (e) => {
         if (state.selectedNode) {
           state.selectedNode.isSpawner = e.target.checked;
-          if (e.target.checked) ui.spawnOrderContainer.classList.remove('hidden');
-          else ui.spawnOrderContainer.classList.add('hidden');
+          if (e.target.checked) ui.spawnOrderContainer.classList.remove('hidden'); else ui.spawnOrderContainer.classList.add('hidden');
         }
       });
-      ui.inputSpawnOrder.addEventListener('input', (e) => {
-        if (state.selectedNode) { state.selectedNode.spawnOrder = parseInt(e.target.value) || 1; }
-      });
+      ui.inputSpawnOrder.addEventListener('input', (e) => { if (state.selectedNode) { state.selectedNode.spawnOrder = parseInt(e.target.value) || 1; } });
 
       ui.inputEdgeColor.addEventListener('input', (e) => { if (state.selectedEdge) { state.selectedEdge.customColor = e.target.value; render(); } });
       ui.checkEdgeColor.addEventListener('change', (e) => { if (state.selectedEdge) { state.selectedEdge.useCustomColor = e.target.checked; render(); } });
@@ -647,9 +626,8 @@
       canvas.addEventListener('dblclick', handleDoubleClick);
       
       canvas.addEventListener('wheel', (e) => {
-          e.preventDefault();
-          let delta = 0;
-          delta = Math.abs(e.deltaY) >= 50 ? (e.deltaY > 0 ? -0.1 : 0.1) : -e.deltaY * 0.005;
+          e.preventDefault(); 
+          let delta = Math.abs(e.deltaY) >= 50 ? (e.deltaY > 0 ? -0.1 : 0.1) : -e.deltaY * 0.005;
           if (delta !== 0) setZoom(state.zoom + delta);
       }, { passive: false });
       
@@ -874,6 +852,7 @@
       const isSelected = state.selectedNode === node || state.selectedGroup.includes(node);
       const hasOutgoing = state.edges.some(e => e.from === node.id);
       const isError = !hasOutgoing && !node.isGoal; const isSuccess = (!hasOutgoing && node.isGoal) || (node.isGoal && node.successCount > 0);
+      const isPresen = state.presentationMode;
 
       let nodeStrokeColor = getColor('nodeDefaultBorder'); let glowColor = null;
       if (isSelected) { nodeStrokeColor = getColor('glowSelected'); glowColor = THEME_COLORS[state.theme].glowSelected; }
@@ -883,7 +862,9 @@
 
       if (state.enableGlow) { ctx.shadowColor = 'rgba(0,0,0,0.5)'; ctx.shadowBlur = 10; ctx.shadowOffsetY = 4; if (glowColor) { ctx.shadowColor = glowColor; ctx.shadowBlur = 15; ctx.shadowOffsetY = 0;} }
 
-      ctx.fillStyle = getColor('nodeBg'); ctx.strokeStyle = nodeStrokeColor; ctx.lineWidth = (isSelected || glowColor) ? 3 : 2;
+      ctx.fillStyle = getColor('nodeBg'); ctx.strokeStyle = nodeStrokeColor; 
+      ctx.lineWidth = isPresen ? (isSelected || glowColor ? 5 : 4) : (isSelected || glowColor ? 3 : 2);
+      
       const size = getNodeSize(node);
 
       if (node.shape === 'rect') {
@@ -895,39 +876,49 @@
       } else { ctx.beginPath(); ctx.arc(node.x, node.y, size.width/2, 0, Math.PI * 2); ctx.fill(); ctx.stroke(); }
 
       ctx.shadowBlur = 0;
-      if (!isEditing) { ctx.fillStyle = getColor('text'); ctx.font = '600 13px Inter, sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; drawMultilineText(ctx, node.name, node.x, node.y, 13); }
+      if (!isEditing) { ctx.fillStyle = getColor('text'); ctx.font = `${size.fontWeight} ${size.fontSize}px Inter, sans-serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; drawMultilineText(ctx, node.name, node.x, node.y, size.fontSize); }
       if (state.showCountBadge && !isEditing) { if (isError && node.errorCount > 0) drawBadge(node, node.errorCount, '#ef4444'); else if (isSuccess && node.successCount > 0) drawBadge(node, node.successCount, '#10b981'); }
       ctx.restore();
     }
 
     function drawBadge(node, count, color) {
+      const isPresen = state.presentationMode;
+      const radius = isPresen ? 16 : 12;
+      const fontSize = isPresen ? 14 : 11;
       const size = getNodeSize(node); const offsetX = size.width/2 - (10 * size.scale); const offsetY = -(size.height/2) + (5 * size.scale);
-      ctx.beginPath(); ctx.arc(node.x + offsetX, node.y + offsetY, 12, 0, Math.PI*2); ctx.fillStyle = color; ctx.fill(); ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 1.5; ctx.stroke();
-      ctx.fillStyle = '#ffffff'; ctx.font = 'bold 11px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(count > 99 ? '99+' : count, node.x + offsetX, node.y + offsetY);
+      
+      ctx.beginPath(); ctx.arc(node.x + offsetX, node.y + offsetY, radius, 0, Math.PI*2); ctx.fillStyle = color; ctx.fill(); 
+      ctx.strokeStyle = '#ffffff'; ctx.lineWidth = isPresen ? 2 : 1.5; ctx.stroke();
+      ctx.fillStyle = '#ffffff'; ctx.font = `bold ${fontSize}px sans-serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(count > 99 ? '99+' : count, node.x + offsetX, node.y + offsetY);
     }
 
     function drawEdge(edge) {
       const curve = getEdgeCurve(edge); if (!curve) return; ctx.save();
       const isSelected = state.selectedEdge === edge; const isDraggedLabel = state.draggedLabelEdge === edge; const isHandleDragging = state.isDraggingEdgeHandle && state.draggedEdgeHandleEdge === edge; const isEditingLabel = (state.editingType === 'edge' && state.editingTarget === edge);
+      const isPresen = state.presentationMode;
       
       let edgeColor = getColor('edgeLine');
-      if (isSelected) edgeColor = '#3b82f6'; else if (edge.useCustomColor && edge.customColor) edgeColor = hexToRgba(edge.customColor, 0.9);
+      if (isSelected) edgeColor = '#3b82f6'; 
+      else if (edge.useCustomColor && edge.customColor) edgeColor = hexToRgba(edge.customColor, 0.9);
+      else if (isPresen) edgeColor = state.theme === 'dark' ? '#cbd5e1' : '#334155'; 
 
       let visualStartX = curve.startX, visualStartY = curve.startY; let visualEndX = curve.endX, visualEndY = curve.endY; let arrowAngle = curve.arrowAngle;
 
+      const baseLineWidth = isPresen ? 4 : 2;
       ctx.beginPath();
       if (isHandleDragging) {
         if (state.draggedEdgeHandleType === 'from') { ctx.moveTo(state.mouseX, state.mouseY); ctx.lineTo(curve.endX, curve.endY); arrowAngle = Math.atan2(curve.endY - state.mouseY, curve.endX - state.mouseX); visualStartX = state.mouseX; visualStartY = state.mouseY; } 
         else { ctx.moveTo(curve.startX, curve.startY); ctx.lineTo(state.mouseX, state.mouseY); arrowAngle = Math.atan2(state.mouseY - curve.startY, state.mouseX - curve.startX); visualEndX = state.mouseX; visualEndY = state.mouseY; }
-        ctx.strokeStyle = edgeColor; ctx.lineWidth = isSelected ? 3 : 2; ctx.setLineDash([5, 5]); ctx.stroke(); ctx.setLineDash([]);
+        ctx.strokeStyle = edgeColor; ctx.lineWidth = isSelected ? baseLineWidth + (isPresen?2:1) : baseLineWidth; ctx.setLineDash([5, 5]); ctx.stroke(); ctx.setLineDash([]);
       } else {
         ctx.moveTo(curve.startX, curve.startY);
         if (curve.isCurved) { ctx.quadraticCurveTo(curve.cpX, curve.cpY, curve.endX, curve.endY); } else { ctx.lineTo(curve.endX, curve.endY); }
-        ctx.strokeStyle = edgeColor; ctx.lineWidth = isSelected ? 3 : 2; ctx.stroke();
+        ctx.strokeStyle = edgeColor; ctx.lineWidth = isSelected ? baseLineWidth + (isPresen?2:1) : baseLineWidth; ctx.stroke();
       }
 
+      const arrowSize = isPresen ? 15 : 10;
       ctx.beginPath(); ctx.moveTo(visualEndX, visualEndY);
-      ctx.lineTo(visualEndX - 10 * Math.cos(arrowAngle - Math.PI/6), visualEndY - 10 * Math.sin(arrowAngle - Math.PI/6)); ctx.lineTo(visualEndX - 10 * Math.cos(arrowAngle + Math.PI/6), visualEndY - 10 * Math.sin(arrowAngle + Math.PI/6));
+      ctx.lineTo(visualEndX - arrowSize * Math.cos(arrowAngle - Math.PI/6), visualEndY - arrowSize * Math.sin(arrowAngle - Math.PI/6)); ctx.lineTo(visualEndX - arrowSize * Math.cos(arrowAngle + Math.PI/6), visualEndY - arrowSize * Math.sin(arrowAngle + Math.PI/6));
       ctx.closePath(); ctx.fillStyle = edgeColor; ctx.fill();
 
       if (!isHandleDragging && !isEditingLabel) {
@@ -935,29 +926,38 @@
         if (rect) {
           let isGlowing = false; const pos = edge.labelPos !== undefined ? edge.labelPos : 0.5; const hitRange = 30 / curve.len;
           for (const sig of state.signals) { if (sig.fromId === edge.from && sig.toId === edge.to) { if (Math.abs(sig.progress - pos) < hitRange) { isGlowing = true; break; } } }
-          ctx.fillStyle = isGlowing ? (state.theme === 'dark' ? '#1e293b' : '#eff6ff') : getColor('edgeLabelBg');
+          
+          let bgColor = isGlowing ? (state.theme === 'dark' ? '#1e293b' : '#eff6ff') : getColor('edgeLabelBg');
+          if(isPresen && !isGlowing && state.theme === 'light') bgColor = 'rgba(255, 255, 255, 1.0)';
+          if(isPresen && !isGlowing && state.theme === 'dark') bgColor = 'rgba(15, 23, 42, 1.0)';
+
           if (isGlowing && state.enableGlow) { ctx.shadowColor = '#3b82f6'; ctx.shadowBlur = 12; ctx.strokeStyle = '#3b82f6'; } 
           else { ctx.shadowBlur = (isDraggedLabel && state.enableGlow) ? 8 : 0; ctx.shadowColor = 'rgba(0,0,0,0.5)'; ctx.strokeStyle = isSelected ? '#3b82f6' : getColor('nodeDefaultBorder'); }
 
-          ctx.fillRect(rect.x, rect.y, rect.w, rect.h); ctx.lineWidth = (isGlowing || isSelected) ? 2 : 1; ctx.strokeRect(rect.x, rect.y, rect.w, rect.h);
-          ctx.shadowBlur = 0; ctx.fillStyle = isGlowing ? '#3b82f6' : (isSelected ? getColor('text') : getColor('edgeLabelText'));
-          ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.font = '12px Inter, sans-serif'; drawMultilineText(ctx, edge.label, rect.midX, rect.midY, 12);
+          ctx.fillStyle = bgColor; ctx.fillRect(rect.x, rect.y, rect.w, rect.h); 
+          ctx.lineWidth = isPresen ? ((isGlowing || isSelected) ? 3 : 2) : ((isGlowing || isSelected) ? 2 : 1); 
+          ctx.strokeRect(rect.x, rect.y, rect.w, rect.h);
+          
+          ctx.shadowBlur = 0; ctx.fillStyle = isGlowing ? '#3b82f6' : (isSelected ? getColor('text') : (isPresen ? (state.theme==='dark'?'#f8fafc':'#0f172a') : getColor('edgeLabelText')));
+          ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.font = `${isPresen?'700':'400'} ${rect.fontSize}px Inter, sans-serif`; 
+          drawMultilineText(ctx, edge.label, rect.midX, rect.midY, rect.fontSize);
         }
       }
 
       if (isSelected && !isHandleDragging) {
-        ctx.beginPath(); ctx.arc(visualStartX, visualStartY, 5/state.zoom, 0, Math.PI * 2); ctx.fillStyle = '#eff6ff'; ctx.fill(); ctx.lineWidth = 2/state.zoom; ctx.strokeStyle = '#3b82f6'; ctx.stroke();
-        ctx.beginPath(); ctx.arc(visualEndX, visualEndY, 5/state.zoom, 0, Math.PI * 2); ctx.fillStyle = '#eff6ff'; ctx.fill(); ctx.lineWidth = 2/state.zoom; ctx.strokeStyle = '#3b82f6'; ctx.stroke();
+        const handleRad = isPresen ? 7 : 5;
+        ctx.beginPath(); ctx.arc(visualStartX, visualStartY, handleRad/state.zoom, 0, Math.PI * 2); ctx.fillStyle = '#eff6ff'; ctx.fill(); ctx.lineWidth = (isPresen?3:2)/state.zoom; ctx.strokeStyle = '#3b82f6'; ctx.stroke();
+        ctx.beginPath(); ctx.arc(visualEndX, visualEndY, handleRad/state.zoom, 0, Math.PI * 2); ctx.fillStyle = '#eff6ff'; ctx.fill(); ctx.lineWidth = (isPresen?3:2)/state.zoom; ctx.strokeStyle = '#3b82f6'; ctx.stroke();
       }
       ctx.restore();
     }
 
     function drawConnectingLine() {
-      if (!state.isConnecting || !state.connectFromNode) return; ctx.save(); ctx.beginPath(); ctx.moveTo(state.connectFromNode.x, state.connectFromNode.y); ctx.lineTo(state.mouseX, state.mouseY); ctx.strokeStyle = 'rgba(59, 130, 246, 0.8)'; ctx.lineWidth = 2; ctx.setLineDash([5, 5]); ctx.stroke(); ctx.restore();
+      if (!state.isConnecting || !state.connectFromNode) return; ctx.save(); ctx.beginPath(); ctx.moveTo(state.connectFromNode.x, state.connectFromNode.y); ctx.lineTo(state.mouseX, state.mouseY); ctx.strokeStyle = 'rgba(59, 130, 246, 0.8)'; ctx.lineWidth = state.presentationMode ? 4 : 2; ctx.setLineDash([5, 5]); ctx.stroke(); ctx.restore();
     }
 
     function drawAlignGuides() {
-      if (!state.alignGuides || state.alignGuides.length === 0) return; ctx.save(); ctx.strokeStyle = '#f472b6'; ctx.setLineDash([4, 4]); ctx.lineWidth = 1 / state.zoom;
+      if (!state.alignGuides || state.alignGuides.length === 0) return; ctx.save(); ctx.strokeStyle = '#f472b6'; ctx.setLineDash([4, 4]); ctx.lineWidth = (state.presentationMode ? 2 : 1) / state.zoom;
       for (const guide of state.alignGuides) {
         ctx.beginPath();
         if (guide.type === 'x') { ctx.moveTo(guide.x, guide.y1); ctx.lineTo(guide.x, guide.y2); } else if (guide.type === 'y') { ctx.moveTo(guide.x1, guide.y); ctx.lineTo(guide.x2, guide.y); } else if (guide.type === 'line') { ctx.moveTo(guide.x1, guide.y1); ctx.lineTo(guide.x2, guide.y2); }
@@ -976,10 +976,7 @@
       if (state.signals.length > 500) return; const outgoingEdges = state.edges.filter(e => e.from === startNode.id); if (outgoingEdges.length === 0) return;
       outgoingEdges.forEach(edge => {
         const vol = edge.volume !== undefined ? edge.volume : 1; const spd = edge.speed !== undefined ? edge.speed : 1.0;
-        for (let k = 0; k < vol; k++) { 
-            // 履歴（history）に自分自身（発生元のノードID）を刻み込んで発射する
-            state.signals.push({ fromId: edge.from, toId: edge.to, progress: 0, speed: (0.005 + Math.random() * 0.002) * spd, history: [startNode.id] }); 
-        }
+        for (let k = 0; k < vol; k++) { state.signals.push({ fromId: edge.from, toId: edge.to, progress: 0, speed: (0.005 + Math.random() * 0.002) * spd, history: [startNode.id] }); }
       });
     }
 
@@ -998,11 +995,9 @@
       let deltaTime = timestamp - state.lastTime; if (deltaTime > 100) deltaTime = 16; state.lastTime = timestamp;
       const timeScale = (deltaTime / 16.6) * state.simulationSpeed;
       
-      // 発生源のリストを作成
       let spawners = state.nodes.filter(n => n.isSpawner);
-      if (spawners.length === 0) spawners = state.nodes.filter(n => !state.edges.some(e => e.to === n.id)); // 互換性のため自動補完
+      if (spawners.length === 0) spawners = state.nodes.filter(n => !state.edges.some(e => e.to === n.id)); 
       
-      // ユニークな発生順番を抽出し、昇順に並べる
       const uniqueOrders = [...new Set(spawners.map(n => n.spawnOrder || 1))].sort((a, b) => a - b);
 
       if (state.spawnMode === 'single') {
@@ -1036,21 +1031,12 @@
         if (sig.progress >= 1.0) {
           const toNode = state.nodes.find(n => n.id === sig.toId);
           if (toNode) {
-            // 無限ループ(往復)防止処理: 到達した拠点が履歴に含まれていれば、サイクル完了として消滅させる
-            if (sig.history && sig.history.includes(toNode.id)) {
-                state.signals.splice(i, 1);
-                continue;
-            }
-
+            if (sig.history && sig.history.includes(toNode.id)) { state.signals.splice(i, 1); continue; }
             const nextEdges = state.edges.filter(e => e.from === toNode.id);
             if (nextEdges.length > 0) {
               nextEdges.forEach(edge => {
                 const vol = edge.volume !== undefined ? edge.volume : 1; const spd = edge.speed !== undefined ? edge.speed : 1.0;
-                for (let k = 0; k < vol; k++) { 
-                    // 次の拠点へ向かう際、履歴に今の拠点を追加して引き継ぐ
-                    const newHistory = sig.history ? [...sig.history, toNode.id] : [toNode.id];
-                    state.signals.push({ fromId: edge.from, toId: edge.to, progress: 0, speed: (0.005 + Math.random() * 0.002) * spd, history: newHistory }); 
-                }
+                for (let k = 0; k < vol; k++) { const newHistory = sig.history ? [...sig.history, toNode.id] : [toNode.id]; state.signals.push({ fromId: edge.from, toId: edge.to, progress: 0, speed: (0.005 + Math.random() * 0.002) * spd, history: newHistory }); }
               });
             } else { if (toNode.isGoal) toNode.successCount++; else toNode.errorCount++; }
           }
@@ -1073,13 +1059,14 @@
       if (state.enableGlow) { ctx.shadowBlur = 15; ctx.shadowColor = '#3b82f6'; }
       ctx.fillStyle = (state.theme === 'dark') ? '#eff6ff' : '#3b82f6';
       
+      const signalRadius = state.presentationMode ? 8 : 5;
       state.signals.forEach(sig => {
         const edge = state.edges.find(e => e.from === sig.fromId && e.to === sig.toId); if (!edge) return;
         const curve = getEdgeCurve(edge); if (!curve) return;
         const t = sig.progress; const mt = 1 - t;
         const currentX = curve.isCurved ? (mt * mt * curve.startX + 2 * mt * t * curve.cpX + t * t * curve.endX) : (curve.startX + (curve.endX - curve.startX) * t);
         const currentY = curve.isCurved ? (mt * mt * curve.startY + 2 * mt * t * curve.cpY + t * t * curve.endY) : (curve.startY + (curve.endY - curve.startY) * t);
-        ctx.beginPath(); ctx.arc(currentX, currentY, 5, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.arc(currentX, currentY, signalRadius, 0, Math.PI * 2); ctx.fill();
       });
       ctx.shadowBlur = 0; state.nodes.forEach(node => drawNode(node)); ctx.restore();
       if(state.editingTarget && state.editingType) updateInlineEditorPosition();
@@ -1091,7 +1078,8 @@
         nodes: state.nodes, edges: state.edges,
         settings: { 
           spawnVal: parseInt(ui.sliderSpawn.value), spawnRate: state.spawnRate, simulationSpeed: state.simulationSpeed, 
-          enableSnap: state.enableSnap, showCountBadge: state.showCountBadge, theme: state.theme, enableGlow: state.enableGlow, bgDragMode: state.bgDragMode
+          enableSnap: state.enableSnap, showCountBadge: state.showCountBadge, theme: state.theme, enableGlow: state.enableGlow, bgDragMode: state.bgDragMode,
+          presentationMode: state.presentationMode
         }
       };
       const jsonStr = JSON.stringify(saveData); const blob = new Blob([jsonStr], { type: 'application/json' });
@@ -1115,18 +1103,15 @@
               errorCount: 0, successCount: 0, useCustomColor: Boolean(n.useCustomColor), customColor: String(n.customColor || '#ef4444')
             }));
 
-            // マイグレーション: もし isSpawner が一つも設定されていない古いデータの場合、自動的に始点を設定する
             const hasSpawner = state.nodes.some(n => n.isSpawner);
-            if (!hasSpawner) {
-                state.nodes.forEach(n => { if (!contents.edges.some(e => e.to === n.id)) { n.isSpawner = true; n.spawnOrder = 1; } });
-            }
+            if (!hasSpawner) { state.nodes.forEach(n => { if (!contents.edges.some(e => e.to === n.id)) { n.isSpawner = true; n.spawnOrder = 1; } }); }
 
             state.edges = contents.edges.map(e => ({ 
               from: String(e.from), to: String(e.to), label: String(e.label !== undefined ? e.label : ''), labelPos: Number(e.labelPos !== undefined ? e.labelPos : 0.5),
               useCustomColor: Boolean(e.useCustomColor), customColor: String(e.customColor || '#ef4444'), speed: Number(e.speed !== undefined ? e.speed : 1.0), volume: Number(e.volume !== undefined ? e.volume : 1)
             }));
 
-            const ds = { spawnVal: 50, simulationSpeed: 1.0, enableSnap: true, showCountBadge: true, theme: 'dark', enableGlow: true, bgDragMode: 'pan' };
+            const ds = { spawnVal: 50, simulationSpeed: 1.0, enableSnap: true, showCountBadge: true, theme: 'dark', enableGlow: true, bgDragMode: 'pan', presentationMode: false };
             const ls = contents.settings || ds;
             
             let loadedSpawnVal = 50;
@@ -1139,10 +1124,12 @@
             state.showCountBadge = ls.showCountBadge !== undefined ? Boolean(ls.showCountBadge) : ds.showCountBadge;
             state.theme = String(ls.theme || ds.theme); state.enableGlow = ls.enableGlow !== undefined ? Boolean(ls.enableGlow) : ds.enableGlow;
             state.bgDragMode = String(ls.bgDragMode || ds.bgDragMode);
+            state.presentationMode = ls.presentationMode !== undefined ? Boolean(ls.presentationMode) : false;
 
             ui.sliderSpeed.value = state.simulationSpeed; ui.valSpeed.textContent = `${state.simulationSpeed.toFixed(1)}x`;
             ui.checkSnap.checked = state.enableSnap; ui.checkShowBadge.checked = state.showCountBadge;
             ui.selectTheme.value = state.theme; ui.checkEnableGlow.checked = state.enableGlow;
+            ui.checkPresentation.checked = state.presentationMode;
             const radioBg = document.querySelector(`input[name="bg-drag-mode"][value="${state.bgDragMode}"]`); if (radioBg) radioBg.checked = true;
             
             state.isDragging = false; state.draggedNode = null; state.isDraggingLabel = false; state.draggedLabelEdge = null; state.isConnecting = false; state.connectFromNode = null; state.isBoxSelecting = false; state.selectedGroup = [];
