@@ -281,7 +281,9 @@
       return `rgba(${r}, ${g}, ${b}, ${alpha})`;
     }
 
-    const canvas = document.getElementById('sim-canvas'); const ctx = canvas.getContext('2d'); let bgPattern = null;
+    const canvas = document.getElementById('sim-canvas'); 
+    const ctx = canvas.getContext('2d'); 
+    let bgPattern = null;
 
     const ui = {
       btnToggle: document.getElementById('btn-toggle-sim'), btnAddZone: document.getElementById('btn-add-zone'),
@@ -304,10 +306,24 @@
     };
 
     function createBackgroundPattern() {
-      const pCanvas = document.createElement('canvas'); pCanvas.width = 40; pCanvas.height = 40; const pCtx = pCanvas.getContext('2d');
-      pCtx.fillStyle = getColor('bg'); pCtx.fillRect(0, 0, 40, 40); pCtx.fillStyle = state.theme === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)';
-      pCtx.beginPath(); pCtx.arc(0, 0, 1.5, 0, Math.PI * 2); pCtx.fill(); pCtx.beginPath(); pCtx.arc(20, 20, 1.5, 0, Math.PI * 2); pCtx.fill();
+      const dpr = window.devicePixelRatio || 1;
+      const pCanvas = document.createElement('canvas'); 
+      const size = 40;
+      pCanvas.width = size * dpr; 
+      pCanvas.height = size * dpr; 
+      const pCtx = pCanvas.getContext('2d');
+      pCtx.scale(dpr, dpr); // Retina対応スケール
+      
+      pCtx.fillStyle = getColor('bg'); pCtx.fillRect(0, 0, size, size); 
+      pCtx.fillStyle = state.theme === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)';
+      pCtx.beginPath(); pCtx.arc(0, 0, 1.5, 0, Math.PI * 2); pCtx.fill(); 
+      pCtx.beginPath(); pCtx.arc(20, 20, 1.5, 0, Math.PI * 2); pCtx.fill();
+      
       bgPattern = ctx.createPattern(pCanvas, 'repeat');
+      // パターン自体もDPRに合わせて逆スケールをかけ、CSSピクセルサイズに合致させる
+      if (bgPattern && bgPattern.setTransform) {
+        bgPattern.setTransform(new DOMMatrix().scale(1/dpr, 1/dpr));
+      }
     }
 
     function getScreenPos(e) { const rect = canvas.getBoundingClientRect(); return { x: e.clientX - rect.left, y: e.clientY - rect.top }; }
@@ -451,12 +467,16 @@
 
     function setZoom(newZoom) {
       const oldZoom = state.zoom; state.zoom = Math.max(0.2, Math.min(newZoom, 3.0));
-      const screenCenterX = canvas.width / 2; const screenCenterY = canvas.height / 2;
+      // 論理的（CSS的）な親コンテナサイズを基準に計算する
+      const screenCenterX = canvas.parentElement.clientWidth / 2; 
+      const screenCenterY = canvas.parentElement.clientHeight / 2;
       const worldCenterX = (screenCenterX - state.panX) / oldZoom; const worldCenterY = (screenCenterY - state.panY) / oldZoom;
       state.panX = screenCenterX - worldCenterX * state.zoom; state.panY = screenCenterY - worldCenterY * state.zoom;
       ui.zoomLevel.textContent = `${Math.round(state.zoom * 100)}%`; if(state.editingTarget) updateInlineEditorPosition(); render();
     }
+    
     function updateTheme() { if (state.theme === 'light') document.documentElement.classList.add('light-mode'); else document.documentElement.classList.remove('light-mode'); createBackgroundPattern(); render(); }
+    
     function updateSpawnSettings(val) {
         if (val === 0) { state.spawnMode = 'single'; ui.valSpawn.textContent = '単発 (完了待機)'; } 
         else { state.spawnMode = 'continuous'; const maxInt = 600; const minInt = 10; state.spawnRate = Math.floor(minInt + (maxInt - minInt) * Math.pow((100 - val) / 99, 2));
@@ -551,7 +571,7 @@
     
     function addZone(worldX, worldY) {
       let wx = worldX; let wy = worldY;
-      if (wx === undefined || wy === undefined) { const screenCenterX = canvas.width / 2; const screenCenterY = canvas.height / 2; const pos = getWorldPos(screenCenterX, screenCenterY); wx = pos.x; wy = pos.y; }
+      if (wx === undefined || wy === undefined) { const screenCenterX = canvas.parentElement.clientWidth / 2; const screenCenterY = canvas.parentElement.clientHeight / 2; const pos = getWorldPos(screenCenterX, screenCenterY); wx = pos.x; wy = pos.y; }
       const newZone = { id: 'zone_' + Date.now(), x: wx, y: wy, w: 250, h: 200, label: '新しいエリア', color: '#f59e0b', style: 'dashed', animation: 'none' };
       state.zones.push(newZone); state.selectedGroup = []; selectZone(newZone); startInlineEditing(newZone, 'zone'); render();
     }
@@ -748,7 +768,6 @@
       for (const edge of state.edges) { if (getDistToEdge(x, y, edge) < 10/state.zoom) { clickedEdge = edge; break; } }
       if (clickedEdge) { state.selectedGroup = []; selectEdge(clickedEdge); startInlineEditing(clickedEdge, 'edge'); return; }
 
-      // Shift + ダブルクリック時は「強調枠（ゾーン）」を追加する
       if (e.shiftKey) { addZone(x, y); return; }
 
       const newNode = { id: 'node_' + Date.now(), x: x, y: y, name: '', shape: 'rect', scale: 1.0, isGoal: false, isSpawner: false, spawnOrder: 1, errorCount: 0, successCount: 0, useCustomColor: false, customColor: '#ef4444' };
@@ -845,7 +864,6 @@
         const text = String(zone.label || ''); const textInfo = measureMultilineText(ctx, text, fontSize);
         const padX = 8, padY = 6; const labelW = textInfo.width + padX*2; const labelH = textInfo.height + padY*2; const lx = left; const ly = top - labelH - 5;
         
-        // 完璧なプロジェクター視認性のためのUI設計（純色背景＋太枠＋高コントラスト文字）
         ctx.fillStyle = state.theme === 'dark' ? '#1e293b' : '#ffffff';
         ctx.beginPath(); ctx.roundRect(lx, ly, labelW, labelH, [4, 4, 4, 4]); ctx.fill();
         ctx.strokeStyle = zone.color || '#f59e0b'; ctx.lineWidth = isPresen ? 4 : 2; ctx.stroke();
@@ -930,9 +948,30 @@
     }
 
     function render() {
-      if (bgPattern) { ctx.save(); ctx.fillStyle = bgPattern; ctx.translate(state.panX % (40 * state.zoom), state.panY % (40 * state.zoom)); ctx.scale(state.zoom, state.zoom); ctx.fillRect(-canvas.width/state.zoom, -canvas.height/state.zoom, canvas.width*2/state.zoom, canvas.height*2/state.zoom); ctx.restore(); } else { ctx.fillStyle = getColor('bg'); ctx.fillRect(0, 0, canvas.width, canvas.height); }
+      const dpr = window.devicePixelRatio || 1;
+
+      // 背景の描画 (画面全体)
+      if (bgPattern) { 
+        ctx.save(); 
+        ctx.fillStyle = bgPattern; 
+        ctx.scale(dpr, dpr); // 論理ピクセル空間にする
+        ctx.translate(state.panX % (40 * state.zoom), state.panY % (40 * state.zoom)); 
+        ctx.scale(state.zoom, state.zoom); 
+        // ズーム＆パンの影響を打ち消す広大な領域を塗りつぶす
+        const cw = (canvas.width / dpr) / state.zoom;
+        const ch = (canvas.height / dpr) / state.zoom;
+        ctx.fillRect(-cw*2, -ch*2, cw*4, ch*4); 
+        ctx.restore(); 
+      } else { 
+        ctx.fillStyle = getColor('bg'); 
+        ctx.fillRect(0, 0, canvas.width, canvas.height); 
+      }
       
-      ctx.save(); ctx.translate(state.panX, state.panY); ctx.scale(state.zoom, state.zoom);
+      ctx.save(); 
+      // ★ 描画空間全体を高精細(Retina)の論理ピクセルにスケールアップ
+      ctx.scale(dpr, dpr);
+      ctx.translate(state.panX, state.panY); 
+      ctx.scale(state.zoom, state.zoom);
 
       state.zones.forEach(zone => drawZone(zone));
       state.edges.forEach(edge => drawEdge(edge)); drawConnectingLine(); drawAlignGuides(); drawBoxSelection();
@@ -981,15 +1020,18 @@
     }
 
     function takeScreenshot() { if (state.editingTarget) stopInlineEditing(true); render(); const dataURL = canvas.toDataURL('image/png'); const a = document.createElement('a'); a.href = dataURL; a.download = 'cycle_flow_screenshot.png'; document.body.appendChild(a); a.click(); document.body.removeChild(a); }
+    
     function startRecording() {
       if (state.editingTarget) stopInlineEditing(true); const stream = canvas.captureStream(60); 
       let mimeType = 'video/webm;codecs=vp9'; if (!MediaRecorder.isTypeSupported(mimeType)) mimeType = 'video/webm;codecs=vp8'; if (!MediaRecorder.isTypeSupported(mimeType)) mimeType = 'video/webm'; if (!MediaRecorder.isTypeSupported(mimeType)) mimeType = 'video/mp4'; 
-      const options = { videoBitsPerSecond: 8000000 }; if (MediaRecorder.isTypeSupported(mimeType)) options.mimeType = mimeType;
+      // ★ 究極画質のためビットレートを 20Mbps (20000000) に引き上げ
+      const options = { videoBitsPerSecond: 20000000 }; if (MediaRecorder.isTypeSupported(mimeType)) options.mimeType = mimeType;
       try { state.mediaRecorder = new MediaRecorder(stream, options); } catch (e) { try { state.mediaRecorder = new MediaRecorder(stream); } catch(e2) { alert("お使いのブラウザは録画機能に対応していません。"); return; } }
       state.recordedChunks = []; state.mediaRecorder.ondataavailable = function(e) { if (e.data.size > 0) state.recordedChunks.push(e.data); };
       state.mediaRecorder.onstop = function() { let finalMimeType = state.mediaRecorder.mimeType || 'video/webm'; let ext = 'webm'; if(finalMimeType.includes('mp4')) ext = 'mp4'; const blob = new Blob(state.recordedChunks, { type: finalMimeType }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = `cycle_flow_movie.${ext}`; document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url); };
       state.mediaRecorder.start(); state.isRecording = true; ui.btnRecord.textContent = '⏹ 録画停止'; ui.btnRecord.classList.replace('btn-secondary', 'btn-danger');
     }
+    
     function toggleRecording() { if (!state.isRecording) startRecording(); else stopRecording(); }
     function stopRecording() { if (state.mediaRecorder && state.mediaRecorder.state !== 'inactive') state.mediaRecorder.stop(); state.isRecording = false; ui.btnRecord.textContent = '🎥 録画開始'; ui.btnRecord.classList.replace('btn-danger', 'btn-secondary'); }
 
@@ -1005,7 +1047,20 @@
       state.zones = [ { id: 'z1', x: 825, y: 200, w: 420, h: 220, label: '出荷・倉庫エリア', color: '#3b82f6', style: 'dashed', animation: 'dash-scroll' } ];
     }
 
-    function resizeCanvas() { canvas.width = canvas.parentElement.clientWidth; canvas.height = canvas.parentElement.clientHeight; createBackgroundPattern(); render(); }
+    function resizeCanvas() { 
+      const parent = canvas.parentElement;
+      const dpr = window.devicePixelRatio || 1;
+      // 物理ピクセルサイズの設定（内部解像度をDPR倍に引き上げ）
+      canvas.width = parent.clientWidth * dpr; 
+      canvas.height = parent.clientHeight * dpr; 
+      // 論理ピクセルサイズの設定（CSSでの表示サイズ）
+      canvas.style.width = `${parent.clientWidth}px`;
+      canvas.style.height = `${parent.clientHeight}px`;
+      
+      createBackgroundPattern(); 
+      render(); 
+    }
+    
     window.addEventListener('resize', resizeCanvas); setupEventListeners(); loadSampleData(); updateSpawnSettings(parseInt(ui.sliderSpawn.value)); resizeCanvas(); updateTheme();
     function staticRenderLoop() { if (!state.isRunning) render(); requestAnimationFrame(staticRenderLoop); } staticRenderLoop();
   </script>
