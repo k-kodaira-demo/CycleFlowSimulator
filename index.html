@@ -844,8 +844,14 @@
         const fontSize = isPresen ? 16 : 13; ctx.font = `${isPresen?'700':'600'} ${fontSize}px Inter, sans-serif`;
         const text = String(zone.label || ''); const textInfo = measureMultilineText(ctx, text, fontSize);
         const padX = 8, padY = 6; const labelW = textInfo.width + padX*2; const labelH = textInfo.height + padY*2; const lx = left; const ly = top - labelH - 5;
-        ctx.fillStyle = zone.color || '#f59e0b'; ctx.beginPath(); ctx.roundRect(lx, ly, labelW, labelH, [4, 4, 4, 4]); ctx.fill();
-        ctx.fillStyle = '#ffffff'; ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+        
+        // 完璧なプロジェクター視認性のためのUI設計（純色背景＋太枠＋高コントラスト文字）
+        ctx.fillStyle = state.theme === 'dark' ? '#1e293b' : '#ffffff';
+        ctx.beginPath(); ctx.roundRect(lx, ly, labelW, labelH, [4, 4, 4, 4]); ctx.fill();
+        ctx.strokeStyle = zone.color || '#f59e0b'; ctx.lineWidth = isPresen ? 4 : 2; ctx.stroke();
+        
+        ctx.fillStyle = state.theme === 'dark' ? '#ffffff' : '#000000'; 
+        ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
         drawMultilineText(ctx, text, lx + padX, ly + textInfo.height/2 + padY, fontSize, 1.2, 'left');
       }
 
