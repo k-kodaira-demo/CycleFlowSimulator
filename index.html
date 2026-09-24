@@ -104,7 +104,8 @@
       <div class="info-box">
         <b>基本操作:</b><br>
         ・空白[Wクリック]：拠点追加<br>
-        ・文字/線[Wクリック]：直接編集 (Shift+Enterで改行)<br>
+        ・<span style="color:var(--accent); font-weight:bold;">空白[Shift+Wクリック]：枠を追加</span><br>
+        ・文字/線[Wクリック]：直接編集<br>
         ・[Shift+ドラッグ]：線を引く<br>
         ・線の端(●)ドラッグ：付け替え<br>
         ・[ホイール回転]：拡大縮小
@@ -119,7 +120,7 @@
       </div>
 
       <button id="btn-toggle-sim" class="btn btn-primary mb-3 mt-2">▶ シミュレーション開始</button>
-      <button id="btn-add-zone" class="btn btn-secondary mb-3" style="font-size:0.85rem; border-style:dashed; border-color:var(--accent); color:var(--accent);">🔲 協調枠(エリア)を追加</button>
+      <button id="btn-add-zone" class="btn btn-secondary mb-3" style="font-size:0.85rem; border-style:dashed; border-color:var(--accent); color:var(--accent);" title="Shift+空白Wクリックでも追加できます">🔲 強調枠(エリア)を画面中央に追加</button>
 
       <div class="form-group">
         <label>発生頻度: <span id="val-spawn" style="font-weight:bold; color:var(--accent);">中</span></label>
@@ -389,6 +390,7 @@
       }
     }
     function getEdgeHandles(edge) { const curve = getEdgeCurve(edge); if (!curve) return null; return { fromHandle: { x: curve.startX, y: curve.startY }, toHandle: { x: curve.endX, y: curve.endY } }; }
+    
     function getLabelRect(edge) {
       if (!edge.label || String(edge.label).trim() === "") return null; const curve = getEdgeCurve(edge); if (!curve) return null;
       const t = edge.labelPos !== undefined ? edge.labelPos : 0.5; let midX, midY;
@@ -464,7 +466,7 @@
 
     function setupEventListeners() {
       ui.btnToggle.addEventListener('click', toggleSimulation);
-      ui.btnAddZone.addEventListener('click', addZone);
+      ui.btnAddZone.addEventListener('click', () => addZone());
       
       ui.sliderSpawn.addEventListener('input', (e) => { updateSpawnSettings(parseInt(e.target.value)); });
       ui.sliderSpeed.addEventListener('input', (e) => { state.simulationSpeed = parseFloat(e.target.value); ui.valSpeed.textContent = `${state.simulationSpeed.toFixed(1)}x`; });
@@ -547,10 +549,10 @@
     function deleteSelectedEdge() { if (!state.selectedEdge) return; state.edges = state.edges.filter(e => e !== state.selectedEdge); if (state.editingType === 'edge' && state.editingTarget === state.selectedEdge) stopInlineEditing(false); clearSelection(); render(); }
     function deleteSelectedZone() { if (!state.selectedZone) return; state.zones = state.zones.filter(z => z !== state.selectedZone); if (state.editingType === 'zone' && state.editingTarget === state.selectedZone) stopInlineEditing(false); clearSelection(); render(); }
     
-    function addZone() {
-      const screenCenterX = canvas.width / 2; const screenCenterY = canvas.height / 2;
-      const worldPos = getWorldPos(screenCenterX, screenCenterY);
-      const newZone = { id: 'zone_' + Date.now(), x: worldPos.x, y: worldPos.y, w: 250, h: 200, label: '新しいエリア', color: '#f59e0b', style: 'dashed', animation: 'none' };
+    function addZone(worldX, worldY) {
+      let wx = worldX; let wy = worldY;
+      if (wx === undefined || wy === undefined) { const screenCenterX = canvas.width / 2; const screenCenterY = canvas.height / 2; const pos = getWorldPos(screenCenterX, screenCenterY); wx = pos.x; wy = pos.y; }
+      const newZone = { id: 'zone_' + Date.now(), x: wx, y: wy, w: 250, h: 200, label: '新しいエリア', color: '#f59e0b', style: 'dashed', animation: 'none' };
       state.zones.push(newZone); state.selectedGroup = []; selectZone(newZone); startInlineEditing(newZone, 'zone'); render();
     }
 
@@ -745,6 +747,9 @@
       let clickedEdge = null;
       for (const edge of state.edges) { if (getDistToEdge(x, y, edge) < 10/state.zoom) { clickedEdge = edge; break; } }
       if (clickedEdge) { state.selectedGroup = []; selectEdge(clickedEdge); startInlineEditing(clickedEdge, 'edge'); return; }
+
+      // Shift + ダブルクリック時は「強調枠（ゾーン）」を追加する
+      if (e.shiftKey) { addZone(x, y); return; }
 
       const newNode = { id: 'node_' + Date.now(), x: x, y: y, name: '', shape: 'rect', scale: 1.0, isGoal: false, isSpawner: false, spawnOrder: 1, errorCount: 0, successCount: 0, useCustomColor: false, customColor: '#ef4444' };
       state.nodes.push(newNode); state.selectedGroup = []; selectNode(newNode); startInlineEditing(newNode, 'node');
