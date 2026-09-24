@@ -39,33 +39,13 @@
     }
 
     body {
-      margin: 0;
-      padding: 0;
-      background-color: var(--bg-color);
-      color: var(--text-main);
-      font-family: 'Inter', sans-serif;
-      overflow: hidden;
-      overscroll-behavior: none; 
-      display: flex;
-      width: 100vw;
-      height: 100vh;
-      transition: background-color 0.3s, color 0.3s;
+      margin: 0; padding: 0; background-color: var(--bg-color); color: var(--text-main); font-family: 'Inter', sans-serif;
+      overflow: hidden; overscroll-behavior: none; touch-action: none; display: flex; width: 100vw; height: 100vh; transition: background-color 0.3s, color 0.3s;
     }
 
     #sidebar {
-      width: 320px;
-      min-width: 320px;
-      flex-shrink: 0; 
-      background-color: var(--panel-bg);
-      border-right: 1px solid var(--border-color);
-      display: flex;
-      flex-direction: column;
-      z-index: 10;
-      box-shadow: 2px 0 10px rgba(0,0,0,0.1);
-      overflow-y: auto;
-      transition: background-color 0.3s, border-color 0.3s;
+      width: 320px; min-width: 320px; flex-shrink: 0; background-color: var(--panel-bg); border-right: 1px solid var(--border-color); display: flex; flex-direction: column; z-index: 10; box-shadow: 2px 0 10px rgba(0,0,0,0.1); overflow-y: auto; transition: background-color 0.3s, border-color 0.3s;
     }
-
     #sidebar::-webkit-scrollbar { width: 6px; }
     #sidebar::-webkit-scrollbar-track { background: var(--panel-bg); }
     #sidebar::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 3px; }
@@ -94,10 +74,8 @@
     .checkbox-label input[type="checkbox"] { accent-color: var(--accent); width: 16px; height: 16px; }
 
     .info-box { background-color: var(--info-bg); border-left: 3px solid var(--accent); padding: 10px; font-size: 0.8rem; color: var(--info-text); margin-bottom: 15px; line-height: 1.5; border-radius: 0 4px 4px 0; }
-
     .radio-group label { display: flex; align-items: center; gap: 5px; cursor: pointer; font-size: 0.85rem; color: var(--text-main); }
     .radio-group input[type="radio"] { accent-color: var(--accent); width: 14px; height: 14px; margin: 0; }
-
     .hidden { display: none !important; }
 
     #canvas-container { flex-grow: 1; position: relative; background-color: var(--bg-color); overflow: hidden; touch-action: none; }
@@ -135,16 +113,13 @@
       <div class="form-group" style="padding: 10px; background: rgba(128,128,128,0.1); border-radius: 4px;">
         <label>背景のドラッグ操作</label>
         <div class="radio-group" style="display: flex; gap: 12px; margin-top: 8px;">
-          <label title="左クリックしたまま画面を移動します">
-            <input type="radio" name="bg-drag-mode" value="pan" checked> ✋ 画面移動
-          </label>
-          <label title="左クリックしたまま範囲を囲んで選択します">
-            <input type="radio" name="bg-drag-mode" value="select"> 🔲 範囲選択
-          </label>
+          <label title="左クリックしたまま画面を移動します"><input type="radio" name="bg-drag-mode" value="pan" checked> ✋ 画面移動</label>
+          <label title="左クリックしたまま範囲を囲んで選択します"><input type="radio" name="bg-drag-mode" value="select"> 🔲 範囲選択</label>
         </div>
       </div>
 
       <button id="btn-toggle-sim" class="btn btn-primary mb-3 mt-2">▶ シミュレーション開始</button>
+      <button id="btn-add-zone" class="btn btn-secondary mb-3" style="font-size:0.85rem; border-style:dashed; border-color:var(--accent); color:var(--accent);">🔲 協調枠(エリア)を追加</button>
 
       <div class="form-group">
         <label>発生頻度: <span id="val-spawn" style="font-weight:bold; color:var(--accent);">中</span></label>
@@ -160,44 +135,27 @@
       <div class="panel-title">表示設定</div>
       <div class="form-group">
         <label>テーマカラー</label>
-        <select id="select-theme">
-          <option value="dark">ダークモード (Dark)</option>
-          <option value="light">ライトモード (Light)</option>
-        </select>
+        <select id="select-theme"><option value="dark">ダークモード (Dark)</option><option value="light">ライトモード (Light)</option></select>
       </div>
       <div class="form-group" style="padding: 10px; background: rgba(128,128,128,0.1); border-radius: 4px;">
-        <label class="checkbox-label">
-          <input type="checkbox" id="check-enable-glow" checked>
-          <span>ネオン・陰影効果 (Glow)</span>
-        </label>
-        <label class="checkbox-label" style="margin-top: 8px;">
-          <input type="checkbox" id="check-snap" checked>
-          <span>整列アシスト (スマートガイド)</span>
-        </label>
-        <label class="checkbox-label" style="margin-top: 8px;">
-          <input type="checkbox" id="check-show-badge" checked>
-          <span>滞留カウント(バッジ)を表示</span>
-        </label>
+        <label class="checkbox-label"><input type="checkbox" id="check-enable-glow" checked><span>ネオン・陰影効果 (Glow)</span></label>
+        <label class="checkbox-label" style="margin-top: 8px;"><input type="checkbox" id="check-snap" checked><span>整列アシスト (スマートガイド)</span></label>
+        <label class="checkbox-label" style="margin-top: 8px;"><input type="checkbox" id="check-show-badge" checked><span>滞留カウント(バッジ)を表示</span></label>
         <label class="checkbox-label" style="margin-top: 12px; color: var(--accent); font-weight: bold; padding-top: 8px; border-top: 1px dashed var(--border-color);">
-          <input type="checkbox" id="check-presentation">
-          <span>プレゼンモード (太字・高視認性)</span>
+          <input type="checkbox" id="check-presentation"><span>プレゼンモード (太字・高視認性)</span>
         </label>
       </div>
     </div>
 
     <div id="no-selection" class="panel-section" style="flex-grow: 1; display: flex; align-items: center; justify-content: center; text-align: center; color: var(--text-muted); font-size: 0.9rem;">
-      拠点 または 線 をクリックすると<br>詳細を設定できます
+      拠点、線、または枠をクリックすると<br>詳細を設定できます
     </div>
 
     <div id="node-properties" class="panel-section hidden" style="flex-grow: 1;">
       <div class="panel-title">拠点の設定</div>
       <div class="form-group">
         <label>形状</label>
-        <select id="select-node-shape">
-          <option value="circle">丸 (Circle)</option>
-          <option value="rect">四角 (Rectangle)</option>
-          <option value="diamond">菱形 (Diamond)</option>
-        </select>
+        <select id="select-node-shape"><option value="circle">丸 (Circle)</option><option value="rect">四角 (Rectangle)</option><option value="diamond">菱形 (Diamond)</option></select>
       </div>
       <div class="form-group">
         <label>サイズ: <span id="val-node-scale" style="color: var(--accent); font-weight: bold;">1.0x</span></label>
@@ -207,33 +165,20 @@
         <label>テーマカラー</label>
         <div class="color-picker-group">
           <input type="color" id="input-node-color" value="#ef4444">
-          <label class="checkbox-label" style="margin-bottom: 0;">
-            <input type="checkbox" id="check-node-color">
-            <span style="font-size: 0.85rem;">色を指定する</span>
-          </label>
+          <label class="checkbox-label" style="margin-bottom: 0;"><input type="checkbox" id="check-node-color"><span style="font-size: 0.85rem;">色を指定する</span></label>
         </div>
       </div>
-      
       <div class="form-group" style="margin-top: 15px; padding: 10px; background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3); border-radius: 4px;">
-        <label class="checkbox-label" style="color: var(--accent);">
-          <input type="checkbox" id="check-is-spawner">
-          <span class="font-bold">この拠点を「発生源(スタート)」にする</span>
-        </label>
+        <label class="checkbox-label" style="color: var(--accent);"><input type="checkbox" id="check-is-spawner"><span class="font-bold">この拠点を「発生源(スタート)」にする</span></label>
         <div id="spawn-order-container" class="hidden" style="margin-top: 10px; padding-left: 24px; border-top: 1px dashed rgba(59, 130, 246, 0.3); padding-top: 10px;">
           <label style="display:inline-block; margin-right: 10px; color: var(--accent);">発生順番:</label>
           <input type="number" id="input-spawn-order" min="1" max="99" value="1" style="width: 60px; padding: 4px; display:inline-block;">
         </div>
       </div>
-
       <div class="form-group" style="margin-top: 15px; padding: 10px; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 4px;">
-        <label class="checkbox-label" style="color: var(--success);">
-          <input type="checkbox" id="check-is-goal">
-          <span class="font-bold">この拠点を「ゴール」にする</span>
-        </label>
+        <label class="checkbox-label" style="color: var(--success);"><input type="checkbox" id="check-is-goal"><span class="font-bold">この拠点を「ゴール」にする</span></label>
       </div>
-      <div style="margin-top: auto; padding-top: 20px;">
-        <button id="btn-delete-node" class="btn btn-danger">拠点を削除 (Del)</button>
-      </div>
+      <div style="margin-top: auto; padding-top: 20px;"><button id="btn-delete-node" class="btn btn-danger">拠点を削除 (Del)</button></div>
     </div>
 
     <div id="edge-properties" class="panel-section hidden" style="flex-grow: 1;">
@@ -241,7 +186,6 @@
       <div class="form-group" style="margin-bottom: 20px; padding: 12px; background: rgba(128,128,128,0.1); border-radius: 6px; border: 1px solid var(--border-color);">
         <label>玉の通過速度: <span id="val-edge-speed" style="color: var(--accent); font-weight: bold;">1.0x</span></label>
         <input type="range" id="slider-edge-speed" min="0.1" max="3.0" step="0.1" value="1.0">
-        
         <label style="margin-top: 10px;">1回の発生量: <span id="val-edge-volume" style="color: var(--accent); font-weight: bold;">1個</span></label>
         <input type="range" id="slider-edge-volume" min="1" max="10" step="1" value="1">
       </div>
@@ -249,25 +193,33 @@
         <label>テーマカラー</label>
         <div class="color-picker-group">
           <input type="color" id="input-edge-color" value="#ef4444">
-          <label class="checkbox-label" style="margin-bottom: 0;">
-            <input type="checkbox" id="check-edge-color">
-            <span style="font-size: 0.85rem;">色を指定する</span>
-          </label>
+          <label class="checkbox-label" style="margin-bottom: 0;"><input type="checkbox" id="check-edge-color"><span style="font-size: 0.85rem;">色を指定する</span></label>
         </div>
       </div>
-      <div style="margin-top: auto; padding-top: 20px;">
-        <button id="btn-delete-edge" class="btn btn-danger">この線を削除 (Del)</button>
+      <div style="margin-top: auto; padding-top: 20px;"><button id="btn-delete-edge" class="btn btn-danger">この線を削除 (Del)</button></div>
+    </div>
+
+    <div id="zone-properties" class="panel-section hidden" style="flex-grow: 1;">
+      <div class="panel-title">協調枠(エリア)の設定</div>
+      <div class="form-group">
+        <label>線種</label>
+        <select id="select-zone-style"><option value="solid">実線</option><option value="dashed">破線</option><option value="dotted">点線</option></select>
       </div>
+      <div class="form-group">
+        <label>アニメーション効果</label>
+        <select id="select-zone-animation"><option value="none">なし</option><option value="blink">ゆっくり点滅</option><option value="dash-scroll">流れる線 (マーチング)</option></select>
+      </div>
+      <div class="form-group">
+        <label>テーマカラー</label>
+        <div class="color-picker-group"><input type="color" id="input-zone-color" value="#f59e0b"></div>
+      </div>
+      <div style="margin-top: auto; padding-top: 20px;"><button id="btn-delete-zone" class="btn btn-danger">枠を削除 (Del)</button></div>
     </div>
 
     <div id="multi-selection-properties" class="panel-section hidden" style="flex-grow: 1;">
       <div class="panel-title">複数選択中</div>
-      <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 20px;">
-        <span id="multi-sel-count" style="font-weight:bold; color: var(--text-main);">0</span> 個の拠点が選択されています。
-      </p>
-      <div style="margin-top: auto; padding-top: 20px;">
-        <button id="btn-delete-multi" class="btn btn-danger">まとめて削除 (Del)</button>
-      </div>
+      <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 20px;"><span id="multi-sel-count" style="font-weight:bold; color: var(--text-main);">0</span> 個の拠点が選択されています。</p>
+      <div style="margin-top: auto; padding-top: 20px;"><button id="btn-delete-multi" class="btn btn-danger">まとめて削除 (Del)</button></div>
     </div>
 
     <div class="panel-section" style="border-bottom: none; padding-bottom: 10px;">
@@ -297,14 +249,16 @@
 
   <script>
     const state = {
-      nodes: [], edges: [], signals: [],
+      nodes: [], edges: [], signals: [], zones: [],
       isRunning: false, simulationSpeed: 1.0, spawnMode: 'continuous', spawnRate: 60, frameCount: 0, currentSpawnerIndex: 0,
       
-      selectedNode: null, selectedEdge: null, selectedGroup: [], 
+      selectedNode: null, selectedEdge: null, selectedGroup: [], selectedZone: null,
       isDragging: false, draggedNode: null, dragOffsetX: 0, dragOffsetY: 0,
       isDraggingLabel: false, draggedLabelEdge: null,
       isDraggingEdgeHandle: false, draggedEdgeHandleEdge: null, draggedEdgeHandleType: null,
       isConnecting: false, connectFromNode: null,
+      isDraggingZone: false, draggedZone: null,
+      isResizingZone: false, resizedZone: null, resizeStartX: 0, resizeStartY: 0, resizeStartW: 0, resizeStartH: 0,
       
       bgDragMode: 'pan', isBoxSelecting: false, boxStartX: 0, boxStartY: 0, boxCurrentX: 0, boxCurrentY: 0,
       panX: 0, panY: 0, zoom: 1.0, isPanning: false, panStartX: 0, panStartY: 0, mouseX: 0, mouseY: 0,
@@ -315,56 +269,10 @@
     };
 
     const THEME_COLORS = {
-      dark: {
-        bg: '#0f172a', nodeBg: '#334155', nodeDefaultBorder: '#475569', text: '#ffffff',
-        edgeLine: 'rgba(148, 163, 184, 0.4)', edgeLabelBg: 'rgba(15, 23, 42, 0.85)', edgeLabelText: '#94a3b8',
-        glowSelected: 'rgba(59, 130, 246, 0.8)', glowError: 'rgba(239, 68, 68, 0.9)', glowSuccess: 'rgba(16, 185, 129, 0.6)',
-        boxSelectFill: 'rgba(59, 130, 246, 0.1)', boxSelectBorder: 'rgba(59, 130, 246, 0.8)'
-      },
-      light: {
-        bg: '#f1f5f9', nodeBg: '#ffffff', nodeDefaultBorder: '#cbd5e1', text: '#0f172a',
-        edgeLine: 'rgba(100, 116, 139, 0.5)', edgeLabelBg: 'rgba(255, 255, 255, 0.9)', edgeLabelText: '#475569',
-        glowSelected: 'rgba(37, 99, 235, 0.5)', glowError: 'rgba(220, 38, 38, 0.6)', glowSuccess: 'rgba(5, 150, 105, 0.4)',
-        boxSelectFill: 'rgba(37, 99, 235, 0.1)', boxSelectBorder: 'rgba(37, 99, 235, 0.8)'
-      }
+      dark: { bg: '#0f172a', nodeBg: '#334155', nodeDefaultBorder: '#475569', text: '#ffffff', edgeLine: 'rgba(148, 163, 184, 0.4)', edgeLabelBg: 'rgba(15, 23, 42, 0.85)', edgeLabelText: '#94a3b8', glowSelected: 'rgba(59, 130, 246, 0.8)', glowError: 'rgba(239, 68, 68, 0.9)', glowSuccess: 'rgba(16, 185, 129, 0.6)', boxSelectFill: 'rgba(59, 130, 246, 0.1)', boxSelectBorder: 'rgba(59, 130, 246, 0.8)' },
+      light: { bg: '#f1f5f9', nodeBg: '#ffffff', nodeDefaultBorder: '#cbd5e1', text: '#0f172a', edgeLine: 'rgba(100, 116, 139, 0.5)', edgeLabelBg: 'rgba(255, 255, 255, 0.9)', edgeLabelText: '#475569', glowSelected: 'rgba(37, 99, 235, 0.5)', glowError: 'rgba(220, 38, 38, 0.6)', glowSuccess: 'rgba(5, 150, 105, 0.4)', boxSelectFill: 'rgba(37, 99, 235, 0.1)', boxSelectBorder: 'rgba(37, 99, 235, 0.8)' }
     };
-
     function getColor(key) { return THEME_COLORS[state.theme][key]; }
-
-    const canvas = document.getElementById('sim-canvas');
-    const ctx = canvas.getContext('2d');
-    let bgPattern = null;
-
-    const ui = {
-      btnToggle: document.getElementById('btn-toggle-sim'),
-      sliderSpawn: document.getElementById('slider-spawn'), valSpawn: document.getElementById('val-spawn'),
-      sliderSpeed: document.getElementById('slider-speed'), valSpeed: document.getElementById('val-speed'),
-      selectTheme: document.getElementById('select-theme'),
-      checkEnableGlow: document.getElementById('check-enable-glow'),
-      checkSnap: document.getElementById('check-snap'),
-      checkShowBadge: document.getElementById('check-show-badge'),
-      checkPresentation: document.getElementById('check-presentation'),
-      panelNoSel: document.getElementById('no-selection'),
-      panelNode: document.getElementById('node-properties'),
-      panelEdge: document.getElementById('edge-properties'),
-      panelMulti: document.getElementById('multi-selection-properties'),
-      multiSelCount: document.getElementById('multi-sel-count'),
-      selectNodeShape: document.getElementById('select-node-shape'),
-      sliderNodeScale: document.getElementById('slider-node-scale'), valNodeScale: document.getElementById('val-node-scale'),
-      checkIsGoal: document.getElementById('check-is-goal'),
-      checkIsSpawner: document.getElementById('check-is-spawner'), spawnOrderContainer: document.getElementById('spawn-order-container'), inputSpawnOrder: document.getElementById('input-spawn-order'),
-      inputNodeColor: document.getElementById('input-node-color'), checkNodeColor: document.getElementById('check-node-color'),
-      btnDeleteNode: document.getElementById('btn-delete-node'), btnDeleteMulti: document.getElementById('btn-delete-multi'),
-      inputEdgeColor: document.getElementById('input-edge-color'), checkEdgeColor: document.getElementById('check-edge-color'),
-      btnDeleteEdge: document.getElementById('btn-delete-edge'),
-      sliderEdgeSpeed: document.getElementById('slider-edge-speed'), valEdgeSpeed: document.getElementById('val-edge-speed'),
-      sliderEdgeVolume: document.getElementById('slider-edge-volume'), valEdgeVolume: document.getElementById('val-edge-volume'),
-      btnSave: document.getElementById('btn-save'), btnLoad: document.getElementById('btn-load'), fileInput: document.getElementById('file-input'),
-      btnScreenshot: document.getElementById('btn-screenshot'), btnRecord: document.getElementById('btn-record'),
-      inlineEditor: document.getElementById('inline-editor'),
-      zoomLevel: document.getElementById('zoom-level'), btnZoomIn: document.getElementById('btn-zoom-in'), btnZoomOut: document.getElementById('btn-zoom-out'), btnZoomReset: document.getElementById('btn-zoom-reset')
-    };
-
     function hexToRgba(hex, alpha) {
       let r = 0, g = 0, b = 0;
       if (hex.length === 4) { r = parseInt(hex[1]+hex[1], 16); g = parseInt(hex[2]+hex[2], 16); b = parseInt(hex[3]+hex[3], 16); }
@@ -372,12 +280,32 @@
       return `rgba(${r}, ${g}, ${b}, ${alpha})`;
     }
 
+    const canvas = document.getElementById('sim-canvas'); const ctx = canvas.getContext('2d'); let bgPattern = null;
+
+    const ui = {
+      btnToggle: document.getElementById('btn-toggle-sim'), btnAddZone: document.getElementById('btn-add-zone'),
+      sliderSpawn: document.getElementById('slider-spawn'), valSpawn: document.getElementById('val-spawn'),
+      sliderSpeed: document.getElementById('slider-speed'), valSpeed: document.getElementById('val-speed'),
+      selectTheme: document.getElementById('select-theme'), checkEnableGlow: document.getElementById('check-enable-glow'),
+      checkSnap: document.getElementById('check-snap'), checkShowBadge: document.getElementById('check-show-badge'), checkPresentation: document.getElementById('check-presentation'),
+      panelNoSel: document.getElementById('no-selection'), panelNode: document.getElementById('node-properties'), panelEdge: document.getElementById('edge-properties'), panelZone: document.getElementById('zone-properties'), panelMulti: document.getElementById('multi-selection-properties'),
+      multiSelCount: document.getElementById('multi-sel-count'),
+      selectNodeShape: document.getElementById('select-node-shape'), sliderNodeScale: document.getElementById('slider-node-scale'), valNodeScale: document.getElementById('val-node-scale'),
+      checkIsGoal: document.getElementById('check-is-goal'), checkIsSpawner: document.getElementById('check-is-spawner'), spawnOrderContainer: document.getElementById('spawn-order-container'), inputSpawnOrder: document.getElementById('input-spawn-order'),
+      inputNodeColor: document.getElementById('input-node-color'), checkNodeColor: document.getElementById('check-node-color'), btnDeleteNode: document.getElementById('btn-delete-node'), btnDeleteMulti: document.getElementById('btn-delete-multi'),
+      inputEdgeColor: document.getElementById('input-edge-color'), checkEdgeColor: document.getElementById('check-edge-color'), btnDeleteEdge: document.getElementById('btn-delete-edge'),
+      sliderEdgeSpeed: document.getElementById('slider-edge-speed'), valEdgeSpeed: document.getElementById('val-edge-speed'), sliderEdgeVolume: document.getElementById('slider-edge-volume'), valEdgeVolume: document.getElementById('val-edge-volume'),
+      selectZoneStyle: document.getElementById('select-zone-style'), selectZoneAnim: document.getElementById('select-zone-animation'), inputZoneColor: document.getElementById('input-zone-color'), btnDeleteZone: document.getElementById('btn-delete-zone'),
+      btnSave: document.getElementById('btn-save'), btnLoad: document.getElementById('btn-load'), fileInput: document.getElementById('file-input'),
+      btnScreenshot: document.getElementById('btn-screenshot'), btnRecord: document.getElementById('btn-record'),
+      inlineEditor: document.getElementById('inline-editor'),
+      zoomLevel: document.getElementById('zoom-level'), btnZoomIn: document.getElementById('btn-zoom-in'), btnZoomOut: document.getElementById('btn-zoom-out'), btnZoomReset: document.getElementById('btn-zoom-reset')
+    };
+
     function createBackgroundPattern() {
       const pCanvas = document.createElement('canvas'); pCanvas.width = 40; pCanvas.height = 40; const pCtx = pCanvas.getContext('2d');
-      pCtx.fillStyle = getColor('bg'); pCtx.fillRect(0, 0, 40, 40);
-      pCtx.fillStyle = state.theme === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)';
-      pCtx.beginPath(); pCtx.arc(0, 0, 1.5, 0, Math.PI * 2); pCtx.fill();
-      pCtx.beginPath(); pCtx.arc(20, 20, 1.5, 0, Math.PI * 2); pCtx.fill();
+      pCtx.fillStyle = getColor('bg'); pCtx.fillRect(0, 0, 40, 40); pCtx.fillStyle = state.theme === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)';
+      pCtx.beginPath(); pCtx.arc(0, 0, 1.5, 0, Math.PI * 2); pCtx.fill(); pCtx.beginPath(); pCtx.arc(20, 20, 1.5, 0, Math.PI * 2); pCtx.fill();
       bgPattern = ctx.createPattern(pCanvas, 'repeat');
     }
 
@@ -391,25 +319,18 @@
       return { width: maxWidth, height: lines.length * fontSize };
     }
 
-    function drawMultilineText(ctx, text, x, y, fontSize, lineHeightMult = 1.2) {
+    function drawMultilineText(ctx, text, x, y, fontSize, lineHeightMult = 1.2, align = 'center') {
       const safeText = String(text || ''); const lines = safeText.split('\n'); const lineHeight = fontSize * lineHeightMult;
       const totalHeight = lines.length * lineHeight; let currentY = y - totalHeight / 2 + lineHeight / 2;
+      const origAlign = ctx.textAlign; ctx.textAlign = align;
       for (let line of lines) { ctx.fillText(line, x, currentY); currentY += lineHeight; }
+      ctx.textAlign = origAlign;
     }
 
     function getNodeSize(node) {
-      const scale = node.scale !== undefined ? Number(node.scale) : 1.0;
-      const isPresen = state.presentationMode;
-      const fontSize = isPresen ? 16 : 13;
-      const fontWeight = isPresen ? '800' : '600';
-      
-      ctx.font = `${fontWeight} ${fontSize}px Inter, sans-serif`; 
-      const textInfo = measureMultilineText(ctx, String(node.name || ''), fontSize);
-      
-      let width, height;
-      const padW = isPresen ? 50 : 40;
-      const padH = isPresen ? 30 : 20;
-      
+      const scale = node.scale !== undefined ? Number(node.scale) : 1.0; const isPresen = state.presentationMode; const fontSize = isPresen ? 16 : 13; const fontWeight = isPresen ? '800' : '600';
+      ctx.font = `${fontWeight} ${fontSize}px Inter, sans-serif`; const textInfo = measureMultilineText(ctx, String(node.name || ''), fontSize);
+      let width, height; const padW = isPresen ? 50 : 40; const padH = isPresen ? 30 : 20;
       if (node.shape === 'rect') { width = Math.max(isPresen?140:120, textInfo.width + padW) * scale; height = Math.max(isPresen?60:46, textInfo.height + padH) * scale; } 
       else if (node.shape === 'diamond') { width = Math.max(isPresen?160:140, textInfo.width + padW+20) * scale; height = Math.max(isPresen?100:80, textInfo.height + padH+20) * scale; } 
       else { const r = Math.max(isPresen?45:35, (Math.max(textInfo.width, textInfo.height) + padH) / 2) * scale; width = r * 2; height = r * 2; }
@@ -435,23 +356,16 @@
     }
 
     function getEdgeCurve(edge) {
-      const from = state.nodes.find(n => n.id === edge.from); const to = state.nodes.find(n => n.id === edge.to);
-      if (!from || !to) return null;
-
+      const from = state.nodes.find(n => n.id === edge.from); const to = state.nodes.find(n => n.id === edge.to); if (!from || !to) return null;
       const isCurved = state.edges.some(e => e !== edge && e.from === edge.to && e.to === edge.from);
       let startX, startY, endX, endY, cpX, cpY, arrowAngle; const dx = to.x - from.x; const dy = to.y - from.y; const len = Math.hypot(dx, dy) || 1;
-      
       if (isCurved) {
-        const midX = from.x + dx / 2; const midY = from.y + dy / 2; const nx = -dy / len; const ny = dx / len; const offset = 35;
-        cpX = midX + nx * offset; cpY = midY + ny * offset;
+        const midX = from.x + dx / 2; const midY = from.y + dy / 2; const nx = -dy / len; const ny = dx / len; const offset = 35; cpX = midX + nx * offset; cpY = midY + ny * offset;
         const angleFrom = Math.atan2(cpY - from.y, cpX - from.x); const posFrom = getNodeIntersection(from, angleFrom); startX = posFrom.x; startY = posFrom.y;
-        const angleToReverse = Math.atan2(cpY - to.y, cpX - to.x); const posTo = getNodeIntersection(to, angleToReverse); endX = posTo.x; endY = posTo.y;
-        arrowAngle = Math.atan2(endY - cpY, endX - cpX);
+        const angleToReverse = Math.atan2(cpY - to.y, cpX - to.x); const posTo = getNodeIntersection(to, angleToReverse); endX = posTo.x; endY = posTo.y; arrowAngle = Math.atan2(endY - cpY, endX - cpX);
       } else {
-        const originalAngle = Math.atan2(dy, dx);
-        const posFrom = getNodeIntersection(from, originalAngle); startX = posFrom.x; startY = posFrom.y;
-        const posTo = getNodeIntersection(to, originalAngle + Math.PI); endX = posTo.x; endY = posTo.y;
-        cpX = (startX + endX) / 2; cpY = (startY + endY) / 2; arrowAngle = originalAngle;
+        const originalAngle = Math.atan2(dy, dx); const posFrom = getNodeIntersection(from, originalAngle); startX = posFrom.x; startY = posFrom.y;
+        const posTo = getNodeIntersection(to, originalAngle + Math.PI); endX = posTo.x; endY = posTo.y; cpX = (startX + endX) / 2; cpY = (startY + endY) / 2; arrowAngle = originalAngle;
       }
       return { isCurved, startX, startY, cpX, cpY, endX, endY, arrowAngle, len };
     }
@@ -469,47 +383,30 @@
       else {
         let minDist = Infinity; let lastX = curve.startX, lastY = curve.startY;
         for (let i = 1; i <= 10; i++) {
-          const t = i / 10; const mt = 1 - t;
-          const px = mt * mt * curve.startX + 2 * mt * t * curve.cpX + t * t * curve.endX; const py = mt * mt * curve.startY + 2 * mt * t * curve.cpY + t * t * curve.endY;
+          const t = i / 10; const mt = 1 - t; const px = mt * mt * curve.startX + 2 * mt * t * curve.cpX + t * t * curve.endX; const py = mt * mt * curve.startY + 2 * mt * t * curve.cpY + t * t * curve.endY;
           const d = getDistToSegment(x, y, lastX, lastY, px, py); if (d < minDist) minDist = d; lastX = px; lastY = py;
-        }
-        return minDist;
+        } return minDist;
       }
     }
-
     function getEdgeHandles(edge) { const curve = getEdgeCurve(edge); if (!curve) return null; return { fromHandle: { x: curve.startX, y: curve.startY }, toHandle: { x: curve.endX, y: curve.endY } }; }
-
     function getLabelRect(edge) {
-      if (!edge.label || String(edge.label).trim() === "") return null;
-      const curve = getEdgeCurve(edge); if (!curve) return null;
+      if (!edge.label || String(edge.label).trim() === "") return null; const curve = getEdgeCurve(edge); if (!curve) return null;
       const t = edge.labelPos !== undefined ? edge.labelPos : 0.5; let midX, midY;
-      if (curve.isCurved) {
-        const mt = 1 - t; midX = mt * mt * curve.startX + 2 * mt * t * curve.cpX + t * t * curve.endX; midY = mt * mt * curve.startY + 2 * mt * t * curve.cpY + t * t * curve.endY;
-      } else { midX = curve.startX + (curve.endX - curve.startX) * t; midY = curve.startY + (curve.endY - curve.startY) * t; }
-      
-      const isPresen = state.presentationMode;
-      const fontSize = isPresen ? 14 : 12;
-      ctx.font = `${isPresen?'700':'400'} ${fontSize}px Inter, sans-serif`; 
-      const textInfo = measureMultilineText(ctx, String(edge.label), fontSize);
-      const pad = isPresen ? 12 : 8;
-      
+      if (curve.isCurved) { const mt = 1 - t; midX = mt * mt * curve.startX + 2 * mt * t * curve.cpX + t * t * curve.endX; midY = mt * mt * curve.startY + 2 * mt * t * curve.cpY + t * t * curve.endY; } 
+      else { midX = curve.startX + (curve.endX - curve.startX) * t; midY = curve.startY + (curve.endY - curve.startY) * t; }
+      const isPresen = state.presentationMode; const fontSize = isPresen ? 14 : 12; ctx.font = `${isPresen?'700':'400'} ${fontSize}px Inter, sans-serif`; const textInfo = measureMultilineText(ctx, String(edge.label), fontSize); const pad = isPresen ? 12 : 8;
       return { x: midX - textInfo.width/2 - pad, y: midY - textInfo.height/2 - pad, w: textInfo.width + pad*2, h: textInfo.height + pad*2, midX, midY, fontSize };
     }
 
     function updateInlineEditorPosition() {
       if (!state.editingTarget || !state.editingType) return;
-      const target = state.editingTarget; const editor = ui.inlineEditor;
-      const isPresen = state.presentationMode;
-      
-      let w = 100, h = 30, worldPx = 0, worldPy = 0;
-      let fontSize = isPresen ? 16 : 13;
+      const target = state.editingTarget; const editor = ui.inlineEditor; const isPresen = state.presentationMode;
+      let w = 100, h = 30, worldPx = 0, worldPy = 0; let fontSize = isPresen ? 16 : 13;
 
       if (state.editingType === 'node') {
-        const size = getNodeSize(target); w = size.width - 10; h = size.height - 10; worldPx = target.x - w/2; worldPy = target.y - h/2;
-        fontSize = size.fontSize;
+        const size = getNodeSize(target); w = size.width - 10; h = size.height - 10; worldPx = target.x - w/2; worldPy = target.y - h/2; fontSize = size.fontSize;
       } else if (state.editingType === 'edge') {
-        fontSize = isPresen ? 14 : 12;
-        const rect = getLabelRect(target);
+        fontSize = isPresen ? 14 : 12; const rect = getLabelRect(target);
         if (rect) { w = rect.w; h = rect.h; worldPx = rect.x; worldPy = rect.y; } 
         else {
             const curve = getEdgeCurve(target);
@@ -520,6 +417,11 @@
               w = 120; h = 40; worldPx = midX - w/2; worldPy = midY - h/2;
             }
         }
+      } else if (state.editingType === 'zone') {
+        fontSize = isPresen ? 16 : 13; ctx.font = `${isPresen?'700':'600'} ${fontSize}px Inter, sans-serif`;
+        const textInfo = measureMultilineText(ctx, String(target.label || ''), fontSize);
+        w = Math.max(120, textInfo.width + 20); h = textInfo.height + 20;
+        worldPx = target.x - target.w/2; worldPy = target.y - target.h/2 - h - 5;
       }
       const screenPos = getScreenFromWorld(worldPx, worldPy);
       editor.style.left = `${screenPos.x}px`; editor.style.top = `${screenPos.y}px`;
@@ -528,11 +430,10 @@
 
     function startInlineEditing(target, type = 'node') {
       state.editingTarget = target; state.editingType = type; const editor = ui.inlineEditor;
-      let text = type === 'node' ? String(target.name || '') : String(target.label || '');
+      let text = type === 'node' ? String(target.name || '') : (type === 'zone' ? String(target.label || '') : String(target.label || ''));
       editor.value = text;
       editor.style.backgroundColor = state.theme === 'dark' ? '#1e293b' : '#ffffff'; editor.style.color = state.theme === 'dark' ? 'white' : 'black';
-      updateInlineEditorPosition();
-      editor.classList.remove('hidden'); editor.focus(); editor.select(); 
+      updateInlineEditorPosition(); editor.classList.remove('hidden'); editor.focus(); editor.select(); 
       const resizeEditor = () => { editor.style.height = 'auto'; editor.style.height = (editor.scrollHeight) + 'px'; };
       editor.oninput = resizeEditor; setTimeout(resizeEditor, 10);
     }
@@ -541,7 +442,7 @@
       if (!state.editingTarget) return;
       if (save) {
         const newText = ui.inlineEditor.value.trim();
-        if (state.editingType === 'node') state.editingTarget.name = newText; else if (state.editingType === 'edge') state.editingTarget.label = newText;
+        if (state.editingType === 'node') state.editingTarget.name = newText; else if (state.editingType === 'edge') state.editingTarget.label = newText; else if (state.editingType === 'zone') state.editingTarget.label = newText;
       }
       ui.inlineEditor.classList.add('hidden'); state.editingTarget = null; state.editingType = null; render();
     }
@@ -551,31 +452,19 @@
       const screenCenterX = canvas.width / 2; const screenCenterY = canvas.height / 2;
       const worldCenterX = (screenCenterX - state.panX) / oldZoom; const worldCenterY = (screenCenterY - state.panY) / oldZoom;
       state.panX = screenCenterX - worldCenterX * state.zoom; state.panY = screenCenterY - worldCenterY * state.zoom;
-      ui.zoomLevel.textContent = `${Math.round(state.zoom * 100)}%`;
-      if(state.editingTarget) stopInlineEditing(true); render();
+      ui.zoomLevel.textContent = `${Math.round(state.zoom * 100)}%`; if(state.editingTarget) updateInlineEditorPosition(); render();
     }
-
-    function updateTheme() {
-      if (state.theme === 'light') document.documentElement.classList.add('light-mode'); else document.documentElement.classList.remove('light-mode');
-      createBackgroundPattern(); if(state.editingTarget) stopInlineEditing(true); render();
-    }
-    
+    function updateTheme() { if (state.theme === 'light') document.documentElement.classList.add('light-mode'); else document.documentElement.classList.remove('light-mode'); createBackgroundPattern(); render(); }
     function updateSpawnSettings(val) {
-        if (val === 0) {
-            state.spawnMode = 'single';
-            ui.valSpawn.textContent = '単発 (完了待機)';
-        } else {
-            state.spawnMode = 'continuous';
-            const maxInt = 600; const minInt = 10;
-            state.spawnRate = Math.floor(minInt + (maxInt - minInt) * Math.pow((100 - val) / 99, 2));
-            if (val < 30) ui.valSpawn.textContent = '低 (数秒に1回)';
-            else if (val > 80) ui.valSpawn.textContent = '高 (激しい)';
-            else ui.valSpawn.textContent = '中';
+        if (val === 0) { state.spawnMode = 'single'; ui.valSpawn.textContent = '単発 (完了待機)'; } 
+        else { state.spawnMode = 'continuous'; const maxInt = 600; const minInt = 10; state.spawnRate = Math.floor(minInt + (maxInt - minInt) * Math.pow((100 - val) / 99, 2));
+            if (val < 30) ui.valSpawn.textContent = '低 (数秒に1回)'; else if (val > 80) ui.valSpawn.textContent = '高 (激しい)'; else ui.valSpawn.textContent = '中';
         }
     }
 
     function setupEventListeners() {
       ui.btnToggle.addEventListener('click', toggleSimulation);
+      ui.btnAddZone.addEventListener('click', addZone);
       
       ui.sliderSpawn.addEventListener('input', (e) => { updateSpawnSettings(parseInt(e.target.value)); });
       ui.sliderSpeed.addEventListener('input', (e) => { state.simulationSpeed = parseFloat(e.target.value); ui.valSpeed.textContent = `${state.simulationSpeed.toFixed(1)}x`; });
@@ -583,8 +472,7 @@
       ui.checkEnableGlow.addEventListener('change', (e) => { state.enableGlow = e.target.checked; render(); });
       ui.checkSnap.addEventListener('change', (e) => { state.enableSnap = e.target.checked; });
       ui.checkShowBadge.addEventListener('change', (e) => { state.showCountBadge = e.target.checked; render(); });
-      ui.checkPresentation.addEventListener('change', (e) => { state.presentationMode = e.target.checked; if(state.editingTarget) stopInlineEditing(true); render(); });
-      
+      ui.checkPresentation.addEventListener('change', (e) => { state.presentationMode = e.target.checked; if(state.editingTarget) updateInlineEditorPosition(); render(); });
       document.querySelectorAll('input[name="bg-drag-mode"]').forEach(radio => { radio.addEventListener('change', (e) => { state.bgDragMode = e.target.value; }); });
 
       ui.selectNodeShape.addEventListener('change', (e) => { if (state.selectedNode) { state.selectedNode.shape = e.target.value; render(); } });
@@ -592,15 +480,8 @@
       ui.checkIsGoal.addEventListener('change', (e) => { if (state.selectedNode) { state.selectedNode.isGoal = e.target.checked; render(); } });
       ui.inputNodeColor.addEventListener('input', (e) => { if (state.selectedNode) { state.selectedNode.customColor = e.target.value; render(); } });
       ui.checkNodeColor.addEventListener('change', (e) => { if (state.selectedNode) { state.selectedNode.useCustomColor = e.target.checked; render(); } });
-      ui.btnDeleteNode.addEventListener('click', deleteSelectedNode);
-      ui.btnDeleteMulti.addEventListener('click', deleteSelectedGroup);
-      
-      ui.checkIsSpawner.addEventListener('change', (e) => {
-        if (state.selectedNode) {
-          state.selectedNode.isSpawner = e.target.checked;
-          if (e.target.checked) ui.spawnOrderContainer.classList.remove('hidden'); else ui.spawnOrderContainer.classList.add('hidden');
-        }
-      });
+      ui.btnDeleteNode.addEventListener('click', deleteSelectedNode); ui.btnDeleteMulti.addEventListener('click', deleteSelectedGroup);
+      ui.checkIsSpawner.addEventListener('change', (e) => { if (state.selectedNode) { state.selectedNode.isSpawner = e.target.checked; if (e.target.checked) ui.spawnOrderContainer.classList.remove('hidden'); else ui.spawnOrderContainer.classList.add('hidden'); } });
       ui.inputSpawnOrder.addEventListener('input', (e) => { if (state.selectedNode) { state.selectedNode.spawnOrder = parseInt(e.target.value) || 1; } });
 
       ui.inputEdgeColor.addEventListener('input', (e) => { if (state.selectedEdge) { state.selectedEdge.customColor = e.target.value; render(); } });
@@ -609,45 +490,72 @@
       ui.sliderEdgeSpeed.addEventListener('input', (e) => { if (state.selectedEdge) { state.selectedEdge.speed = parseFloat(e.target.value); ui.valEdgeSpeed.textContent = `${state.selectedEdge.speed.toFixed(1)}x`; } });
       ui.sliderEdgeVolume.addEventListener('input', (e) => { if (state.selectedEdge) { state.selectedEdge.volume = parseInt(e.target.value); ui.valEdgeVolume.textContent = `${state.selectedEdge.volume}個`; } });
 
-      ui.btnSave.addEventListener('click', saveToFile);
-      ui.btnLoad.addEventListener('click', () => ui.fileInput.click());
-      ui.fileInput.addEventListener('change', loadFromFile);
-      ui.btnScreenshot.addEventListener('click', takeScreenshot);
-      ui.btnRecord.addEventListener('click', toggleRecording);
-      
-      ui.btnZoomIn.addEventListener('click', () => setZoom(state.zoom + 0.1));
-      ui.btnZoomOut.addEventListener('click', () => setZoom(state.zoom - 0.1));
-      ui.btnZoomReset.addEventListener('click', () => { state.panX = 0; state.panY = 0; setZoom(1.0); });
+      ui.selectZoneStyle.addEventListener('change', (e) => { if (state.selectedZone) { state.selectedZone.style = e.target.value; render(); } });
+      ui.selectZoneAnim.addEventListener('change', (e) => { if (state.selectedZone) { state.selectedZone.animation = e.target.value; render(); } });
+      ui.inputZoneColor.addEventListener('input', (e) => { if (state.selectedZone) { state.selectedZone.color = e.target.value; render(); } });
+      ui.btnDeleteZone.addEventListener('click', deleteSelectedZone);
 
-      canvas.addEventListener('contextmenu', e => e.preventDefault());
-      canvas.addEventListener('mousedown', handleMouseDown);
-      canvas.addEventListener('mousemove', handleMouseMove);
-      canvas.addEventListener('mouseup', handleMouseUp);
-      canvas.addEventListener('dblclick', handleDoubleClick);
+      ui.btnSave.addEventListener('click', saveToFile); ui.btnLoad.addEventListener('click', () => ui.fileInput.click()); ui.fileInput.addEventListener('change', loadFromFile);
+      ui.btnScreenshot.addEventListener('click', takeScreenshot); ui.btnRecord.addEventListener('click', toggleRecording);
       
-      canvas.addEventListener('wheel', (e) => {
-          e.preventDefault(); 
-          let delta = Math.abs(e.deltaY) >= 50 ? (e.deltaY > 0 ? -0.1 : 0.1) : -e.deltaY * 0.005;
-          if (delta !== 0) setZoom(state.zoom + delta);
-      }, { passive: false });
+      ui.btnZoomIn.addEventListener('click', () => setZoom(state.zoom + 0.1)); ui.btnZoomOut.addEventListener('click', () => setZoom(state.zoom - 0.1)); ui.btnZoomReset.addEventListener('click', () => { state.panX = 0; state.panY = 0; setZoom(1.0); });
+
+      canvas.addEventListener('contextmenu', e => e.preventDefault()); canvas.addEventListener('mousedown', handleMouseDown); canvas.addEventListener('mousemove', handleMouseMove); canvas.addEventListener('mouseup', handleMouseUp); canvas.addEventListener('dblclick', handleDoubleClick);
+      canvas.addEventListener('wheel', (e) => { e.preventDefault(); let delta = Math.abs(e.deltaY) >= 50 ? (e.deltaY > 0 ? -0.1 : 0.1) : -e.deltaY * 0.005; if (delta !== 0) setZoom(state.zoom + delta); }, { passive: false });
       
       window.addEventListener('keydown', (e) => {
         if ((e.key === 'Delete' || e.key === 'Backspace') && document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') {
-          if (state.selectedGroup.length > 0) deleteSelectedGroup(); else if (state.selectedNode) deleteSelectedNode(); else if (state.selectedEdge) deleteSelectedEdge();
+          if (state.selectedGroup.length > 0) deleteSelectedGroup(); else if (state.selectedNode) deleteSelectedNode(); else if (state.selectedEdge) deleteSelectedEdge(); else if (state.selectedZone) deleteSelectedZone();
         }
       });
+      ui.inlineEditor.addEventListener('mousedown', e => e.stopPropagation()); ui.inlineEditor.addEventListener('dblclick', e => e.stopPropagation()); ui.inlineEditor.addEventListener('blur', () => stopInlineEditing(true));
+      ui.inlineEditor.addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); ui.inlineEditor.blur(); } else if (e.key === 'Escape') { e.preventDefault(); stopInlineEditing(false); } });
+    }
 
-      ui.inlineEditor.addEventListener('mousedown', e => e.stopPropagation());
-      ui.inlineEditor.addEventListener('dblclick', e => e.stopPropagation());
-      ui.inlineEditor.addEventListener('blur', () => stopInlineEditing(true));
-      ui.inlineEditor.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); ui.inlineEditor.blur(); } else if (e.key === 'Escape') { e.preventDefault(); stopInlineEditing(false); }
-      });
+    function selectNode(node) {
+      state.selectedNode = node; state.selectedEdge = null; state.selectedZone = null;
+      ui.panelNoSel.classList.add('hidden'); ui.panelEdge.classList.add('hidden'); ui.panelZone.classList.add('hidden'); ui.panelMulti.classList.add('hidden'); ui.panelNode.classList.remove('hidden');
+      ui.selectNodeShape.value = node.shape || 'circle'; ui.sliderNodeScale.value = node.scale !== undefined ? node.scale : 1.0; ui.valNodeScale.textContent = `${(node.scale !== undefined ? node.scale : 1.0).toFixed(1)}x`;
+      ui.checkIsGoal.checked = node.isGoal || false; ui.checkNodeColor.checked = node.useCustomColor || false; ui.inputNodeColor.value = node.customColor || '#ef4444';
+      ui.checkIsSpawner.checked = node.isSpawner || false; if (node.isSpawner) ui.spawnOrderContainer.classList.remove('hidden'); else ui.spawnOrderContainer.classList.add('hidden'); ui.inputSpawnOrder.value = node.spawnOrder !== undefined ? node.spawnOrder : 1;
+    }
+    function selectEdge(edge) {
+      state.selectedEdge = edge; state.selectedNode = null; state.selectedZone = null;
+      ui.panelNoSel.classList.add('hidden'); ui.panelNode.classList.add('hidden'); ui.panelZone.classList.add('hidden'); ui.panelMulti.classList.add('hidden'); ui.panelEdge.classList.remove('hidden');
+      ui.checkEdgeColor.checked = edge.useCustomColor || false; ui.inputEdgeColor.value = edge.customColor || '#ef4444';
+      ui.sliderEdgeSpeed.value = edge.speed !== undefined ? edge.speed : 1.0; ui.valEdgeSpeed.textContent = `${(edge.speed !== undefined ? edge.speed : 1.0).toFixed(1)}x`;
+      ui.sliderEdgeVolume.value = edge.volume !== undefined ? edge.volume : 1; ui.valEdgeVolume.textContent = `${(edge.volume !== undefined ? edge.volume : 1)}個`;
+    }
+    function selectZone(zone) {
+      state.selectedZone = zone; state.selectedNode = null; state.selectedEdge = null;
+      ui.panelNoSel.classList.add('hidden'); ui.panelNode.classList.add('hidden'); ui.panelEdge.classList.add('hidden'); ui.panelMulti.classList.add('hidden'); ui.panelZone.classList.remove('hidden');
+      ui.selectZoneStyle.value = zone.style || 'dashed'; ui.selectZoneAnim.value = zone.animation || 'none'; ui.inputZoneColor.value = zone.color || '#f59e0b';
+    }
+    function clearSelection() {
+      state.selectedNode = null; state.selectedEdge = null; state.selectedZone = null; state.selectedGroup = [];
+      ui.panelNode.classList.add('hidden'); ui.panelEdge.classList.add('hidden'); ui.panelZone.classList.add('hidden'); ui.panelMulti.classList.add('hidden'); ui.panelNoSel.classList.remove('hidden');
+    }
+    function deleteSelectedNode() {
+      if (!state.selectedNode) return; const id = state.selectedNode.id;
+      state.nodes = state.nodes.filter(n => n.id !== id); state.edges = state.edges.filter(e => e.from !== id && e.to !== id); state.signals = state.signals.filter(s => s.fromId !== id && s.toId !== id);
+      if (state.editingType === 'node' && state.editingTarget === state.selectedNode) stopInlineEditing(false); clearSelection(); render();
+    }
+    function deleteSelectedGroup() {
+      if (state.selectedGroup.length === 0) return; const ids = state.selectedGroup.map(n => n.id);
+      state.nodes = state.nodes.filter(n => !ids.includes(n.id)); state.edges = state.edges.filter(e => !ids.includes(e.from) && !ids.includes(e.to)); state.signals = state.signals.filter(s => !ids.includes(s.fromId) && !ids.includes(s.toId)); clearSelection(); render();
+    }
+    function deleteSelectedEdge() { if (!state.selectedEdge) return; state.edges = state.edges.filter(e => e !== state.selectedEdge); if (state.editingType === 'edge' && state.editingTarget === state.selectedEdge) stopInlineEditing(false); clearSelection(); render(); }
+    function deleteSelectedZone() { if (!state.selectedZone) return; state.zones = state.zones.filter(z => z !== state.selectedZone); if (state.editingType === 'zone' && state.editingTarget === state.selectedZone) stopInlineEditing(false); clearSelection(); render(); }
+    
+    function addZone() {
+      const screenCenterX = canvas.width / 2; const screenCenterY = canvas.height / 2;
+      const worldPos = getWorldPos(screenCenterX, screenCenterY);
+      const newZone = { id: 'zone_' + Date.now(), x: worldPos.x, y: worldPos.y, w: 250, h: 200, label: '新しいエリア', color: '#f59e0b', style: 'dashed', animation: 'none' };
+      state.zones.push(newZone); state.selectedGroup = []; selectZone(newZone); startInlineEditing(newZone, 'zone'); render();
     }
 
     function handleMouseDown(e) {
-      if (state.editingTarget) stopInlineEditing(true);
-      const screenPos = getScreenPos(e);
+      if (state.editingTarget) stopInlineEditing(true); const screenPos = getScreenPos(e);
       if (e.button === 2 || e.button === 1 || (e.button === 0 && e.spaceKey)) { state.isPanning = true; state.panStartX = screenPos.x - state.panX; state.panStartY = screenPos.y - state.panY; canvas.style.cursor = 'grabbing'; return; }
 
       const worldPos = getWorldPos(screenPos.x, screenPos.y); const x = worldPos.x; const y = worldPos.y;
@@ -672,8 +580,33 @@
         else {
           if(!state.selectedGroup.includes(clickedNode)) { state.selectedGroup = []; selectNode(clickedNode); }
           state.isDragging = true; state.draggedNode = clickedNode; state.dragOffsetX = x - clickedNode.x; state.dragOffsetY = y - clickedNode.y; canvas.style.cursor = 'grabbing';
+        } return;
+      }
+      
+      if (state.selectedZone) {
+        const hx = state.selectedZone.x + state.selectedZone.w/2; const hy = state.selectedZone.y + state.selectedZone.h/2;
+        if (Math.hypot(x - hx, y - hy) <= 12 / state.zoom) {
+          state.isResizingZone = true; state.resizedZone = state.selectedZone;
+          state.resizeStartX = x; state.resizeStartY = y; state.resizeStartW = state.selectedZone.w; state.resizeStartH = state.selectedZone.h;
+          canvas.style.cursor = 'nwse-resize'; return;
         }
-        return;
+      }
+
+      let clickedZone = null;
+      for (let i = state.zones.length - 1; i >= 0; i--) {
+        const z = state.zones[i];
+        ctx.font = `600 13px Inter, sans-serif`; const textInfo = measureMultilineText(ctx, String(z.label || ''), 13);
+        const lx = z.x - z.w/2; const ly = z.y - z.h/2 - textInfo.height - 10;
+        const inLabel = (x >= lx && x <= lx + textInfo.width + 16 && y >= ly && y <= ly + textInfo.height + 16);
+        const left = z.x - z.w/2; const right = z.x + z.w/2; const top = z.y - z.h/2; const bottom = z.y + z.h/2;
+        const outBound = (x >= left - 15 && x <= right + 15 && y >= top - 15 && y <= bottom + 15);
+        const inBound  = (x >= left + 15 && x <= right - 15 && y >= top + 15 && y <= bottom - 15);
+        if (inLabel || (outBound && !inBound)) { clickedZone = z; break; }
+      }
+
+      if (clickedZone) {
+        state.selectedGroup = []; selectZone(clickedZone); state.isDraggingZone = true; state.draggedZone = clickedZone;
+        state.dragOffsetX = x - clickedZone.x; state.dragOffsetY = y - clickedZone.y; canvas.style.cursor = 'grabbing'; return;
       }
 
       let clickedEdge = null;
@@ -694,34 +627,47 @@
 
       if (state.isBoxSelecting) { state.boxCurrentX = x; state.boxCurrentY = y; render(); return; }
       if (state.isDraggingEdgeHandle && state.draggedEdgeHandleEdge) { render(); return; }
+      if (state.isResizingZone && state.resizedZone) {
+        const dx = x - state.resizeStartX; const dy = y - state.resizeStartY;
+        const left = state.resizedZone.x - state.resizedZone.w/2; const top = state.resizedZone.y - state.resizedZone.h/2;
+        state.resizedZone.w = Math.max(50, state.resizeStartW + dx); state.resizedZone.h = Math.max(30, state.resizeStartH + dy);
+        state.resizedZone.x = left + state.resizedZone.w/2; state.resizedZone.y = top + state.resizedZone.h/2; render(); return;
+      }
+      if (state.isDraggingZone && state.draggedZone) { state.draggedZone.x = x - state.dragOffsetX; state.draggedZone.y = y - state.dragOffsetY; render(); return; }
       
       if (state.isDraggingLabel && state.draggedLabelEdge) {
         const curve = getEdgeCurve(state.draggedLabelEdge);
         if (curve) {
           const dx = curve.endX - curve.startX; const dy = curve.endY - curve.startY; const lenSq = dx * dx + dy * dy;
           if (lenSq > 0) { let t = ((x - curve.startX) * dx + (y - curve.startY) * dy) / lenSq; state.draggedLabelEdge.labelPos = Math.max(0.1, Math.min(0.9, t)); }
-        }
-        render(); return;
+        } render(); return;
       }
 
-      if (!state.isDragging && !state.isConnecting) {
+      if (!state.isDragging && !state.isConnecting && !state.isDraggingZone && !state.isResizingZone) {
         let hoverHandle = false;
-        if (state.selectedEdge) {
-          const handles = getEdgeHandles(state.selectedEdge);
-          if (handles && (Math.hypot(x - handles.fromHandle.x, y - handles.fromHandle.y) <= 10/state.zoom || Math.hypot(x - handles.toHandle.x, y - handles.toHandle.y) <= 10/state.zoom)) hoverHandle = true;
-        }
+        if (state.selectedEdge) { const handles = getEdgeHandles(state.selectedEdge); if (handles && (Math.hypot(x - handles.fromHandle.x, y - handles.fromHandle.y) <= 10/state.zoom || Math.hypot(x - handles.toHandle.x, y - handles.toHandle.y) <= 10/state.zoom)) hoverHandle = true; }
+        let hoverZoneHandle = false;
+        if (state.selectedZone) { const hx = state.selectedZone.x + state.selectedZone.w/2; const hy = state.selectedZone.y + state.selectedZone.h/2; if (Math.hypot(x - hx, y - hy) <= 12 / state.zoom) hoverZoneHandle = true; }
+        
         const hoverNode = state.nodes.some(n => isMouseOnNode(x, y, n));
         const hoverLabel = state.edges.some(e => { const r = getLabelRect(e); return r && x >= r.x && x <= r.x + r.w && y >= r.y && y <= r.y + r.h; });
         const hoverEdge = state.edges.some(e => getDistToEdge(x, y, e) < 10/state.zoom);
-        
+        const hoverZone = state.zones.some(z => {
+          ctx.font = `600 13px Inter, sans-serif`; const textInfo = measureMultilineText(ctx, String(z.label || ''), 13);
+          const lx = z.x - z.w/2; const ly = z.y - z.h/2 - textInfo.height - 10;
+          if (x >= lx && x <= lx + textInfo.width + 16 && y >= ly && y <= ly + textInfo.height + 16) return true;
+          const left = z.x - z.w/2; const right = z.x + z.w/2; const top = z.y - z.h/2; const bottom = z.y + z.h/2;
+          return (x >= left - 15 && x <= right + 15 && y >= top - 15 && y <= bottom + 15) && !(x >= left + 15 && x <= right - 15 && y >= top + 15 && y <= bottom - 15);
+        });
+
         if (hoverHandle) canvas.style.cursor = 'grab';
-        else if (hoverNode || hoverLabel || hoverEdge) canvas.style.cursor = 'pointer';
+        else if (hoverZoneHandle) canvas.style.cursor = 'nwse-resize';
+        else if (hoverNode || hoverLabel || hoverEdge || hoverZone) canvas.style.cursor = 'pointer';
         else canvas.style.cursor = state.bgDragMode === 'pan' ? 'grab' : 'default';
       }
 
       if (state.isDragging && state.draggedNode) {
         let newX = x - state.dragOffsetX; let newY = y - state.dragOffsetY; state.alignGuides = [];
-        
         if (state.enableSnap && state.selectedGroup.length <= 1) {
           const SNAP_DIST = 15 / state.zoom; let snapX = null; let minDistX = SNAP_DIST; let snapY = null; let minDistY = SNAP_DIST; let snapAngle = null; let minDistAngle = SNAP_DIST;
           for (const node of state.nodes) {
@@ -730,8 +676,7 @@
             if (Math.abs(newY - node.y) < minDistY) { minDistY = Math.abs(newY - node.y); snapY = node.y; }
             const diagAngles = [30, 45, 60, 120, 135, 150];
             for(const ang of diagAngles) {
-              const rad = ang * Math.PI / 180; const dx = newX - node.x; const dy = newY - node.y;
-              const dist = Math.abs(dx * (-Math.sin(rad)) + dy * Math.cos(rad));
+              const rad = ang * Math.PI / 180; const dx = newX - node.x; const dy = newY - node.y; const dist = Math.abs(dx * (-Math.sin(rad)) + dy * Math.cos(rad));
               if (dist < minDistAngle) { minDistAngle = dist; const t = dx * Math.cos(rad) + dy * Math.sin(rad); snapAngle = { x: node.x + t * Math.cos(rad), y: node.y + t * Math.sin(rad), guideStartX: node.x - 2000 * Math.cos(rad), guideStartY: node.y - 2000 * Math.sin(rad), guideEndX: node.x + 2000 * Math.cos(rad), guideEndY: node.y + 2000 * Math.sin(rad) }; }
             }
           }
@@ -739,10 +684,8 @@
           if (snapY !== null) { newY = snapY; state.alignGuides.push({ type: 'y', y: snapY, x1: newX - 2000, x2: newX + 2000 }); }
           if (snapX === null && snapY === null && snapAngle !== null) { newX = snapAngle.x; newY = snapAngle.y; state.alignGuides.push({ type: 'line', x1: snapAngle.guideStartX, y1: snapAngle.guideStartY, x2: snapAngle.guideEndX, y2: snapAngle.guideEndY }); }
         }
-        
         const deltaX = newX - state.draggedNode.x; const deltaY = newY - state.draggedNode.y;
-        if (state.selectedGroup.length > 0) { state.selectedGroup.forEach(n => { n.x += deltaX; n.y += deltaY; }); } 
-        else { state.draggedNode.x = newX; state.draggedNode.y = newY; }
+        if (state.selectedGroup.length > 0) { state.selectedGroup.forEach(n => { n.x += deltaX; n.y += deltaY; }); } else { state.draggedNode.x = newX; state.draggedNode.y = newY; }
       }
       if (!state.isRunning) render();
     }
@@ -753,17 +696,11 @@
 
       if (state.isBoxSelecting) {
         state.isBoxSelecting = false;
-        const minX = Math.min(state.boxStartX, state.boxCurrentX); const maxX = Math.max(state.boxStartX, state.boxCurrentX);
-        const minY = Math.min(state.boxStartY, state.boxCurrentY); const maxY = Math.max(state.boxStartY, state.boxCurrentY);
+        const minX = Math.min(state.boxStartX, state.boxCurrentX); const maxX = Math.max(state.boxStartX, state.boxCurrentX); const minY = Math.min(state.boxStartY, state.boxCurrentY); const maxY = Math.max(state.boxStartY, state.boxCurrentY);
         state.selectedGroup = state.nodes.filter(n => n.x >= minX && n.x <= maxX && n.y >= minY && n.y <= maxY);
-        if (state.selectedGroup.length > 1) {
-          state.selectedNode = null; state.selectedEdge = null;
-          ui.panelNoSel.classList.add('hidden'); ui.panelNode.classList.add('hidden'); ui.panelEdge.classList.add('hidden');
-          ui.panelMulti.classList.remove('hidden'); ui.multiSelCount.textContent = state.selectedGroup.length;
-        } else if (state.selectedGroup.length === 1) { selectNode(state.selectedGroup[0]); state.selectedGroup = []; }
-        render(); return;
+        if (state.selectedGroup.length > 1) { state.selectedNode = null; state.selectedEdge = null; state.selectedZone = null; ui.panelNoSel.classList.add('hidden'); ui.panelNode.classList.add('hidden'); ui.panelEdge.classList.add('hidden'); ui.panelZone.classList.add('hidden'); ui.panelMulti.classList.remove('hidden'); ui.multiSelCount.textContent = state.selectedGroup.length; } 
+        else if (state.selectedGroup.length === 1) { selectNode(state.selectedGroup[0]); state.selectedGroup = []; } render(); return;
       }
-
       if (state.isDraggingEdgeHandle && state.draggedEdgeHandleEdge) {
         let targetNode = null; for (const node of state.nodes) { if (isMouseOnNode(x, y, node)) { targetNode = node; break; } }
         if (targetNode) {
@@ -772,10 +709,8 @@
             const exists = state.edges.some(e => e !== edge && ((state.draggedEdgeHandleType === 'from' && e.from === targetNode.id && e.to === edge.to) || (state.draggedEdgeHandleType === 'to' && e.from === edge.from && e.to === targetNode.id)));
             if (!exists) { if (state.draggedEdgeHandleType === 'from') edge.from = targetNode.id; else edge.to = targetNode.id; state.signals = state.signals.filter(s => !(s.fromId === edge.from && s.toId === edge.to)); }
           }
-        }
-        state.isDraggingEdgeHandle = false; state.draggedEdgeHandleEdge = null; state.draggedEdgeHandleType = null; canvas.style.cursor = 'default'; render(); return;
+        } state.isDraggingEdgeHandle = false; state.draggedEdgeHandleEdge = null; state.draggedEdgeHandleType = null; canvas.style.cursor = 'default'; render(); return;
       }
-
       if (state.isConnecting && state.connectFromNode) {
         let targetNode = null; for (const node of state.nodes) { if (isMouseOnNode(x, y, node) && node.id !== state.connectFromNode.id) { targetNode = node; break; } }
         if (targetNode) {
@@ -783,8 +718,7 @@
           if (!exists) { state.edges.push({ from: state.connectFromNode.id, to: targetNode.id, label: '', labelPos: 0.5, useCustomColor: false, customColor: '#ef4444', speed: 1.0, volume: 1 }); selectEdge(state.edges[state.edges.length - 1]); }
         }
       }
-      
-      state.isDragging = false; state.draggedNode = null; state.isDraggingLabel = false; state.draggedLabelEdge = null; state.isConnecting = false; state.connectFromNode = null; state.alignGuides = [];
+      state.isDragging = false; state.draggedNode = null; state.isDraggingLabel = false; state.draggedLabelEdge = null; state.isConnecting = false; state.connectFromNode = null; state.isDraggingZone = false; state.draggedZone = null; state.isResizingZone = false; state.resizedZone = null; state.alignGuides = [];
       canvas.style.cursor = state.bgDragMode === 'pan' ? 'grab' : 'default'; render();
     }
 
@@ -799,6 +733,15 @@
       for (const edge of state.edges) { const rect = getLabelRect(edge); if (rect && x >= rect.x && x <= rect.x + rect.w && y >= rect.y && y <= rect.y + rect.h) { clickedLabelEdge = edge; break; } }
       if (clickedLabelEdge) { state.selectedGroup = []; selectEdge(clickedLabelEdge); startInlineEditing(clickedLabelEdge, 'edge'); return; }
 
+      let clickedZone = null;
+      for (let i = state.zones.length - 1; i >= 0; i--) {
+        const z = state.zones[i]; ctx.font = `600 13px Inter, sans-serif`; const textInfo = measureMultilineText(ctx, String(z.label || ''), 13);
+        const lx = z.x - z.w/2; const ly = z.y - z.h/2 - textInfo.height - 10;
+        const left = z.x - z.w/2; const right = z.x + z.w/2; const top = z.y - z.h/2; const bottom = z.y + z.h/2;
+        if ((x >= lx && x <= lx + textInfo.width + 16 && y >= ly && y <= ly + textInfo.height + 16) || ((x >= left - 15 && x <= right + 15 && y >= top - 15 && y <= bottom + 15) && !(x >= left + 15 && x <= right - 15 && y >= top + 15 && y <= bottom - 15))) { clickedZone = z; break; }
+      }
+      if (clickedZone) { state.selectedGroup = []; selectZone(clickedZone); startInlineEditing(clickedZone, 'zone'); return; }
+
       let clickedEdge = null;
       for (const edge of state.edges) { if (getDistToEdge(x, y, edge) < 10/state.zoom) { clickedEdge = edge; break; } }
       if (clickedEdge) { state.selectedGroup = []; selectEdge(clickedEdge); startInlineEditing(clickedEdge, 'edge'); return; }
@@ -807,70 +750,22 @@
       state.nodes.push(newNode); state.selectedGroup = []; selectNode(newNode); startInlineEditing(newNode, 'node');
     }
 
-    function selectNode(node) {
-      state.selectedNode = node; state.selectedEdge = null;
-      ui.panelNoSel.classList.add('hidden'); ui.panelEdge.classList.add('hidden'); ui.panelMulti.classList.add('hidden'); ui.panelNode.classList.remove('hidden');
-      ui.selectNodeShape.value = node.shape || 'circle'; ui.sliderNodeScale.value = node.scale !== undefined ? node.scale : 1.0; ui.valNodeScale.textContent = `${(node.scale !== undefined ? node.scale : 1.0).toFixed(1)}x`;
-      ui.checkIsGoal.checked = node.isGoal || false; ui.checkNodeColor.checked = node.useCustomColor || false; ui.inputNodeColor.value = node.customColor || '#ef4444';
-      ui.checkIsSpawner.checked = node.isSpawner || false;
-      if (node.isSpawner) ui.spawnOrderContainer.classList.remove('hidden'); else ui.spawnOrderContainer.classList.add('hidden');
-      ui.inputSpawnOrder.value = node.spawnOrder !== undefined ? node.spawnOrder : 1;
-    }
-
-    function selectEdge(edge) {
-      state.selectedEdge = edge; state.selectedNode = null;
-      ui.panelNoSel.classList.add('hidden'); ui.panelNode.classList.add('hidden'); ui.panelMulti.classList.add('hidden'); ui.panelEdge.classList.remove('hidden');
-      ui.checkEdgeColor.checked = edge.useCustomColor || false; ui.inputEdgeColor.value = edge.customColor || '#ef4444';
-      ui.sliderEdgeSpeed.value = edge.speed !== undefined ? edge.speed : 1.0; ui.valEdgeSpeed.textContent = `${(edge.speed !== undefined ? edge.speed : 1.0).toFixed(1)}x`;
-      ui.sliderEdgeVolume.value = edge.volume !== undefined ? edge.volume : 1; ui.valEdgeVolume.textContent = `${(edge.volume !== undefined ? edge.volume : 1)}個`;
-    }
-
-    function clearSelection() {
-      state.selectedNode = null; state.selectedEdge = null; state.selectedGroup = [];
-      ui.panelNode.classList.add('hidden'); ui.panelEdge.classList.add('hidden'); ui.panelMulti.classList.add('hidden'); ui.panelNoSel.classList.remove('hidden');
-    }
-
-    function deleteSelectedNode() {
-      if (!state.selectedNode) return; const id = state.selectedNode.id;
-      state.nodes = state.nodes.filter(n => n.id !== id); state.edges = state.edges.filter(e => e.from !== id && e.to !== id); state.signals = state.signals.filter(s => s.fromId !== id && s.toId !== id);
-      if (state.editingType === 'node' && state.editingTarget === state.selectedNode) stopInlineEditing(false); clearSelection(); render();
-    }
-
-    function deleteSelectedGroup() {
-      if (state.selectedGroup.length === 0) return; const ids = state.selectedGroup.map(n => n.id);
-      state.nodes = state.nodes.filter(n => !ids.includes(n.id)); state.edges = state.edges.filter(e => !ids.includes(e.from) && !ids.includes(e.to)); state.signals = state.signals.filter(s => !ids.includes(s.fromId) && !ids.includes(s.toId));
-      clearSelection(); render();
-    }
-
-    function deleteSelectedEdge() {
-      if (!state.selectedEdge) return; state.edges = state.edges.filter(e => e !== state.selectedEdge);
-      if (state.editingType === 'edge' && state.editingTarget === state.selectedEdge) stopInlineEditing(false); clearSelection(); render();
-    }
-
     function drawNode(node) {
       const isEditing = (state.editingType === 'node' && node === state.editingTarget); ctx.save();
       const isSelected = state.selectedNode === node || state.selectedGroup.includes(node);
-      const hasOutgoing = state.edges.some(e => e.from === node.id);
-      const isError = !hasOutgoing && !node.isGoal; const isSuccess = (!hasOutgoing && node.isGoal) || (node.isGoal && node.successCount > 0);
-      const isPresen = state.presentationMode;
+      const hasOutgoing = state.edges.some(e => e.from === node.id); const isError = !hasOutgoing && !node.isGoal; const isSuccess = (!hasOutgoing && node.isGoal) || (node.isGoal && node.successCount > 0); const isPresen = state.presentationMode;
 
       let nodeStrokeColor = getColor('nodeDefaultBorder'); let glowColor = null;
-      if (isSelected) { nodeStrokeColor = getColor('glowSelected'); glowColor = THEME_COLORS[state.theme].glowSelected; }
-      else if (node.useCustomColor && node.customColor) { nodeStrokeColor = node.customColor; glowColor = hexToRgba(node.customColor, 0.8); }
-      else if (isError && node.errorCount > 0) { nodeStrokeColor = '#ef4444'; glowColor = THEME_COLORS[state.theme].glowError; }
-      else if (isSuccess) { nodeStrokeColor = '#10b981'; if (node.successCount > 0) glowColor = THEME_COLORS[state.theme].glowSuccess; }
+      if (isSelected) { nodeStrokeColor = getColor('glowSelected'); glowColor = THEME_COLORS[state.theme].glowSelected; } else if (node.useCustomColor && node.customColor) { nodeStrokeColor = node.customColor; glowColor = hexToRgba(node.customColor, 0.8); } else if (isError && node.errorCount > 0) { nodeStrokeColor = '#ef4444'; glowColor = THEME_COLORS[state.theme].glowError; } else if (isSuccess) { nodeStrokeColor = '#10b981'; if (node.successCount > 0) glowColor = THEME_COLORS[state.theme].glowSuccess; }
 
       if (state.enableGlow) { ctx.shadowColor = 'rgba(0,0,0,0.5)'; ctx.shadowBlur = 10; ctx.shadowOffsetY = 4; if (glowColor) { ctx.shadowColor = glowColor; ctx.shadowBlur = 15; ctx.shadowOffsetY = 0;} }
 
-      ctx.fillStyle = getColor('nodeBg'); ctx.strokeStyle = nodeStrokeColor; 
-      ctx.lineWidth = isPresen ? (isSelected || glowColor ? 5 : 4) : (isSelected || glowColor ? 3 : 2);
-      
+      ctx.fillStyle = getColor('nodeBg'); ctx.strokeStyle = nodeStrokeColor; ctx.lineWidth = isPresen ? (isSelected || glowColor ? 5 : 4) : (isSelected || glowColor ? 3 : 2);
       const size = getNodeSize(node);
 
       if (node.shape === 'rect') {
         const w = size.width; const h = size.height; const r = 8 * size.scale; const x = node.x - w/2; const y = node.y - h/2;
-        ctx.beginPath(); ctx.moveTo(x + r, y); ctx.lineTo(x + w - r, y); ctx.arcTo(x + w, y, x + w, y + h, r);
-        ctx.lineTo(x + w, y + h - r); ctx.arcTo(x + w, y + h, x, y + h, r); ctx.lineTo(x + r, y + h); ctx.arcTo(x, y + h, x, y, r); ctx.lineTo(x, y + r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath(); ctx.fill(); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(x + r, y); ctx.lineTo(x + w - r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.lineTo(x + w, y + h - r); ctx.arcTo(x + w, y + h, x, y + h, r); ctx.lineTo(x + r, y + h); ctx.arcTo(x, y + h, x, y, r); ctx.lineTo(x, y + r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath(); ctx.fill(); ctx.stroke();
       } else if (node.shape === 'diamond') {
         const w = size.width; const h = size.height; ctx.beginPath(); ctx.moveTo(node.x, node.y - h/2); ctx.lineTo(node.x + w/2, node.y); ctx.lineTo(node.x, node.y + h/2); ctx.lineTo(node.x - w/2, node.y); ctx.closePath(); ctx.fill(); ctx.stroke();
       } else { ctx.beginPath(); ctx.arc(node.x, node.y, size.width/2, 0, Math.PI * 2); ctx.fill(); ctx.stroke(); }
@@ -882,13 +777,9 @@
     }
 
     function drawBadge(node, count, color) {
-      const isPresen = state.presentationMode;
-      const radius = isPresen ? 16 : 12;
-      const fontSize = isPresen ? 14 : 11;
+      const isPresen = state.presentationMode; const radius = isPresen ? 16 : 12; const fontSize = isPresen ? 14 : 11;
       const size = getNodeSize(node); const offsetX = size.width/2 - (10 * size.scale); const offsetY = -(size.height/2) + (5 * size.scale);
-      
-      ctx.beginPath(); ctx.arc(node.x + offsetX, node.y + offsetY, radius, 0, Math.PI*2); ctx.fillStyle = color; ctx.fill(); 
-      ctx.strokeStyle = '#ffffff'; ctx.lineWidth = isPresen ? 2 : 1.5; ctx.stroke();
+      ctx.beginPath(); ctx.arc(node.x + offsetX, node.y + offsetY, radius, 0, Math.PI*2); ctx.fillStyle = color; ctx.fill(); ctx.strokeStyle = '#ffffff'; ctx.lineWidth = isPresen ? 2 : 1.5; ctx.stroke();
       ctx.fillStyle = '#ffffff'; ctx.font = `bold ${fontSize}px sans-serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(count > 99 ? '99+' : count, node.x + offsetX, node.y + offsetY);
     }
 
@@ -896,28 +787,16 @@
       const curve = getEdgeCurve(edge); if (!curve) return; ctx.save();
       const isSelected = state.selectedEdge === edge; const isDraggedLabel = state.draggedLabelEdge === edge; const isHandleDragging = state.isDraggingEdgeHandle && state.draggedEdgeHandleEdge === edge; const isEditingLabel = (state.editingType === 'edge' && state.editingTarget === edge);
       const isPresen = state.presentationMode;
+      let edgeColor = getColor('edgeLine'); if (isSelected) edgeColor = '#3b82f6'; else if (edge.useCustomColor && edge.customColor) edgeColor = hexToRgba(edge.customColor, 0.9); else if (isPresen) edgeColor = state.theme === 'dark' ? '#cbd5e1' : '#334155'; 
+      let visualStartX = curve.startX, visualStartY = curve.startY; let visualEndX = curve.endX, visualEndY = curve.endY; let arrowAngle = curve.arrowAngle; const baseLineWidth = isPresen ? 4 : 2;
       
-      let edgeColor = getColor('edgeLine');
-      if (isSelected) edgeColor = '#3b82f6'; 
-      else if (edge.useCustomColor && edge.customColor) edgeColor = hexToRgba(edge.customColor, 0.9);
-      else if (isPresen) edgeColor = state.theme === 'dark' ? '#cbd5e1' : '#334155'; 
-
-      let visualStartX = curve.startX, visualStartY = curve.startY; let visualEndX = curve.endX, visualEndY = curve.endY; let arrowAngle = curve.arrowAngle;
-
-      const baseLineWidth = isPresen ? 4 : 2;
       ctx.beginPath();
       if (isHandleDragging) {
-        if (state.draggedEdgeHandleType === 'from') { ctx.moveTo(state.mouseX, state.mouseY); ctx.lineTo(curve.endX, curve.endY); arrowAngle = Math.atan2(curve.endY - state.mouseY, curve.endX - state.mouseX); visualStartX = state.mouseX; visualStartY = state.mouseY; } 
-        else { ctx.moveTo(curve.startX, curve.startY); ctx.lineTo(state.mouseX, state.mouseY); arrowAngle = Math.atan2(state.mouseY - curve.startY, state.mouseX - curve.startX); visualEndX = state.mouseX; visualEndY = state.mouseY; }
+        if (state.draggedEdgeHandleType === 'from') { ctx.moveTo(state.mouseX, state.mouseY); ctx.lineTo(curve.endX, curve.endY); arrowAngle = Math.atan2(curve.endY - state.mouseY, curve.endX - state.mouseX); visualStartX = state.mouseX; visualStartY = state.mouseY; } else { ctx.moveTo(curve.startX, curve.startY); ctx.lineTo(state.mouseX, state.mouseY); arrowAngle = Math.atan2(state.mouseY - curve.startY, state.mouseX - curve.startX); visualEndX = state.mouseX; visualEndY = state.mouseY; }
         ctx.strokeStyle = edgeColor; ctx.lineWidth = isSelected ? baseLineWidth + (isPresen?2:1) : baseLineWidth; ctx.setLineDash([5, 5]); ctx.stroke(); ctx.setLineDash([]);
-      } else {
-        ctx.moveTo(curve.startX, curve.startY);
-        if (curve.isCurved) { ctx.quadraticCurveTo(curve.cpX, curve.cpY, curve.endX, curve.endY); } else { ctx.lineTo(curve.endX, curve.endY); }
-        ctx.strokeStyle = edgeColor; ctx.lineWidth = isSelected ? baseLineWidth + (isPresen?2:1) : baseLineWidth; ctx.stroke();
-      }
+      } else { ctx.moveTo(curve.startX, curve.startY); if (curve.isCurved) { ctx.quadraticCurveTo(curve.cpX, curve.cpY, curve.endX, curve.endY); } else { ctx.lineTo(curve.endX, curve.endY); } ctx.strokeStyle = edgeColor; ctx.lineWidth = isSelected ? baseLineWidth + (isPresen?2:1) : baseLineWidth; ctx.stroke(); }
 
-      const arrowSize = isPresen ? 15 : 10;
-      ctx.beginPath(); ctx.moveTo(visualEndX, visualEndY);
+      const arrowSize = isPresen ? 15 : 10; ctx.beginPath(); ctx.moveTo(visualEndX, visualEndY);
       ctx.lineTo(visualEndX - arrowSize * Math.cos(arrowAngle - Math.PI/6), visualEndY - arrowSize * Math.sin(arrowAngle - Math.PI/6)); ctx.lineTo(visualEndX - arrowSize * Math.cos(arrowAngle + Math.PI/6), visualEndY - arrowSize * Math.sin(arrowAngle + Math.PI/6));
       ctx.closePath(); ctx.fillStyle = edgeColor; ctx.fill();
 
@@ -926,51 +805,55 @@
         if (rect) {
           let isGlowing = false; const pos = edge.labelPos !== undefined ? edge.labelPos : 0.5; const hitRange = 30 / curve.len;
           for (const sig of state.signals) { if (sig.fromId === edge.from && sig.toId === edge.to) { if (Math.abs(sig.progress - pos) < hitRange) { isGlowing = true; break; } } }
-          
-          let bgColor = isGlowing ? (state.theme === 'dark' ? '#1e293b' : '#eff6ff') : getColor('edgeLabelBg');
-          if(isPresen && !isGlowing && state.theme === 'light') bgColor = 'rgba(255, 255, 255, 1.0)';
-          if(isPresen && !isGlowing && state.theme === 'dark') bgColor = 'rgba(15, 23, 42, 1.0)';
-
-          if (isGlowing && state.enableGlow) { ctx.shadowColor = '#3b82f6'; ctx.shadowBlur = 12; ctx.strokeStyle = '#3b82f6'; } 
-          else { ctx.shadowBlur = (isDraggedLabel && state.enableGlow) ? 8 : 0; ctx.shadowColor = 'rgba(0,0,0,0.5)'; ctx.strokeStyle = isSelected ? '#3b82f6' : getColor('nodeDefaultBorder'); }
-
-          ctx.fillStyle = bgColor; ctx.fillRect(rect.x, rect.y, rect.w, rect.h); 
-          ctx.lineWidth = isPresen ? ((isGlowing || isSelected) ? 3 : 2) : ((isGlowing || isSelected) ? 2 : 1); 
-          ctx.strokeRect(rect.x, rect.y, rect.w, rect.h);
-          
+          let bgColor = isGlowing ? (state.theme === 'dark' ? '#1e293b' : '#eff6ff') : getColor('edgeLabelBg'); if(isPresen && !isGlowing && state.theme === 'light') bgColor = 'rgba(255, 255, 255, 1.0)'; if(isPresen && !isGlowing && state.theme === 'dark') bgColor = 'rgba(15, 23, 42, 1.0)';
+          if (isGlowing && state.enableGlow) { ctx.shadowColor = '#3b82f6'; ctx.shadowBlur = 12; ctx.strokeStyle = '#3b82f6'; } else { ctx.shadowBlur = (isDraggedLabel && state.enableGlow) ? 8 : 0; ctx.shadowColor = 'rgba(0,0,0,0.5)'; ctx.strokeStyle = isSelected ? '#3b82f6' : getColor('nodeDefaultBorder'); }
+          ctx.fillStyle = bgColor; ctx.fillRect(rect.x, rect.y, rect.w, rect.h); ctx.lineWidth = isPresen ? ((isGlowing || isSelected) ? 3 : 2) : ((isGlowing || isSelected) ? 2 : 1); ctx.strokeRect(rect.x, rect.y, rect.w, rect.h);
           ctx.shadowBlur = 0; ctx.fillStyle = isGlowing ? '#3b82f6' : (isSelected ? getColor('text') : (isPresen ? (state.theme==='dark'?'#f8fafc':'#0f172a') : getColor('edgeLabelText')));
-          ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.font = `${isPresen?'700':'400'} ${rect.fontSize}px Inter, sans-serif`; 
-          drawMultilineText(ctx, edge.label, rect.midX, rect.midY, rect.fontSize);
+          ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.font = `${isPresen?'700':'400'} ${rect.fontSize}px Inter, sans-serif`; drawMultilineText(ctx, edge.label, rect.midX, rect.midY, rect.fontSize);
         }
       }
-
       if (isSelected && !isHandleDragging) {
         const handleRad = isPresen ? 7 : 5;
         ctx.beginPath(); ctx.arc(visualStartX, visualStartY, handleRad/state.zoom, 0, Math.PI * 2); ctx.fillStyle = '#eff6ff'; ctx.fill(); ctx.lineWidth = (isPresen?3:2)/state.zoom; ctx.strokeStyle = '#3b82f6'; ctx.stroke();
         ctx.beginPath(); ctx.arc(visualEndX, visualEndY, handleRad/state.zoom, 0, Math.PI * 2); ctx.fillStyle = '#eff6ff'; ctx.fill(); ctx.lineWidth = (isPresen?3:2)/state.zoom; ctx.strokeStyle = '#3b82f6'; ctx.stroke();
+      } ctx.restore();
+    }
+
+    function drawZone(zone) {
+      ctx.save();
+      const isSelected = state.selectedZone === zone; const isEditing = (state.editingType === 'zone' && state.editingTarget === zone); const isPresen = state.presentationMode;
+      const time = performance.now(); let alpha = 1.0;
+      if (zone.animation === 'blink') alpha = 0.5 + 0.5 * Math.sin(time / 300);
+      
+      ctx.globalAlpha = alpha; ctx.strokeStyle = zone.color || '#f59e0b'; ctx.lineWidth = isPresen ? (isSelected ? 5 : 4) : (isSelected ? 3 : 2);
+      if (zone.animation === 'dash-scroll') ctx.lineDashOffset = -(time / 50) % 40;
+      if (zone.style === 'dashed') ctx.setLineDash(isPresen ? [12, 12] : [8, 8]); else if (zone.style === 'dotted') ctx.setLineDash(isPresen ? [4, 8] : [2, 6]); else ctx.setLineDash([]);
+
+      const left = zone.x - zone.w/2; const top = zone.y - zone.h/2;
+      ctx.beginPath(); ctx.rect(left, top, zone.w, zone.h);
+      ctx.fillStyle = hexToRgba(zone.color || '#f59e0b', 0.05); ctx.fill(); ctx.stroke();
+
+      ctx.setLineDash([]); ctx.globalAlpha = 1.0;
+      
+      if (!isEditing) {
+        const fontSize = isPresen ? 16 : 13; ctx.font = `${isPresen?'700':'600'} ${fontSize}px Inter, sans-serif`;
+        const text = String(zone.label || ''); const textInfo = measureMultilineText(ctx, text, fontSize);
+        const padX = 8, padY = 6; const labelW = textInfo.width + padX*2; const labelH = textInfo.height + padY*2; const lx = left; const ly = top - labelH - 5;
+        ctx.fillStyle = zone.color || '#f59e0b'; ctx.beginPath(); ctx.roundRect(lx, ly, labelW, labelH, [4, 4, 4, 4]); ctx.fill();
+        ctx.fillStyle = '#ffffff'; ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+        drawMultilineText(ctx, text, lx + padX, ly + textInfo.height/2 + padY, fontSize, 1.2, 'left');
+      }
+
+      if (isSelected) {
+        ctx.fillStyle = '#ffffff'; ctx.strokeStyle = '#3b82f6'; ctx.lineWidth = 2 / state.zoom;
+        ctx.beginPath(); const hr = (isPresen ? 8 : 6) / state.zoom; ctx.arc(left + zone.w, top + zone.h, hr, 0, Math.PI*2); ctx.fill(); ctx.stroke();
       }
       ctx.restore();
     }
 
-    function drawConnectingLine() {
-      if (!state.isConnecting || !state.connectFromNode) return; ctx.save(); ctx.beginPath(); ctx.moveTo(state.connectFromNode.x, state.connectFromNode.y); ctx.lineTo(state.mouseX, state.mouseY); ctx.strokeStyle = 'rgba(59, 130, 246, 0.8)'; ctx.lineWidth = state.presentationMode ? 4 : 2; ctx.setLineDash([5, 5]); ctx.stroke(); ctx.restore();
-    }
-
-    function drawAlignGuides() {
-      if (!state.alignGuides || state.alignGuides.length === 0) return; ctx.save(); ctx.strokeStyle = '#f472b6'; ctx.setLineDash([4, 4]); ctx.lineWidth = (state.presentationMode ? 2 : 1) / state.zoom;
-      for (const guide of state.alignGuides) {
-        ctx.beginPath();
-        if (guide.type === 'x') { ctx.moveTo(guide.x, guide.y1); ctx.lineTo(guide.x, guide.y2); } else if (guide.type === 'y') { ctx.moveTo(guide.x1, guide.y); ctx.lineTo(guide.x2, guide.y); } else if (guide.type === 'line') { ctx.moveTo(guide.x1, guide.y1); ctx.lineTo(guide.x2, guide.y2); }
-        ctx.stroke();
-      }
-      ctx.restore();
-    }
-
-    function drawBoxSelection() {
-      if (!state.isBoxSelecting) return; ctx.save();
-      const x = Math.min(state.boxStartX, state.boxCurrentX); const y = Math.min(state.boxStartY, state.boxCurrentY); const w = Math.abs(state.boxCurrentX - state.boxStartX); const h = Math.abs(state.boxCurrentY - state.boxStartY);
-      ctx.fillStyle = getColor('boxSelectFill'); ctx.fillRect(x, y, w, h); ctx.strokeStyle = getColor('boxSelectBorder'); ctx.lineWidth = 1 / state.zoom; ctx.strokeRect(x, y, w, h); ctx.restore();
-    }
+    function drawConnectingLine() { if (!state.isConnecting || !state.connectFromNode) return; ctx.save(); ctx.beginPath(); ctx.moveTo(state.connectFromNode.x, state.connectFromNode.y); ctx.lineTo(state.mouseX, state.mouseY); ctx.strokeStyle = 'rgba(59, 130, 246, 0.8)'; ctx.lineWidth = state.presentationMode ? 4 : 2; ctx.setLineDash([5, 5]); ctx.stroke(); ctx.restore(); }
+    function drawAlignGuides() { if (!state.alignGuides || state.alignGuides.length === 0) return; ctx.save(); ctx.strokeStyle = '#f472b6'; ctx.setLineDash([4, 4]); ctx.lineWidth = (state.presentationMode ? 2 : 1) / state.zoom; for (const guide of state.alignGuides) { ctx.beginPath(); if (guide.type === 'x') { ctx.moveTo(guide.x, guide.y1); ctx.lineTo(guide.x, guide.y2); } else if (guide.type === 'y') { ctx.moveTo(guide.x1, guide.y); ctx.lineTo(guide.x2, guide.y); } else if (guide.type === 'line') { ctx.moveTo(guide.x1, guide.y1); ctx.lineTo(guide.x2, guide.y2); } ctx.stroke(); } ctx.restore(); }
+    function drawBoxSelection() { if (!state.isBoxSelecting) return; ctx.save(); const x = Math.min(state.boxStartX, state.boxCurrentX); const y = Math.min(state.boxStartY, state.boxCurrentY); const w = Math.abs(state.boxCurrentX - state.boxStartX); const h = Math.abs(state.boxCurrentY - state.boxStartY); ctx.fillStyle = getColor('boxSelectFill'); ctx.fillRect(x, y, w, h); ctx.strokeStyle = getColor('boxSelectBorder'); ctx.lineWidth = 1 / state.zoom; ctx.strokeRect(x, y, w, h); ctx.restore(); }
 
     function spawnSignal(startNode) {
       if (state.signals.length > 500) return; const outgoingEdges = state.edges.filter(e => e.from === startNode.id); if (outgoingEdges.length === 0) return;
@@ -997,7 +880,6 @@
       
       let spawners = state.nodes.filter(n => n.isSpawner);
       if (spawners.length === 0) spawners = state.nodes.filter(n => !state.edges.some(e => e.to === n.id)); 
-      
       const uniqueOrders = [...new Set(spawners.map(n => n.spawnOrder || 1))].sort((a, b) => a - b);
 
       if (state.spawnMode === 'single') {
@@ -1005,24 +887,14 @@
               state.frameCount += timeScale;
               if (state.frameCount >= 30) { 
                   state.frameCount = 0; 
-                  if (uniqueOrders.length > 0) {
-                      const targetOrder = uniqueOrders[state.currentSpawnerIndex % uniqueOrders.length];
-                      const targetSpawners = spawners.filter(n => (n.spawnOrder || 1) === targetOrder);
-                      targetSpawners.forEach(spawner => spawnSignal(spawner));
-                      state.currentSpawnerIndex++;
-                  }
+                  if (uniqueOrders.length > 0) { const targetOrder = uniqueOrders[state.currentSpawnerIndex % uniqueOrders.length]; const targetSpawners = spawners.filter(n => (n.spawnOrder || 1) === targetOrder); targetSpawners.forEach(spawner => spawnSignal(spawner)); state.currentSpawnerIndex++; }
               }
           } else { state.frameCount = 0; }
       } else {
           state.frameCount += timeScale;
           if (state.frameCount >= state.spawnRate) {
             state.frameCount = 0; 
-            if (uniqueOrders.length > 0) {
-                const targetOrder = uniqueOrders[state.currentSpawnerIndex % uniqueOrders.length];
-                const targetSpawners = spawners.filter(n => (n.spawnOrder || 1) === targetOrder);
-                targetSpawners.forEach(spawner => spawnSignal(spawner));
-                state.currentSpawnerIndex++;
-            }
+            if (uniqueOrders.length > 0) { const targetOrder = uniqueOrders[state.currentSpawnerIndex % uniqueOrders.length]; const targetSpawners = spawners.filter(n => (n.spawnOrder || 1) === targetOrder); targetSpawners.forEach(spawner => spawnSignal(spawner)); state.currentSpawnerIndex++; }
           }
       }
 
@@ -1047,13 +919,11 @@
     }
 
     function render() {
-      if (bgPattern) {
-        ctx.save(); ctx.fillStyle = bgPattern; ctx.translate(state.panX % (40 * state.zoom), state.panY % (40 * state.zoom));
-        ctx.scale(state.zoom, state.zoom); ctx.fillRect(-canvas.width/state.zoom, -canvas.height/state.zoom, canvas.width*2/state.zoom, canvas.height*2/state.zoom); ctx.restore();
-      } else { ctx.fillStyle = getColor('bg'); ctx.fillRect(0, 0, canvas.width, canvas.height); }
+      if (bgPattern) { ctx.save(); ctx.fillStyle = bgPattern; ctx.translate(state.panX % (40 * state.zoom), state.panY % (40 * state.zoom)); ctx.scale(state.zoom, state.zoom); ctx.fillRect(-canvas.width/state.zoom, -canvas.height/state.zoom, canvas.width*2/state.zoom, canvas.height*2/state.zoom); ctx.restore(); } else { ctx.fillStyle = getColor('bg'); ctx.fillRect(0, 0, canvas.width, canvas.height); }
       
       ctx.save(); ctx.translate(state.panX, state.panY); ctx.scale(state.zoom, state.zoom);
 
+      state.zones.forEach(zone => drawZone(zone));
       state.edges.forEach(edge => drawEdge(edge)); drawConnectingLine(); drawAlignGuides(); drawBoxSelection();
 
       if (state.enableGlow) { ctx.shadowBlur = 15; ctx.shadowColor = '#3b82f6'; }
@@ -1061,8 +931,7 @@
       
       const signalRadius = state.presentationMode ? 8 : 5;
       state.signals.forEach(sig => {
-        const edge = state.edges.find(e => e.from === sig.fromId && e.to === sig.toId); if (!edge) return;
-        const curve = getEdgeCurve(edge); if (!curve) return;
+        const edge = state.edges.find(e => e.from === sig.fromId && e.to === sig.toId); if (!edge) return; const curve = getEdgeCurve(edge); if (!curve) return;
         const t = sig.progress; const mt = 1 - t;
         const currentX = curve.isCurved ? (mt * mt * curve.startX + 2 * mt * t * curve.cpX + t * t * curve.endX) : (curve.startX + (curve.endX - curve.startX) * t);
         const currentY = curve.isCurved ? (mt * mt * curve.startY + 2 * mt * t * curve.cpY + t * t * curve.endY) : (curve.startY + (curve.endY - curve.startY) * t);
@@ -1074,119 +943,43 @@
 
     function saveToFile() {
       if (state.editingTarget) stopInlineEditing(true);
-      const saveData = {
-        nodes: state.nodes, edges: state.edges,
-        settings: { 
-          spawnVal: parseInt(ui.sliderSpawn.value), spawnRate: state.spawnRate, simulationSpeed: state.simulationSpeed, 
-          enableSnap: state.enableSnap, showCountBadge: state.showCountBadge, theme: state.theme, enableGlow: state.enableGlow, bgDragMode: state.bgDragMode,
-          presentationMode: state.presentationMode
-        }
-      };
-      const jsonStr = JSON.stringify(saveData); const blob = new Blob([jsonStr], { type: 'application/json' });
-      const url = URL.createObjectURL(blob); const downloadAnchorNode = document.createElement('a');
-      downloadAnchorNode.href = url; downloadAnchorNode.download = "cycle_flow_data.json";
-      document.body.appendChild(downloadAnchorNode); downloadAnchorNode.click(); document.body.removeChild(downloadAnchorNode); URL.revokeObjectURL(url);
+      const saveData = { nodes: state.nodes, edges: state.edges, zones: state.zones, settings: { spawnVal: parseInt(ui.sliderSpawn.value), spawnRate: state.spawnRate, simulationSpeed: state.simulationSpeed, enableSnap: state.enableSnap, showCountBadge: state.showCountBadge, theme: state.theme, enableGlow: state.enableGlow, bgDragMode: state.bgDragMode, presentationMode: state.presentationMode } };
+      const jsonStr = JSON.stringify(saveData); const blob = new Blob([jsonStr], { type: 'application/json' }); const url = URL.createObjectURL(blob); const downloadAnchorNode = document.createElement('a'); downloadAnchorNode.href = url; downloadAnchorNode.download = "cycle_flow_data.json"; document.body.appendChild(downloadAnchorNode); downloadAnchorNode.click(); document.body.removeChild(downloadAnchorNode); URL.revokeObjectURL(url);
     }
 
     function loadFromFile(event) {
       if (state.editingTarget) stopInlineEditing(false);
       const file = event.target.files[0]; if (!file) return; const reader = new FileReader();
-      
       reader.onload = function(e) {
         try {
           const contents = JSON.parse(e.target.result);
           if (contents.nodes && contents.edges) {
-            state.nodes = contents.nodes.map(n => ({ 
-              id: String(n.id || 'node_' + Date.now() + Math.random()), x: Number(n.x) || 0, y: Number(n.y) || 0, 
-              name: String(n.name !== undefined ? n.name : (n.text !== undefined ? n.text : '')), shape: String(n.shape || 'circle'), scale: Number(n.scale !== undefined ? n.scale : 1.0),
-              isGoal: Boolean(n.isGoal), isSpawner: Boolean(n.isSpawner), spawnOrder: Number(n.spawnOrder !== undefined ? n.spawnOrder : 1),
-              errorCount: 0, successCount: 0, useCustomColor: Boolean(n.useCustomColor), customColor: String(n.customColor || '#ef4444')
-            }));
-
-            const hasSpawner = state.nodes.some(n => n.isSpawner);
-            if (!hasSpawner) { state.nodes.forEach(n => { if (!contents.edges.some(e => e.to === n.id)) { n.isSpawner = true; n.spawnOrder = 1; } }); }
-
-            state.edges = contents.edges.map(e => ({ 
-              from: String(e.from), to: String(e.to), label: String(e.label !== undefined ? e.label : ''), labelPos: Number(e.labelPos !== undefined ? e.labelPos : 0.5),
-              useCustomColor: Boolean(e.useCustomColor), customColor: String(e.customColor || '#ef4444'), speed: Number(e.speed !== undefined ? e.speed : 1.0), volume: Number(e.volume !== undefined ? e.volume : 1)
-            }));
-
-            const ds = { spawnVal: 50, simulationSpeed: 1.0, enableSnap: true, showCountBadge: true, theme: 'dark', enableGlow: true, bgDragMode: 'pan', presentationMode: false };
-            const ls = contents.settings || ds;
-            
-            let loadedSpawnVal = 50;
-            if (ls.spawnVal !== undefined) { loadedSpawnVal = Number(ls.spawnVal); } 
-            else if (ls.spawnRate !== undefined) { const sr = Number(ls.spawnRate); if (sr > 100) loadedSpawnVal = 20; else if (sr < 40) loadedSpawnVal = 80; else loadedSpawnVal = 50; }
-            ui.sliderSpawn.value = loadedSpawnVal; updateSpawnSettings(loadedSpawnVal);
-            
-            state.simulationSpeed = ls.simulationSpeed !== undefined ? Number(ls.simulationSpeed) : ds.simulationSpeed;
-            state.enableSnap = ls.enableSnap !== undefined ? Boolean(ls.enableSnap) : ds.enableSnap;
-            state.showCountBadge = ls.showCountBadge !== undefined ? Boolean(ls.showCountBadge) : ds.showCountBadge;
-            state.theme = String(ls.theme || ds.theme); state.enableGlow = ls.enableGlow !== undefined ? Boolean(ls.enableGlow) : ds.enableGlow;
-            state.bgDragMode = String(ls.bgDragMode || ds.bgDragMode);
-            state.presentationMode = ls.presentationMode !== undefined ? Boolean(ls.presentationMode) : false;
-
-            ui.sliderSpeed.value = state.simulationSpeed; ui.valSpeed.textContent = `${state.simulationSpeed.toFixed(1)}x`;
-            ui.checkSnap.checked = state.enableSnap; ui.checkShowBadge.checked = state.showCountBadge;
-            ui.selectTheme.value = state.theme; ui.checkEnableGlow.checked = state.enableGlow;
-            ui.checkPresentation.checked = state.presentationMode;
-            const radioBg = document.querySelector(`input[name="bg-drag-mode"][value="${state.bgDragMode}"]`); if (radioBg) radioBg.checked = true;
-            
-            state.isDragging = false; state.draggedNode = null; state.isDraggingLabel = false; state.draggedLabelEdge = null; state.isConnecting = false; state.connectFromNode = null; state.isBoxSelecting = false; state.selectedGroup = [];
+            state.nodes = contents.nodes.map(n => ({ id: String(n.id || 'node_'+Date.now()+Math.random()), x: Number(n.x)||0, y: Number(n.y)||0, name: String(n.name !== undefined ? n.name : (n.text !== undefined ? n.text : '')), shape: String(n.shape||'circle'), scale: Number(n.scale !== undefined ? n.scale : 1.0), isGoal: Boolean(n.isGoal), isSpawner: Boolean(n.isSpawner), spawnOrder: Number(n.spawnOrder !== undefined ? n.spawnOrder : 1), errorCount: 0, successCount: 0, useCustomColor: Boolean(n.useCustomColor), customColor: String(n.customColor || '#ef4444') }));
+            const hasSpawner = state.nodes.some(n => n.isSpawner); if (!hasSpawner) { state.nodes.forEach(n => { if (!contents.edges.some(e => e.to === n.id)) { n.isSpawner = true; n.spawnOrder = 1; } }); }
+            state.edges = contents.edges.map(e => ({ from: String(e.from), to: String(e.to), label: String(e.label !== undefined ? e.label : ''), labelPos: Number(e.labelPos !== undefined ? e.labelPos : 0.5), useCustomColor: Boolean(e.useCustomColor), customColor: String(e.customColor || '#ef4444'), speed: Number(e.speed !== undefined ? e.speed : 1.0), volume: Number(e.volume !== undefined ? e.volume : 1) }));
+            state.zones = (contents.zones || []).map(z => ({ id: String(z.id || 'zone_'+Date.now()+Math.random()), x: Number(z.x)||0, y: Number(z.y)||0, w: Number(z.w)||200, h: Number(z.h)||150, label: String(z.label !== undefined ? z.label : '協調枠'), color: String(z.color || '#f59e0b'), style: String(z.style || 'dashed'), animation: String(z.animation || 'none') }));
+            const ds = { spawnVal: 50, simulationSpeed: 1.0, enableSnap: true, showCountBadge: true, theme: 'dark', enableGlow: true, bgDragMode: 'pan', presentationMode: false }; const ls = contents.settings || ds;
+            let loadedSpawnVal = 50; if (ls.spawnVal !== undefined) { loadedSpawnVal = Number(ls.spawnVal); } else if (ls.spawnRate !== undefined) { const sr = Number(ls.spawnRate); if (sr > 100) loadedSpawnVal = 20; else if (sr < 40) loadedSpawnVal = 80; else loadedSpawnVal = 50; } ui.sliderSpawn.value = loadedSpawnVal; updateSpawnSettings(loadedSpawnVal);
+            state.simulationSpeed = ls.simulationSpeed !== undefined ? Number(ls.simulationSpeed) : ds.simulationSpeed; state.enableSnap = ls.enableSnap !== undefined ? Boolean(ls.enableSnap) : ds.enableSnap; state.showCountBadge = ls.showCountBadge !== undefined ? Boolean(ls.showCountBadge) : ds.showCountBadge; state.theme = String(ls.theme || ds.theme); state.enableGlow = ls.enableGlow !== undefined ? Boolean(ls.enableGlow) : ds.enableGlow; state.bgDragMode = String(ls.bgDragMode || ds.bgDragMode); state.presentationMode = ls.presentationMode !== undefined ? Boolean(ls.presentationMode) : false;
+            ui.sliderSpeed.value = state.simulationSpeed; ui.valSpeed.textContent = `${state.simulationSpeed.toFixed(1)}x`; ui.checkSnap.checked = state.enableSnap; ui.checkShowBadge.checked = state.showCountBadge; ui.selectTheme.value = state.theme; ui.checkEnableGlow.checked = state.enableGlow; ui.checkPresentation.checked = state.presentationMode; const radioBg = document.querySelector(`input[name="bg-drag-mode"][value="${state.bgDragMode}"]`); if (radioBg) radioBg.checked = true;
+            state.isDragging = false; state.draggedNode = null; state.isDraggingLabel = false; state.draggedLabelEdge = null; state.isConnecting = false; state.connectFromNode = null; state.isBoxSelecting = false; state.selectedGroup = []; state.isDraggingZone = false; state.draggedZone = null; state.isResizingZone = false; state.resizedZone = null;
             updateTheme(); state.signals = []; clearSelection(); state.panX = 0; state.panY = 0; setZoom(1.0);
           }
         } catch (err) { alert("ファイルの読み込みに失敗しました。正しいデータ形式か確認してください。"); }
-      };
-      reader.readAsText(file); ui.fileInput.value = "";
+      }; reader.readAsText(file); ui.fileInput.value = "";
     }
 
-    function takeScreenshot() {
-      if (state.editingTarget) stopInlineEditing(true); render();
-      const dataURL = canvas.toDataURL('image/png'); const a = document.createElement('a'); a.href = dataURL; a.download = 'cycle_flow_screenshot.png'; document.body.appendChild(a); a.click(); document.body.removeChild(a);
-    }
-
+    function takeScreenshot() { if (state.editingTarget) stopInlineEditing(true); render(); const dataURL = canvas.toDataURL('image/png'); const a = document.createElement('a'); a.href = dataURL; a.download = 'cycle_flow_screenshot.png'; document.body.appendChild(a); a.click(); document.body.removeChild(a); }
     function startRecording() {
-      if (state.editingTarget) stopInlineEditing(true);
-      
-      // 60fpsで滑らかにキャプチャ
-      const stream = canvas.captureStream(60); 
-      
-      // 高画質コーデックを優先
-      let mimeType = 'video/webm;codecs=vp9'; 
-      if (!MediaRecorder.isTypeSupported(mimeType)) mimeType = 'video/webm;codecs=vp8';
-      if (!MediaRecorder.isTypeSupported(mimeType)) mimeType = 'video/webm'; 
-      if (!MediaRecorder.isTypeSupported(mimeType)) mimeType = 'video/mp4'; 
-      
-      // エンコードオプション（ビットレートを8Mbpsに指定して画質劣化・ぼやけを防ぐ）
-      const options = { videoBitsPerSecond: 8000000 };
-      if (MediaRecorder.isTypeSupported(mimeType)) options.mimeType = mimeType;
-
-      try { state.mediaRecorder = new MediaRecorder(stream, options); } 
-      catch (e) { 
-          // フォールバック: ビットレート指定なしで試す
-          try { state.mediaRecorder = new MediaRecorder(stream); }
-          catch(e2) { alert("お使いのブラウザは録画機能に対応していません。"); return; }
-      }
-      
-      state.recordedChunks = []; 
-      state.mediaRecorder.ondataavailable = function(e) { if (e.data.size > 0) state.recordedChunks.push(e.data); };
-      state.mediaRecorder.onstop = function() {
-        let finalMimeType = state.mediaRecorder.mimeType || 'video/webm';
-        let ext = 'webm';
-        if(finalMimeType.includes('mp4')) ext = 'mp4';
-        
-        const blob = new Blob(state.recordedChunks, { type: finalMimeType }); 
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a'); a.href = url; a.download = `cycle_flow_movie.${ext}`;
-        document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
-      };
-      
-      state.mediaRecorder.start(); state.isRecording = true; 
-      ui.btnRecord.textContent = '⏹ 録画停止'; ui.btnRecord.classList.replace('btn-secondary', 'btn-danger');
+      if (state.editingTarget) stopInlineEditing(true); const stream = canvas.captureStream(60); 
+      let mimeType = 'video/webm;codecs=vp9'; if (!MediaRecorder.isTypeSupported(mimeType)) mimeType = 'video/webm;codecs=vp8'; if (!MediaRecorder.isTypeSupported(mimeType)) mimeType = 'video/webm'; if (!MediaRecorder.isTypeSupported(mimeType)) mimeType = 'video/mp4'; 
+      const options = { videoBitsPerSecond: 8000000 }; if (MediaRecorder.isTypeSupported(mimeType)) options.mimeType = mimeType;
+      try { state.mediaRecorder = new MediaRecorder(stream, options); } catch (e) { try { state.mediaRecorder = new MediaRecorder(stream); } catch(e2) { alert("お使いのブラウザは録画機能に対応していません。"); return; } }
+      state.recordedChunks = []; state.mediaRecorder.ondataavailable = function(e) { if (e.data.size > 0) state.recordedChunks.push(e.data); };
+      state.mediaRecorder.onstop = function() { let finalMimeType = state.mediaRecorder.mimeType || 'video/webm'; let ext = 'webm'; if(finalMimeType.includes('mp4')) ext = 'mp4'; const blob = new Blob(state.recordedChunks, { type: finalMimeType }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = `cycle_flow_movie.${ext}`; document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url); };
+      state.mediaRecorder.start(); state.isRecording = true; ui.btnRecord.textContent = '⏹ 録画停止'; ui.btnRecord.classList.replace('btn-secondary', 'btn-danger');
     }
-    
     function toggleRecording() { if (!state.isRecording) startRecording(); else stopRecording(); }
-    
     function stopRecording() { if (state.mediaRecorder && state.mediaRecorder.state !== 'inactive') state.mediaRecorder.stop(); state.isRecording = false; ui.btnRecord.textContent = '🎥 録画開始'; ui.btnRecord.classList.replace('btn-danger', 'btn-secondary'); }
 
     function loadSampleData() {
@@ -1197,20 +990,13 @@
         { id: 'n4', x: 700, y: 500, name: '④ 異常品対応', shape: 'rect', scale: 1.0, isGoal: false, isSpawner: false, spawnOrder: 1, errorCount: 0, successCount: 0, useCustomColor: true, customColor: '#ef4444' },
         { id: 'n5', x: 950, y: 200, name: '⑤ 出荷完了', shape: 'rect', scale: 1.0, isGoal: true, isSpawner: false, spawnOrder: 1, errorCount: 0, successCount: 0 }
       ];
-      state.edges = [
-        { from: 'n1', to: 'n2', label: '', labelPos: 0.5, speed: 1.0, volume: 1 },
-        { from: 'n2', to: 'n3', label: '合格\nルート', labelPos: 0.5, speed: 1.5, volume: 2 },
-        { from: 'n2', to: 'n4', label: '不合格', labelPos: 0.5, useCustomColor: true, customColor: '#ef4444', speed: 0.3, volume: 1 },
-        { from: 'n3', to: 'n5', label: '', labelPos: 0.5, speed: 1.0, volume: 1 },
-        { from: 'n5', to: 'n1', label: 'サイクル戻り', labelPos: 0.5, speed: 1.0, volume: 1 }
-      ];
+      state.edges = [ { from: 'n1', to: 'n2', label: '', labelPos: 0.5, speed: 1.0, volume: 1 }, { from: 'n2', to: 'n3', label: '合格\nルート', labelPos: 0.5, speed: 1.5, volume: 2 }, { from: 'n2', to: 'n4', label: '不合格', labelPos: 0.5, useCustomColor: true, customColor: '#ef4444', speed: 0.3, volume: 1 }, { from: 'n3', to: 'n5', label: '', labelPos: 0.5, speed: 1.0, volume: 1 }, { from: 'n5', to: 'n1', label: 'サイクル戻り', labelPos: 0.5, speed: 1.0, volume: 1 } ];
+      state.zones = [ { id: 'z1', x: 825, y: 200, w: 420, h: 220, label: '出荷・倉庫エリア', color: '#3b82f6', style: 'dashed', animation: 'dash-scroll' } ];
     }
 
     function resizeCanvas() { canvas.width = canvas.parentElement.clientWidth; canvas.height = canvas.parentElement.clientHeight; createBackgroundPattern(); render(); }
-    window.addEventListener('resize', resizeCanvas);
-    setupEventListeners(); loadSampleData(); updateSpawnSettings(parseInt(ui.sliderSpawn.value)); resizeCanvas(); updateTheme();
-    function staticRenderLoop() { if (!state.isRunning) render(); requestAnimationFrame(staticRenderLoop); }
-    staticRenderLoop();
+    window.addEventListener('resize', resizeCanvas); setupEventListeners(); loadSampleData(); updateSpawnSettings(parseInt(ui.sliderSpawn.value)); resizeCanvas(); updateTheme();
+    function staticRenderLoop() { if (!state.isRunning) render(); requestAnimationFrame(staticRenderLoop); } staticRenderLoop();
   </script>
 </body>
 </html>
